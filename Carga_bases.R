@@ -21,9 +21,6 @@ anos <- seq(1994,format(Sys.Date(), "%Y"),2)
 # Endereço dos dados de eleitorado
 dwlpath <- "http://agencia.tse.jus.br/estatistica/sead/odsele/perfil_eleitorado/perfil_eleitorado_"
 
-# # Arquivos temporários
-# tf <- tempfile()
-# td <- tempdir()
 
 # looping para baixar os dados
 for (i in anos){
@@ -433,6 +430,10 @@ candidato <<- rbind(candidato,base)
 # Remover arquivos descompactados
 file.remove(list.files("TSE/Candidatos",pattern = ".txt|csv",full.names = T))
 
+# Remover objetos desnecessários
+rm(bls,base,a,anos,dwlpath,filenames,i,initp,names2010,
+   names2012,names2014,td,tf,ufs,ufs2,ufs3)
+
 #################################################################
 ########## Carregar dados Interlegis         ####################
 #################################################################
@@ -443,10 +444,34 @@ censolegis <- data.table::fread("http://www.interlegis.leg.br/produtos_servicos/
                                 encoding = "Latin-1") %>%
   dplyr::select(Cod_TSE,Cod_IBGE,localidade) %>%
   dplyr::rename(CD_MUNICIPIO=Cod_TSE,
-                COD_IBGE=Cod_IBGE)
-
-x <- resultado %>%
-  dplyr::left_join(censolegis)
+                COD_IBGE=Cod_IBGE) %>%
+  # Adicionar código das cidades sem informações no interlegis
+  dplyr::bind_rows(bind_cols(
+    CD_MUNICIPIO=c(4863,12734,33090,37915,55050,55069,83909,
+                   83925,89540,89931,89931,91065,91081,91103,
+                   97012,99901,99902,99903,99904,99905,99906,
+                   99907,99908,99909,99910,99911,99912,99913,
+                   99914,99915,99916,99917,99918,99919,99920,
+                   99921,99922,99923,99924,99925,99926,99927,12726,30015),
+    COD_IBGE=c(1504752,2200950,2900504,2924504,5006275,5003856,4220000,
+               4212650,4314548,5107107,5107107,4103008,5104535,
+               5104545,5300108,3550308,3106200,3304557,4314902,
+               2927408,4106902,2304400,2611606,4205407,5208707,
+               2111300,2507507,1501402,3205309,2211001,2408102,
+               2704302,5103403,5002704,5300108,2800308,1302603,
+               1100205,1200401,1600303,1400100,1721000,2206720,2605459),
+    localidade=c("MOJUÍ DOS CAMPOS","AROEIRAS DO ITAIM","ERICO CARDOSO","PINDAI",
+                "PARAÍSO DAS ÁGUAS","FIGUEIRÃO","BALNEÁRIO RINCÃO",
+                "PESCARIA BRAVA","PINTO BANDEIRA","QUATRO MARCOS",
+                "SÃO JOSÉ DOS QUATRO MARCOS","BOA ESPERANCA DO NORTE",
+                "IPIRANGA DO NORTE","ITANHANGÁ","BRASÍLIA",
+                "SÃO PAULO","BELO HORIZONTE","RIO DE JANEIRO",
+                "PORTO ALEGRE","SALVADOR","CURITIBA","FORTALEZA",
+                "RECIFE","FLORIANÓPOLIS","GOIÂNIA","SÃO LUÍS",
+                "JOÃO PESSOA","BELÉM","VITÓRIA","TERESINA","NATAL",
+                "MACEIÓ","CUIABÁ","CAMPO GRANDE","BRASÍLIA","ARACAJU",
+                "MANAUS","PORTO VELHO","RIO BRANCO","MACAPÁ","BOA VISTA",
+                "PALMAS","NAZÁRIA","FERNANDO DE NORONHA")))
 
 #################################################################
 ########## Carregar dados da Anatel, backhaul####################
@@ -539,7 +564,7 @@ rm(SCM_2007_2010,SCM_2011_2012,SCM_2013_2014,SCM_2015_2018)
 
 # Carregar os dados de internet móvel
 # 2009 não resolve pq tem somente por região
-smp_2005_200901 <- data.table::fread("Acessos_SMP_2005-200901_-_Total.csv") 
+#smp_2005_200901 <- data.table::fread("Acessos_SMP_2005-200901_-_Total.csv") 
 
 # Carregar dados 200902 a 2014
 smp_200902_2014 <- data.table::fread("Acessos_SMP_200902-2014_-_Total.csv") %>%
@@ -571,9 +596,8 @@ rm(smp_2005_200901, smp_200902_2014, smp_2015_2018)
 # Carregar correspondências municípios DDD
 dic_DDD <- data.table::fread("PGCN com código IBGE.csv")
 
-# Carregar base com correspondências entre TSE e IBGE para municípios
-dic_tse_ibge <- data.table::fread("TSE/6-capital-humano.csv") %>%
-  dplyr::select(Cod_TSE,Cod_IBGE)
-
-
+#################################################################
+########## Carregar dados do Censo ##############################
+#################################################################
+censo <- readxl::read_excel("./Censo/censo_vars.xlsx")
 
