@@ -13,7 +13,7 @@ gc()
 setwd("F:/OneDrive/Doutorado/Tese/Bases/")
 
 # Criar diretórios para download dos dados de eleitorado
-dir.create("TSE2/Eleitorado", recursive = T)
+dir.create("TSE/Eleitorado", recursive = T)
 
 # Anos a serem baixados
 anos <- seq(1994,format(Sys.Date(), "%Y"),2)
@@ -28,14 +28,14 @@ dwlpath <- "http://agencia.tse.jus.br/estatistica/sead/odsele/perfil_eleitorado/
 # looping para baixar os dados
 for (i in anos){
   tf <- paste0(dwlpath, i, ".zip")
-  td <- paste0("./TSE2/Eleitorado/", i, ".zip")
+  td <- paste0("./TSE/Eleitorado/", i, ".zip")
   print(i)
   download.file(tf, td, mode="wb")
 }
 
 # Descompactar arquivos
-filenames <- list.files("./TSE2/Eleitorado/", pattern=".zip", full.names=TRUE)
-lapply(filenames,unzip, exdir = "./TSE2/Eleitorado",junkpaths=T)
+filenames <- list.files("./TSE/Eleitorado/", pattern=".zip", full.names=TRUE)
+lapply(filenames,unzip, exdir = "./TSE/Eleitorado",junkpaths=T)
 
 # Carregar os anos de interesse
 anos <- seq(2000,2014,2)
@@ -46,7 +46,7 @@ eleitorado <- c()
 
 for(i in anos){
   
-base <- data.table::fread(paste0("TSE2/Eleitorado/perfil_eleitorado_",i,
+base <- data.table::fread(paste0("TSE/Eleitorado/perfil_eleitorado_",i,
                                  if (a >= 2018){".csv"}else{".txt"}),
                                 encoding = "Latin-1") %>%
   dplyr::mutate(ANO=paste0(i)) %>%
@@ -96,14 +96,14 @@ eleitorado <<- rbind(eleitorado,base)
 rm(base)
 
 # Remover arquivos descompactados
-file.remove(list.files("TSE2/Eleitorado",pattern = ".txt|csv",full.names = T))
+file.remove(list.files("TSE/Eleitorado",pattern = ".txt|csv",full.names = T))
 
-#####################################################
-########## Carregar a base de resultado ###########
-####################################################
+##############################################################
+########## Carregar a base de Resultado - Apuração ###########
+##############################################################
 
 # Criar diretórios para download dos dados de eleitorado
-dir.create("TSE2/Resultado", recursive = T)
+dir.create("TSE/Resultado", recursive = T)
 
 # Anos a serem baixados
 anos <- seq(1994,format(Sys.Date(), "%Y"),2)
@@ -114,20 +114,20 @@ dwlpath <- "http://agencia.tse.jus.br/estatistica/sead/odsele/detalhe_votacao_mu
 # looping para baixar os dados
 for (i in anos){
   tf <- paste0(dwlpath, i, ".zip")
-  td <- paste0("./TSE2/Resultado/","detalhe",i, ".zip")
+  td <- paste0("./TSE/Resultado/","detalhe",i, ".zip")
   print(i)
   download.file(tf, td, mode="wb")
 }
 
 # Descompactar arquivos
-filenames <- list.files("./TSE2/Resultado/", pattern=".zip", full.names=TRUE)
-lapply(filenames,unzip, exdir = "./TSE2/Resultado",junkpaths=T)
+filenames <- list.files("./TSE/Resultado/", pattern=".zip", full.names=TRUE)
+lapply(filenames,unzip, exdir = "./TSE/Resultado",junkpaths=T)
 
 # Carregar a base de resultado do TSE de 2018
 # Fazer o looping para carregar todos os municípios
 
 # Caminho inicial
-initp <- "TSE2/Resultado/detalhe_votacao_munzona_"
+initp <- "TSE/Resultado/detalhe_votacao_munzona_"
 
 # Anos para análise
 anos <- seq(2000,2014,2)
@@ -183,8 +183,8 @@ if(a<=2012){
 base <-
 base %>%
   dplyr::group_by(CD_MUNICIPIO,DS_CARGO) %>%
-  dplyr::summarise(municipio=first(NM_MUNICIPIO),
-                   ano=first(ANO_ELEICAO),
+  dplyr::summarise(NM_MUNICIPIO=first(NM_MUNICIPIO),
+                   ANO_ELEICAO=first(ANO_ELEICAO),
                    aptos=sum(QT_APTOS),
                    aptos_tot=sum(QT_APTOS_TOT),
                    compareceu=sum(QT_COMPARECIMENTO),
@@ -197,61 +197,270 @@ base %>%
 
 resultado <<- rbind(resultado,base)
 
-
-
 }
 }
 
+# Remover arquivos descompactados
+file.remove(list.files("TSE/Resultado",pattern = ".txt|csv",full.names = T))
 
-  
-# Caregar base de votação
-# Caminho inicial
-initp <- "TSE/Resultado/votacao_partido_munzona_2018_"
+#############################################################
+########## Carregar a base de Resultado - Votação ###########
+#############################################################
+
+# Criar novo diretório
+dir.create("TSE/Resultado/Partidos", recursive = T)
+
+# Anos a serem baixados
+anos <- seq(1994,format(Sys.Date(), "%Y"),2)
+
+# Endereço dos dados de eleitorado
+dwlpath <- "http://agencia.tse.jus.br/estatistica/sead/odsele/votacao_partido_munzona/votacao_partido_munzona_"
+
+# looping para baixar os dados
+for (i in anos){
+  tf <- paste0(dwlpath, i, ".zip")
+  td <- paste0("./TSE/Resultado/Partidos/","partido",i, ".zip")
+  print(i)
+  download.file(tf, td, mode="wb")
+}
+
+# Descompactar arquivos
+filenames <- list.files("./TSE/Resultado/Partidos", pattern=".zip", full.names=TRUE)
+lapply(filenames,unzip, exdir = "./TSE/Resultado/Partidos",junkpaths=T)
+
+
+# Selecionar anos de interesse
+anos <- seq(2000,2014,2)
+
+# Caminho inicial dos arquivos
+initp <- "TSE/Resultado/Partidos/votacao_partido_munzona_"
+
+# Nomes até 2012
+names2012 <- c("DT_GERACAO","HH_GERACAO","ANO_ELEICAO","NR_TURNO",
+               "DS_ELEICAO","SG_UF","SG_UE","CD_MUNICIPIO",
+               "NM_MUNICIPIO","NR_ZONA","CD_CARGO","DS_CARGO",
+               "TP_AGREMIACAO","NM_COLIGACAO","DS_COMPOSICAO_COLIGACAO",
+               "SG_PARTIDO","NR_PARTIDO","NM_PARTIDO",
+               "QT_VOTOS_NOMINAIS","QT_VOTOS_LEGENDA","SEQUENCIAL_COLIGACAO")
+
+# Nomes até 2014
+names2014 <- c(names2012[1:20],"TRANSITO",names2012[21])
+
+# # Excluir arquivos vazios da pasta
+# ## Get vector of all file names
+# ff <- dir("./TSE/Resultado/Partidos", recursive=TRUE, full.names=TRUE)
+# ## Extract vector of empty files' names
+# eff <- ff[file.info(ff)[["size"]]==0]
+# ## Remove empty files
+# file.remove(eff, recursive=TRUE, force=FALSE)
+
+# UFs
+ufs <- c("AC","AL","AM","AP","BA","CE","ES","GO","MA",
+         "MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO",
+         "RR","RS","SC","SE","SP","TO")
+
+ufs2 <- c(ufs,"DF")
+
+ufs3 <- c(ufs,"BR","DF")
 
 
 # Construir objeto para receber valores
-votacao_18 <- c()
+votacao <- c()
 
-for(i in ufs){
-base <- data.table::fread(paste0(initp,i,finp)) %>%
+# Iniciar loop
+for(a in anos){
+  
+  for(i in if(a%in%c(1994,seq(1996,format(Sys.Date(),"%Y"),4))){ufs}else{if(a%in%c(1998,2002)){ufs2}else{ufs3}}){
+
+base <- data.table::fread(paste0(initp,a,"_",i,if (a >= 2018){".csv"}else{".txt"}),
+                          encoding = "Latin-1")
+
+
+if(a<=2012){
+  
+  base <- base %>%
+    
+    dplyr::rename_all(funs(eval(names2012)))} else{
+      
+      if(a %in% c(2014,2016)){
+        
+        base <- base %>%
+          
+          dplyr::rename_all(funs(eval(names2014)))}  else{
+            
+          }
+    }
+
+base <- base %>%
   dplyr::mutate(votos=QT_VOTOS_NOMINAIS+QT_VOTOS_LEGENDA) %>%
   dplyr::group_by(ANO_ELEICAO,CD_MUNICIPIO,NM_MUNICIPIO,DS_CARGO,SG_PARTIDO) %>%
   dplyr::summarise(votos=sum(votos))
 
-votacao_18 <<- rbind(votacao_18,base)
+votacao <<- rbind(votacao,base)
 
+  }
 }
 
-# Carregar dados dos candidatos
+# Remover arquivos descompactados
+file.remove(list.files("TSE/Resultado/Partidos",pattern = ".txt|csv",full.names = T))
 
-candidatos_18 <-data.table::fread("TSE/Candidatos/2018/consulta_cand_2018_BRASIL.csv") %>%
-  dplyr::filter(CD_SITUACAO_CANDIDATURA==12) %>%
-  dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% c("PT","PDT","PSB",
-                                                       "PC do B","PPS","PMN",
-                                                       "PV","PATRI","PCB",
-                                                       "PCO","PSOL","PSTU",
-                                                       "SOLIDARIEDADE")~"Esquerda",
-                                     SG_PARTIDO %in% c("MDB,PMDB",
-                                                       "PSDB","PTB","Rede",
-                                                       "Avante","NOVO",
-                                                       "PTN","PODEMOS")~"Centro",
-                                     SG_PARTIDO %in% c("PFL","PPB","PL",
-                                                       "PSD","PSC","Prona",
-                                                       "PSL","PST","DEM",
-                                                       "PP","PTC")~"Direita",
+#############################################################
+########## Carregar a base da BLS - Zucco ####################
+#############################################################
+load("bls7_released_v01.RData")
+
+# Fazer a média ponderada da orientação ideológica dos partidos
+indexparty <- bls %>%
+  dplyr::select(party_survey,czideo,pweight) %>%
+  dplyr::mutate(czideo=as.numeric(czideo),
+                party_survey=as.character(party_survey)) %>%
+  dplyr::group_by(party_survey) %>%
+  dplyr::summarise(index=weighted.mean(czideo,pweight ,na.rm = T)) %>%
+  dplyr::arrange(index) 
+
+# Armazenar 
+left_parties <- indexparty[indexparty$index<=quantile(indexparty$index, na.rm=T,0.25),]$party_survey
+center_parties <- indexparty[indexparty$index>quantile(indexparty$index, na.rm=T,0.25)&
+                               indexparty$index<quantile(indexparty$index, na.rm=T,0.75),]$party_survey
+right_parties <- indexparty[indexparty$index>=quantile(indexparty$index, na.rm=T,0.75),]$party_survey
+
+#############################################################
+########## Carregar a base de Candidatos ####################
+#############################################################
+
+# Criar novo diretório
+dir.create("TSE/Candidatos", recursive = T)
+
+# Anos a serem baixados
+anos <- seq(1994,format(Sys.Date(), "%Y"),2)
+
+# Endereço dos dados de eleitorado
+dwlpath <- "http://agencia.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_"
+
+# looping para baixar os dados
+for (i in anos){
+  tf <- paste0(dwlpath, i, ".zip")
+  td <- paste0("./TSE/Candidatos/","candidato",i, ".zip")
+  print(i)
+  download.file(tf, td, mode="wb")
+}
+
+# Descompactar arquivos
+filenames <- list.files("./TSE/Candidatos", pattern=".zip", full.names=TRUE)
+lapply(filenames,unzip, exdir = "./TSE/Candidatos",junkpaths=T)
+
+
+# Selecionar anos de interesse
+anos <- seq(2000,2014,2)
+
+initp <- "TSE/Candidatos/consulta_cand_"
+
+names2010 <- c("DT_GERACAO","HH_GERACAO","ANO_ELEICAO",
+               "NR_TURNO","DS_ELEICAO","SG_UF","SG_UE","DS_UE",
+               "CD_CARGO","DS_CARGO","NM_CANDIDATO", 
+               "SQ_CANDIDATO","NR_CANDIDATO",
+               "NR_CPF_CANDIDATO","NM_URNA_CANDIDATO",
+               "CD_SITUACAO_CANDIDATURA","DS_SITUACAO_CANDIDATURA",
+               "NR_PARTIDO","SG_PARTIDO","NM_PARTIDO","SQ_COLIGACAO",
+               "SG_COLIGACAO","DS_COMPOSICAO_COLIGACAO","NM_COLIGACAO",
+               "CD_OCUPACAO","DS_OCUPACAO","DT_NASCIMENTO",
+               "NR_TITULO_ELEITORAL_CANDIDATO","NR_IDADE_DATA_POSSE",
+               "CD_GENERO","DS_GENERO","CD_GRAU_INSTRUCAO","DS_GRAU_INSTRUCAO",
+               "CD_ESTADO_CIVIL","DS_ESTADO_CIVIL",
+               "CD_NACIONALIDADE","DS_NACIONALIDADE","SG_UF_NASCIMENTO",
+               "CD_MUNICIPIO_NASCIMENTO","NM_MUNICIPIO_NASCIMENTO",
+               "NR_DESPESA_MAX_CAMPANHA","CD_SIT_TOT_TURNO","DS_SIT_TOT_TURNO")
+
+names2012 <- c(names2010,"NM_EMAIL")
+
+# UFs
+ufs <- c("AC","AL","AM","AP","BA","CE","ES","GO","MA",
+         "MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO",
+         "RR","RS","SC","SE","SP","TO")
+
+ufs2 <- c(ufs,"BR")
+
+ufs3 <- c(ufs,"BR","DF")
+
+candidato <- c()
+
+for(a in anos){
+  
+  for(i in if(a==1994){ufs2}else{if(a %in% c(seq(1998,format(Sys.Date(),"%Y"),4))){ufs3}else{ufs}}){
+
+base <- data.table::fread(paste0(initp,a,"_",i,if (a >= 2014){".csv"}else{".txt"}),
+                          encoding = "Latin-1")
+
+if(a<=2010){
+  
+  base <- base %>%
+    
+    dplyr::rename_all(funs(eval(names2010)))} else{
+      
+      if(a==2012){
+        
+        base <- base %>%
+          
+          dplyr::rename_all(funs(eval(names2012)))}  else{
+            
+          }
+    }
+
+base <-
+base %>%
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO")) %>%
+  dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% c("PSTU","PSOL","PC do B",
+                                                       "PT","PSDB")~"Esquerda",
+                                     SG_PARTIDO %in% c("PDT","PV","PCB",
+                                                       "PPS","PSDB","PMDB",
+                                                       "PTB","PSD","PL",
+                                                       "PRONA","PR","PSC",
+                                                       "PRB")~"Centro",
+                                     SG_PARTIDO %in% c("PRN","PFL","DEM",
+                                                       "PDS","PPR","PDC",
+                                                       "PPB","PP","PMN")~"Direita",
                                      TRUE~"Outros")) %>%
-  dplyr::count(ANO_ELEICAO,DS_CARGO,SG_UF,orientacao)
-  
-  
-  
-  
-# Ler dados da Anatel, backhaul
+  dplyr::count(ANO_ELEICAO,DS_CARGO,SG_UF,orientacao,
+               DS_SIT_TOT_TURNO)
+
+
+candidato <<- rbind(candidato,base)
+
+
+  }
+}
+
+# Remover arquivos descompactados
+file.remove(list.files("TSE/Candidatos",pattern = ".txt|csv",full.names = T))
+
+#################################################################
+########## Carregar dados Interlegis         ####################
+#################################################################
+# Carregar uma tabela do Censo Legislativo para pegar a correspondencia entre
+# o COD_MUN do IBGE e do TSE
+
+censolegis <- data.table::fread("http://www.interlegis.leg.br/produtos_servicos/informacao/censo/relatorios/1-cadastro-da-cm.csv/download",
+                                encoding = "Latin-1") %>%
+  dplyr::select(Cod_TSE,Cod_IBGE,localidade) %>%
+  dplyr::rename(CD_MUNICIPIO=Cod_TSE,
+                COD_IBGE=Cod_IBGE)
+
+x <- resultado %>%
+  dplyr::left_join(censolegis)
+
+#################################################################
+########## Carregar dados da Anatel, backhaul####################
+#################################################################
+
 backhaul <- readstata13::read.dta13("anatel_backhaul.dta") %>%
   dplyr::select(fk_cod_municipio,ano,backhaul_ano,backhaul,popIBGE_anoantes,
                 Situao,tecnologiadeatendimento,UF,Municpio,
                 concessionaria)
 
-# Ler dados brutos da Anatel
+#################################################################
+########## Carregar dados da Anatel, Brutos #####################
+#################################################################
+
 # Carregar dados de internet de 2007 a 2010
 SCM_2007_2010 <- data.table::fread("Acessos_SCM_2007-2010_-_Total.csv",
                                    skip = 1) %>%
@@ -366,6 +575,5 @@ dic_DDD <- data.table::fread("PGCN com código IBGE.csv")
 dic_tse_ibge <- data.table::fread("TSE/6-capital-humano.csv") %>%
   dplyr::select(Cod_TSE,Cod_IBGE)
 
-# Pegar dados do censo
-library(lodown)
+
 
