@@ -41,12 +41,12 @@ anos <- seq(2000,2014,2)
 
 eleitorado <- c()
 
-for(i in anos){
+for(a in anos){
   
 base <- data.table::fread(paste0("TSE/Eleitorado/perfil_eleitorado_",i,
                                  if (a >= 2018){".csv"}else{".txt"}),
                                 encoding = "Latin-1") %>%
-  dplyr::mutate(ANO=paste0(i)) %>%
+  dplyr::mutate(ANO=paste0(a)) %>%
   dplyr::rename_all(funs(c("PERIODO","UF","MUNICIPIO","COD_MUNICIPIO_TSE",
                            "NR_ZONA","SEXO","FAIXA_ETARIA","GRAU_DE_ESCOLARIDADE",
                            "QTD_ELEITORES_NO_PERFIL","ANO"))) 
@@ -176,10 +176,11 @@ if(a<=2012){
         dplyr::rename_all(funs(eval(names2014)))}  else{
             
         }
-      }
+    }
+
 base <-
-base %>%
-  dplyr::group_by(CD_MUNICIPIO,DS_CARGO) %>%
+  base %>%
+  dplyr::group_by(CD_MUNICIPIO,DS_CARGO, NR_TURNO) %>%
   dplyr::summarise(NM_MUNICIPIO=first(NM_MUNICIPIO),
                    ANO_ELEICAO=first(ANO_ELEICAO),
                    aptos=sum(QT_APTOS),
@@ -199,6 +200,28 @@ resultado <<- rbind(resultado,base)
 
 # Remover arquivos descompactados
 file.remove(list.files("TSE/Resultado",pattern = ".txt|csv",full.names = T))
+
+#############################################################
+########## Carregar a base da BLS - Zucco ####################
+#############################################################
+load("bls7_released_v01.RData")
+
+# Fazer a média ponderada da orientação ideológica dos partidos
+indexparty <- bls %>%
+  dplyr::select(party_survey,czideo,pweight) %>%
+  dplyr::mutate(czideo=as.numeric(czideo),
+                party_survey=as.character(party_survey)) %>%
+  dplyr::group_by(party_survey) %>%
+  dplyr::summarise(index=weighted.mean(czideo,pweight ,na.rm = T)) %>%
+  dplyr::arrange(index) 
+
+# Armazenar 
+left_parties <- indexparty[indexparty$index<=quantile(indexparty$index, na.rm=T,0.25),]$party_survey
+center_parties <- indexparty[indexparty$index>quantile(indexparty$index, na.rm=T,0.25)&
+                               indexparty$index<quantile(indexparty$index, na.rm=T,0.75),]$party_survey
+right_parties <- indexparty[indexparty$index>=quantile(indexparty$index, na.rm=T,0.75),]$party_survey
+
+
 
 #############################################################
 ########## Carregar a base de Resultado - Votação ###########
@@ -289,8 +312,20 @@ if(a<=2012){
     }
 
 base <- base %>%
-  dplyr::mutate(votos=QT_VOTOS_NOMINAIS+QT_VOTOS_LEGENDA) %>%
-  dplyr::group_by(ANO_ELEICAO,CD_MUNICIPIO,NM_MUNICIPIO,DS_CARGO,SG_PARTIDO) %>%
+  dplyr::mutate(votos=QT_VOTOS_NOMINAIS+QT_VOTOS_LEGENDA,
+                orientacao=case_when(SG_PARTIDO %in% c("PSTU","PSOL","PC do B",
+                                                       "PT","PSB","PC DO B",
+                                                       "PCO")~"Esquerda",
+                                     SG_PARTIDO %in% c("PDT","PV","PCB",
+                                                       "PPS","PSDB","PMDB",
+                                                       "PTB","PSD","PL",
+                                                       "PRONA","PR","PSC",
+                                                       "PRB")~"Centro",
+                                     SG_PARTIDO %in% c("PRN","PFL","DEM",
+                                                       "PDS","PPR","PDC",
+                                                       "PPB","PP","PMN","PSL")~"Direita",
+                                     TRUE~"Outros")) %>%
+  dplyr::group_by(ANO_ELEICAO,CD_MUNICIPIO,NM_MUNICIPIO,DS_CARGO,NR_TURNO,SG_PARTIDO,orientacao) %>%
   dplyr::summarise(votos=sum(votos))
 
 votacao <<- rbind(votacao,base)
@@ -300,26 +335,6 @@ votacao <<- rbind(votacao,base)
 
 # Remover arquivos descompactados
 file.remove(list.files("TSE/Resultado/Partidos",pattern = ".txt|csv",full.names = T))
-
-#############################################################
-########## Carregar a base da BLS - Zucco ####################
-#############################################################
-load("bls7_released_v01.RData")
-
-# Fazer a média ponderada da orientação ideológica dos partidos
-indexparty <- bls %>%
-  dplyr::select(party_survey,czideo,pweight) %>%
-  dplyr::mutate(czideo=as.numeric(czideo),
-                party_survey=as.character(party_survey)) %>%
-  dplyr::group_by(party_survey) %>%
-  dplyr::summarise(index=weighted.mean(czideo,pweight ,na.rm = T)) %>%
-  dplyr::arrange(index) 
-
-# Armazenar 
-left_parties <- indexparty[indexparty$index<=quantile(indexparty$index, na.rm=T,0.25),]$party_survey
-center_parties <- indexparty[indexparty$index>quantile(indexparty$index, na.rm=T,0.25)&
-                               indexparty$index<quantile(indexparty$index, na.rm=T,0.75),]$party_survey
-right_parties <- indexparty[indexparty$index>=quantile(indexparty$index, na.rm=T,0.75),]$party_survey
 
 #############################################################
 ########## Carregar a base de Candidatos ####################
@@ -400,6 +415,9 @@ if(a<=2010){
           
           dplyr::rename_all(funs(eval(names2012)))}  else{
             
+            base <- base %>%
+              dplyr::rename(DS_UE=NM_UE)
+            
           }
     }
 
@@ -407,7 +425,8 @@ base <-
 base %>%
   dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO")) %>%
   dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% c("PSTU","PSOL","PC do B",
-                                                       "PT","PSDB")~"Esquerda",
+                                                       "PT","PSB","PC DO B",
+                                                       "PCO")~"Esquerda",
                                      SG_PARTIDO %in% c("PDT","PV","PCB",
                                                        "PPS","PSDB","PMDB",
                                                        "PTB","PSD","PL",
@@ -415,9 +434,9 @@ base %>%
                                                        "PRB")~"Centro",
                                      SG_PARTIDO %in% c("PRN","PFL","DEM",
                                                        "PDS","PPR","PDC",
-                                                       "PPB","PP","PMN")~"Direita",
+                                                       "PPB","PP","PMN","PSL")~"Direita",
                                      TRUE~"Outros")) %>%
-  dplyr::count(ANO_ELEICAO,DS_CARGO,SG_UF,orientacao,
+  dplyr::count(ANO_ELEICAO,SG_UF,SG_UE,DS_UE,DS_CARGO,NR_TURNO,orientacao,
                DS_SIT_TOT_TURNO)
 
 
@@ -471,7 +490,8 @@ censolegis <- data.table::fread("http://www.interlegis.leg.br/produtos_servicos/
                 "JOÃO PESSOA","BELÉM","VITÓRIA","TERESINA","NATAL",
                 "MACEIÓ","CUIABÁ","CAMPO GRANDE","BRASÍLIA","ARACAJU",
                 "MANAUS","PORTO VELHO","RIO BRANCO","MACAPÁ","BOA VISTA",
-                "PALMAS","NAZÁRIA","FERNANDO DE NORONHA")))
+                "PALMAS","NAZÁRIA","FERNANDO DE NORONHA"))) %>%
+  dplyr::filter(localidade!="QUATRO MARCOS")
 
 #################################################################
 ########## Carregar dados da Anatel, backhaul####################
@@ -574,7 +594,7 @@ smp_200902_2014 <- data.table::fread("Acessos_SMP_200902-2014_-_Total.csv") %>%
   tidyr::gather("Ref","valor",8:length(.)) %>%
   dplyr::mutate(Ano=stringr::str_sub(Ref,1,4)) %>%
   dplyr::group_by(DDD,Tipo,Ano) %>%
-  dplyr::summarise(Valor=sum(valor))
+  dplyr::summarise(Valor=sum(valor)/12)
 
 # Carregar dados de 2015 até hoje
 smp_2015_2018 <- data.table::fread("Acessos_SMP_2015-2018_-_Total.csv") %>%
@@ -584,7 +604,7 @@ smp_2015_2018 <- data.table::fread("Acessos_SMP_2015-2018_-_Total.csv") %>%
   tidyr::gather("Ref","valor",9:length(.)) %>%
   dplyr::mutate(Ano=stringr::str_sub(Ref,1,4)) %>%
   dplyr::group_by(DDD,Tipo,Ano) %>%
-  dplyr::summarise(Valor=sum(valor))
+  dplyr::summarise(Valor=sum(valor)/12)
 
 # Juntar a porra toda
 smp2009_2018 <- smp_200902_2014 %>%
@@ -599,5 +619,277 @@ dic_DDD <- data.table::fread("PGCN com código IBGE.csv")
 #################################################################
 ########## Carregar dados do Censo ##############################
 #################################################################
-censo <- readxl::read_excel("./Censo/censo_vars.xlsx")
+censo <- readxl::read_excel("./Censo/censo_vars.xlsx") %>%
+  dplyr::mutate_at(vars(linha_tel_2000,pc_2000,carro_2000,
+                        pc_internet_2010,carro_2010,ens_med_2000,
+                        pea_2000,rural_2000,rural_2010),
+                   funs(as.numeric(.))) %>%
+  dplyr::mutate_at(vars(`0_14_anos_2000`:`60_anos_2000`,
+                        negro_2000,iluminacao_2000:carro_2000,
+                        ens_med_2000,ens_sup_2000,casado_2000,
+                        pea_2000,rural_2000),
+                   funs(./Total_2000)) %>%
+  dplyr::mutate_at(vars(`0_14_anos_2010`:`60_anos_2010`,
+                        negro_2010,iluminacao_2010:carro_2010,
+                        ens_med_2010,ens_sup_2010,casado_2010,
+                        pea_2010,rural_2010),
+                   funs(./Total_2010)) %>%
+  dplyr::mutate(renda_med_2000=renda_med_2000*inflator,
+                COD_IBGE=as.character(COD_IBGE))
+
+summary(censo)
+
+#################################################################
+########## Carregar dados de população  #########################
+#################################################################
+
+# Fazer para 2012 a 2018
+files <- list.files("./Populacao",pattern = "estimativa",
+                    full.names = T)
+
+populacao <- c()
+
+for(i in files){
+  
+  a<-str_extract(i,"[0-9]{4}")
+  
+  pop<-
+  readxl::read_excel(i,
+                     sheet =2,
+                     skip=1,
+                     col_types = "text") %>%
+    na.omit %>%
+    dplyr::transmute(COD_IBGE=paste0(`COD. UF`,`COD. MUNIC`),
+                     pop=as.numeric(`POPULAÇÃO ESTIMADA`),
+                     ano=paste0("pop_",a))
+  
+  populacao <- rbind(populacao,pop)
+}
+
+# Fazer para 2007 a 2009 e 2011
+files <- list.files("./Populacao",pattern = "pop",
+                    full.names = T)
+for(i in files){
+  
+  a<-str_extract(i,"[0-9]{4}")
+  
+  pop<-
+    readxl::read_excel(i,
+                       sheet =1,
+                       skip=1,
+                       col_types = "text") %>%
+    na.omit %>%
+    dplyr::rename_all(funs(c("uf","cod_uf","cod_mun",
+                             "mun","pop"))) %>%
+    dplyr::transmute(COD_IBGE=paste0(cod_uf,stringr::str_pad(cod_mun,5,"left",pad = 0)),
+                     pop=as.numeric(pop),
+                     ano=paste0("pop_",a))
+  
+  populacao <- rbind(populacao,pop)
+}
+
+populacao <- populacao %>%
+  tidyr::spread(ano,pop) %>%
+  dplyr::left_join(censo %>%
+                     dplyr::select(COD_IBGE,Total_2010) %>%
+                     dplyr::rename(pop_2010=Total_2010) %>%
+                     dplyr::mutate(COD_IBGE=as.character(COD_IBGE)))
+
+
+# Salvar as bases
+save.image(file = "paper1.rda",compress = T)
+
+load("paper1.rda")
+
+
+# Carregar base CETIC
+library(survey)
+library(srvyr)
+
+
+cetic_2015 <- data.table::fread("http://cetic.br/media/microdados/81/ticdom_2015_individuos_base_de_microdados_v1.0.csv",
+                                dec = ",")
+
+sample_cetic <-
+  survey::svydesign(ids = ~UPA,
+                    strata=~ESTRATO,
+                    weights=~Peso,
+                    data=cetic_2015,
+                    nest=T)
+
+# wgts <-
+#   survey::bootweights(
+#     strata = cetic_2015$ESTRATO ,
+#     psu = cetic_2015$UPA ,
+#     replicates = 80 
+#   )
+
+# cetic_design <-
+#   survey::svrepdesign(
+#     weight = ~ Peso ,
+#     repweights = wgts$repweights ,
+#     type = "bootstrap",
+#     combined.weights = FALSE ,
+#     scale = wgts$scale ,
+#     rscales = wgts$rscales ,
+#     data = cetic_2015
+#   )
+
+sample_cetic <- as_survey(sample_cetic)
+# cetic_design <- as_survey(cetic_design)
+
+sample_cetic %>%
+  srvyr::filter(idade %in% c(18:69)) %>%
+  srvyr::group_by(C7_D) %>%
+  srvyr::summarise(n=survey_total(vartype="ci"),
+                   pct=survey_mean(vartype = "ci"))
+
+
+# Baixar base de dados BPC
+
+anos <- c(2004:2018)
+
+BPC <- c()
+
+for(i in anos){
+  
+  BPC_t <- data.table::fread(paste0("http://aplicacoes.mds.gov.br/sagi/servicos/misocial?q=*&fq=anomes_s:",i,"*&fq=tipo_s:mes_mu&wt=csv&omitHeader=true&fl=ibge:codigo_ibge,anomes:anomes_s,bpc_ben:bpc_ben_i,bpc_pcd_ben:bpc_pcd_ben_i,bpc_idoso_ben:bpc_idoso_ben_i,bpc_pcd_val:bpc_pcd_val_s,bpc_idoso_val:bpc_idoso_val_s,bpc_val:bpc_val_s&rows=100000000&sort=anomes_s%20asc,%20codigo_ibge%20asc"))
+  
+  BPC <- rbind(BPC,BPC_t)
+  
+}
+
+BOLSA <- c()
+
+for(i in anos){
+  
+  BOLSA_t <- data.table::fread(paste0("http://aplicacoes.mds.gov.br/sagi/servicos/misocial?q=*&fq=anomes_s:",i,"*&fq=tipo_s:mes_mu&wt=csv&fl=ibge:codigo_ibge,anomes:anomes_s,qtd_familias_beneficiarias_bolsa_familia,valor_repassado_bolsa_familia&rows=10000000&sort=anomes_s%20asc,%20codigo_ibge%20asc"))
+  
+  BOLSA <- rbind(BOLSA,BOLSA_t)
+  
+}
+
+rm(BPC_t,BOLSA_t,i,anos)
+
+BOLSA_anual <- BOLSA %>%
+  dplyr::mutate(Ano=substr(anomes,1,4),
+                ibge=as.character(ibge)) %>%
+  dplyr::group_by(ibge,Ano) %>% 
+  dplyr::summarise(qtd_fam_bolsa=round(mean(qtd_familias_beneficiarias_bolsa_familia)),
+                   valor_bolsa=sum(valor_repassado_bolsa_familia)) %>%
+  dplyr::rename(COD_IBGE=ibge)
+
+BPC_anual <- BPC %>% 
+  dplyr::mutate(Ano=substr(anomes,1,4),
+                ibge=as.character(ibge)) %>%
+  dplyr::group_by(ibge,Ano) %>% 
+  dplyr::summarise(qtd_bpc_idoso=round(mean(bpc_idoso_ben)),
+                   qtd_bpc_pcd=round(mean(bpc_pcd_ben)),
+                   valor_bpc_idoso=sum(bpc_idoso_val),
+                   valor_bpc_pcd=sum(bpc_pcd_val)) %>%
+  dplyr::rename(COD_IBGE=ibge)
+
+BPC_anual %>%
+  dplyr::group_by(Ano) %>%
+  dplyr::summarise(n_idoso=sum(valor_bpc_idoso),
+                   n_pcd=sum(valor_bpc_pcd),
+                   b_idoso=sum(qtd_bpc_idoso),
+                   b_pcd=sum(qtd_bpc_pcd)) %>%
+  dplyr::mutate(n_idoso=n_idoso/1000000000,
+                n_pcd=n_pcd/1000000000,
+                total=n_idoso+n_pcd,
+                b_idoso=b_idoso/1000000,
+                b_pcd=b_pcd/1000000,
+                total_b=b_idoso+b_pcd)
+
+BOLSA_anual %>%
+  dplyr::group_by(Ano) %>%
+  dplyr::summarise(n_fam=sum(qtd_fam_bolsa),
+                   n_valor=sum(valor_bolsa)) %>%
+  dplyr::mutate(n_valor=n_valor/1000000000,
+                n_fam=n_fam/1000000)
+
+pib <- data.table::fread("pibmun.csv",encoding = "UTF-8")
+
+# Carregar informações da RAIS
+rais <- data.table::fread("rais_bi_vinc.csv") %>%
+  dplyr::select(-18) %>%
+  dplyr::filter(`Município`!="{ñ class}") %>%
+  tidyr::gather("Ano","vinculos_rais",-1) %>%
+  dplyr::rename(COD_IBGE=`Município`) %>%
+  dplyr::arrange(COD_IBGE,Ano) %>% 
+  dplyr::left_join(data.table::fread("rais_bi_salarios.csv",
+                                     dec = ",") %>%
+                     dplyr::select(-18,-19) %>%
+                     dplyr::filter(!`Município` %in% c("{ñ class}","Total")) %>%
+                     tidyr::gather("Ano","salarios_rais",-1) %>%
+                     dplyr::rename(COD_IBGE=`Município`) %>%
+                     dplyr::arrange(COD_IBGE,Ano)) 
+
+# Carregar informações do Imet
+
+# Listar arquivos
+files <- list.files("imet/mensal", full.names = T)
+
+# Carregar bases
+
+info_estacao <- c()
+
+for(i in files){
+
+base <- data.table::fread(i,
+                          stringsAsFactors=F) %>%
+  t() %>% 
+  data.frame(stringsAsFactors = F) %>%
+  janitor::row_to_names(1) %>%
+  dplyr::rename_all(list(~c("UF","ESTACAO","COD_WMO","LAT","LONG","ALTITUDE",
+                    "DAT_INICIO_OP","DATA_FIM_OP","STATUS"))) %>%
+  remove_rownames
+
+info_estacao <<- rbind(info_estacao,base)
+
+}
+
+files <- list.files("imet/diario", full.names = T)
+
+dados_estacao <- c()
+
+for(i in files){
+
+wmo <- data.table::fread(i,
+                          stringsAsFactors=F) %>%
+  .[[3,2]] 
+
+base <- data.table::fread(i,skip=8, header = T) %>%
+  dplyr::select(-7) %>% 
+  dplyr::rename_all(list(~c("DATA","PRECIP_TOT",
+                            "TEMP_MAX","TEMP_MED","TEMP_MIN",
+                            "URA_MED"))) %>%
+  dplyr::mutate(COD_WMO=wmo)
+
+dados_estacao <<- rbind(dados_estacao,base)
+}
+
+
+dados_estacao <- dados_estacao %>%
+  dplyr::left_join(info_estacao)
+
+problemas <- dados_estacao %>%
+  dplyr::filter(is.na(ESTACAO)==T)
+
+table(problemas$COD_WMO)
+
+# As estações problemáticas não apresentam dados recentes
+# Todos anteriores a 1966
+
+rm(base,info_estacao,problemas,wmo,files,i)
+
+# Carregar dados do IPEA Data
+
+ipea <- ipeadatar::ipeadata(c("THOMIC","TSUICID",
+                              "DISTCAPF","DISTCAPU",
+                              "DESPCORRM","DINVESTM","DESPCUPM")) %>%
+  dplyr::filter(uname=="Municipality")
+
+
 
