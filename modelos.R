@@ -393,36 +393,42 @@ estacao <- dados_estacao %>%
 mapa <- dplyr::bind_rows(
   
   brazilmaps::get_brmap("City") %>%
+    sf::st_transform(crs = 4674) %>% 
     sf::st_join(estacao %>% 
                   dplyr::filter(ANO==2008,NR_TURNO==1),
                 join=st_nearest_feature) %>%
     sf::st_set_geometry(NULL),
   
   brazilmaps::get_brmap("City") %>%
+    sf::st_transform(crs = 4674) %>% 
     sf::st_join(estacao %>% 
                   dplyr::filter(ANO==2008,NR_TURNO==2),
                 join=st_nearest_feature) %>%
     sf::st_set_geometry(NULL),
   
   brazilmaps::get_brmap("City") %>%
+    sf::st_transform(crs = 4674) %>%
     sf::st_join(estacao %>% 
                   dplyr::filter(ANO==2010,NR_TURNO==1),
                 join=st_nearest_feature) %>%
     sf::st_set_geometry(NULL),
   
   brazilmaps::get_brmap("City") %>%
+    sf::st_transform(crs = 4674) %>%
     sf::st_join(estacao %>% 
                   dplyr::filter(ANO==2010,NR_TURNO==2),
                 join=st_nearest_feature) %>%
     sf::st_set_geometry(NULL),
   
   brazilmaps::get_brmap("City") %>%
+    sf::st_transform(crs = 4674) %>%
     sf::st_join(estacao %>% 
                   dplyr::filter(ANO==2012,NR_TURNO==1),
                 join=st_nearest_feature) %>%
     sf::st_set_geometry(NULL),
   
   brazilmaps::get_brmap("City") %>%
+    sf::st_transform(crs = 4674) %>%
     sf::st_join(estacao %>% 
                   dplyr::filter(ANO==2012,NR_TURNO==2),
                 join=st_nearest_feature) %>%
@@ -798,7 +804,7 @@ u_base <- dplyr::bind_cols(
 # Carregar função ajustada para fuzzy
 library(rdmulti)
 #source("F:/Backup Thiago/Thiago/tese_1/rdmc_adj2.R")
-source("F:/OneDrive/Doutorado/Tese/tese_1/rdmc_adj2.R")
+source("F:/OneDrive/Doutorado/Tese/tese_1/rdmc_adj3.R")
 
 covs_2008= "Total_2000+renda_med_2000+60_anos_2000+rural_2000+negro_2000+radio_2000+televisao_2000+ens_sup_2000+casado_2000+pea_2000+PRECIP_DIA+TEMP_MED+valor_bolsa+valor_bpc_idoso+PIB+salarios_rais"
 
@@ -1056,7 +1062,8 @@ rodar_modelo_vs <- function(y,
                dplyr::filter(ANO_ELEICAO==ano) %>% 
                dplyr::filter(NR_TURNO==turno) %>% 
                dplyr::filter(DS_CARGO==cargo_m) %>% 
-               dplyr::filter(orientacao==orient))
+               dplyr::filter(orientacao==orient) %>% 
+               dplyr::filter(is.na(eval(parse(text = y)))==F))
     
     mod <- results_dt %>% 
       dplyr::mutate(Year=paste0(ano),
@@ -1081,7 +1088,8 @@ rodar_modelo_vs <- function(y,
                  dplyr::filter(ANO_ELEICAO==ano) %>% 
                  dplyr::filter(NR_TURNO==turno) %>% 
                  dplyr::filter(DS_CARGO==cargo_n) %>% 
-                 dplyr::filter(orientacao==orient))
+                 dplyr::filter(orientacao==orient) %>% 
+                 dplyr::filter(is.na(eval(parse(text = y)))==F))
       
       mod <- results_dt %>% 
         dplyr::mutate(Year=paste0(ano),
@@ -1108,6 +1116,7 @@ rodar_modelo_vs <- function(y,
                  dplyr::filter(NR_TURNO==turno) %>% 
                  dplyr::filter(DS_CARGO==cargo_m) %>% 
                  dplyr::filter(orientacao==orient)%>% 
+                 dplyr::filter(is.na(eval(parse(text = y)))==F) %>% 
                  dplyr::mutate(nordeste=case_when(regiao=="Nordeste"~1,
                                                   TRUE~0),
                                norte=case_when(regiao=="Norte"~1,
@@ -1142,6 +1151,7 @@ rodar_modelo_vs <- function(y,
                  dplyr::filter(NR_TURNO==turno) %>% 
                  dplyr::filter(DS_CARGO==cargo_n) %>% 
                  dplyr::filter(orientacao==orient)%>% 
+                 dplyr::filter(is.na(eval(parse(text = y)))==F) %>% 
                  dplyr::mutate(nordeste=case_when(regiao=="Nordeste"~1,
                                                   TRUE~0),
                                norte=case_when(regiao=="Norte"~1,
@@ -1174,6 +1184,7 @@ rodar_modelo_vs <- function(y,
                  dplyr::filter(NR_TURNO==turno) %>% 
                  dplyr::filter(DS_CARGO==cargo_m) %>% 
                  dplyr::filter(orientacao==orient)%>% 
+                 dplyr::filter(is.na(eval(parse(text = y)))==F) %>% 
                  dplyr::mutate(nordeste=case_when(regiao=="Nordeste"~1,
                                                   TRUE~0),
                                norte=case_when(regiao=="Norte"~1,
