@@ -12,7 +12,7 @@ back_2008 <- backhaul %>%
   # Retirar da análise municípios que já possuiam infraestrutura anteriormente
   dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
   # Agrupar por município
-  dplyr::group_by(fk_cod_municipio) %>% 
+  dplyr::group_by(fk_cod_municipio,tecnologiadeatendimento) %>% 
   # Recuperar a velocidade do backhaul para todas as linhas,
   dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
   # Desagrupar
@@ -28,7 +28,7 @@ back_2008 <- backhaul %>%
                                      TRUE~as.numeric(backhaul_ano_2008)),
                 COD_IBGE=as.character(fk_cod_municipio)) %>%
   # Ficar somente com a informação de velocidade e o código do município
-  dplyr::select(COD_IBGE,Velocity) %>%
+  dplyr::select(COD_IBGE,Velocity,Technology=tecnologiadeatendimento) %>%
   # Recuperar as informações de população
   dplyr::left_join(populacao %>%
                      dplyr::select(COD_IBGE,pop_2007)) %>%
@@ -62,7 +62,7 @@ back_2008 <- backhaul %>%
 back_2009 <- backhaul %>%
   dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
   #dplyr::filter(!(Situao=="Atendido"&is.na(backhaul)==T)) %>%
-  dplyr::group_by(fk_cod_municipio) %>% 
+  dplyr::group_by(fk_cod_municipio,tecnologiadeatendimento) %>% 
   dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
   dplyr::ungroup() %>% 
   dplyr::filter(ano==2009) %>% 
@@ -73,7 +73,7 @@ back_2009 <- backhaul %>%
                                                     "backhaul_ano_2009")],
                                                   na.rm=T)),
                 COD_IBGE=as.character(fk_cod_municipio)) %>%
-  dplyr::select(COD_IBGE,Velocity) %>%
+  dplyr::select(COD_IBGE,Velocity,Technology=tecnologiadeatendimento) %>%
   dplyr::left_join(populacao %>%
                      dplyr::select(COD_IBGE,pop_2008)) %>%
   dplyr::rename(pop_anterior=pop_2008) %>%
@@ -100,7 +100,7 @@ back_2009 <- backhaul %>%
 back_2010 <-backhaul %>%
   dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
   #dplyr::filter(!(Situao=="Atendido"&is.na(backhaul)==T)) %>%
-  dplyr::group_by(fk_cod_municipio) %>% 
+  dplyr::group_by(fk_cod_municipio,tecnologiadeatendimento) %>% 
   dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
   dplyr::ungroup() %>% 
   dplyr::filter(ano==2009) %>% 
@@ -113,7 +113,7 @@ back_2010 <-backhaul %>%
                                                        "backhaul_ano_2010")],
                                                   na.rm=T)),
                 COD_IBGE=as.character(fk_cod_municipio)) %>%
-  dplyr::select(COD_IBGE,Velocity) %>%
+  dplyr::select(COD_IBGE,Velocity,Technology=tecnologiadeatendimento) %>%
   dplyr::left_join(populacao %>%
                      dplyr::select(COD_IBGE,pop_2009)) %>%
   dplyr::rename(pop_anterior=pop_2009) %>%
@@ -141,7 +141,7 @@ back_2010 <-backhaul %>%
 back_2011 <- backhaul %>%
   dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
   #dplyr::filter(!(Situao=="Atendido"&is.na(backhaul)==T)) %>%
-  dplyr::group_by(fk_cod_municipio) %>% 
+  dplyr::group_by(fk_cod_municipio,tecnologiadeatendimento) %>% 
   dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
   dplyr::ungroup() %>% 
   dplyr::filter(ano==2009) %>% 
@@ -156,7 +156,7 @@ back_2011 <- backhaul %>%
                                                        "backhaul_ano_2011")],
                                                   na.rm=T)),
                 COD_IBGE=as.character(fk_cod_municipio)) %>%
-  dplyr::select(COD_IBGE,Velocity) %>%
+  dplyr::select(COD_IBGE,Velocity,Technology=tecnologiadeatendimento) %>%
   dplyr::left_join(populacao %>%
                      dplyr::select(COD_IBGE,pop_2010)) %>%
   dplyr::rename(pop_anterior=pop_2010) %>%
@@ -184,7 +184,7 @@ back_2011 <- backhaul %>%
 back_2012 <- backhaul %>%
   dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
   #dplyr::filter(!(Situao=="Atendido"&is.na(backhaul)==T)) %>%
-  dplyr::group_by(fk_cod_municipio) %>% 
+  dplyr::group_by(fk_cod_municipio,tecnologiadeatendimento) %>% 
   dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
   dplyr::ungroup() %>% 
   dplyr::filter(ano==2009) %>% 
@@ -201,7 +201,7 @@ back_2012 <- backhaul %>%
                                                        "backhaul_ano_2012")],
                                                   na.rm=T)),
                 COD_IBGE=as.character(fk_cod_municipio)) %>%
-  dplyr::select(COD_IBGE,Velocity) %>%
+  dplyr::select(COD_IBGE,Velocity,Technology=tecnologiadeatendimento) %>%
   dplyr::left_join(populacao %>%
                      dplyr::select(COD_IBGE,pop_2011)) %>%
   dplyr::rename(pop_anterior=pop_2011) %>%
@@ -225,6 +225,56 @@ back_2012 <- backhaul %>%
                                    TRUE~0),
                 year=2012)
 
+
+# Replicar para 2014
+back_2014 <- backhaul %>%
+  dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
+  #dplyr::filter(!(Situao=="Atendido"&is.na(backhaul)==T)) %>%
+  dplyr::group_by(fk_cod_municipio,tecnologiadeatendimento) %>% 
+  dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(ano==2009) %>% 
+  tidyr::spread(backhaul_ano, backhaul,sep="_") %>%
+  dplyr::mutate(Velocity=case_when(is.na(backhaul_ano_2008)==T&
+                                     is.na(backhaul_ano_2009)==T&
+                                     is.na(backhaul_ano_2010)==T&
+                                     is.na(backhaul_ano_2011)==T&
+                                     is.na(backhaul_ano_2012)==T&
+                                     is.na(backhaul_ano_2013)==T&
+                                     is.na(backhaul_ano_2014)==T~0,
+                                   TRUE~rowSums(.[,c("backhaul_ano_2008",
+                                                     "backhaul_ano_2009",
+                                                     "backhaul_ano_2010",
+                                                     "backhaul_ano_2011",
+                                                     "backhaul_ano_2012",
+                                                     "backhaul_ano_2013",
+                                                     "backhaul_ano_2014")],
+                                                na.rm=T)),
+                COD_IBGE=as.character(fk_cod_municipio)) %>%
+  dplyr::select(COD_IBGE,Velocity,Technology=tecnologiadeatendimento) %>%
+  dplyr::left_join(populacao %>%
+                     dplyr::select(COD_IBGE,pop_2013)) %>%
+  dplyr::rename(pop_anterior=pop_2013) %>%
+  dplyr::filter(is.na(pop_anterior)==F) %>%
+  dplyr::distinct() %>%
+  dplyr::filter(is.na(Velocity)==F&Velocity!=-Inf) %>%
+  dplyr::mutate(faixa_pop=cut(pop_anterior,
+                              c(-Inf,20000,40000,60000,Inf),
+                              labels = c("Up to 20k",
+                                         "from 20k to 40k",
+                                         "from 40k to 60k",
+                                         "Above 60k"),
+                              ordered_result = T),
+                cut_off=case_when(pop_anterior <=30000~20000,
+                                  pop_anterior %in% c(30001:50000)~40000,
+                                  pop_anterior>=50001~60000),
+                cut_off2=case_when(pop_anterior %in% c(15000:25000)~20000,
+                                   pop_anterior %in% c(35000:45000)~40000,
+                                   pop_anterior %in% c(55000:65000)~60000),
+                internet=case_when(Velocity>0~1,
+                                   TRUE~0),
+                year=2014)
+
 # Recuperar informação do ano de implantação do backhaul
 back_ano <- backhaul %>% 
   dplyr::group_by(fk_cod_municipio) %>% 
@@ -237,9 +287,191 @@ back_ano <- backhaul %>%
 # Juntar as informações do backhaul de 2008, 2010 e 2012
 back_junto <- back_2008 %>% 
   dplyr::bind_rows(back_2010,
-                   back_2012) %>% 
+                   back_2012
+                   #back_2014
+                   ) %>% 
   # Pegar as informações do ano de implantação
   dplyr::left_join(back_ano)
+
+# Verificar número de partidos e candidatos
+x<-candidato2 %>% 
+  dplyr::filter(!SG_PARTIDO%in%c("NÃO","SIM")) %>% 
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>% 
+  dplyr::select(ANO_ELEICAO,SG_PARTIDO) %>% 
+  dplyr::distinct() %>% 
+  dplyr::group_by(ANO_ELEICAO) %>% 
+  dplyr::summarise(n=n())
+
+x1<-candidato2 %>% 
+  dplyr::filter(NR_TURNO==1) %>% 
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>%
+  dplyr::select(ANO_ELEICAO,SG_PARTIDO,n) %>% 
+  dplyr::filter(!SG_PARTIDO%in%c("NÃO","SIM")) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(SG_PARTIDO=case_when(SG_PARTIDO %in% c("PTN","PODE")~"PTN/PODEMOS",
+                                     SG_PARTIDO %in% c("PT do B","AVANTE")~"PT do B/AVANTE",
+                                     SG_PARTIDO %in% c("PEN","PATRI")~"PEN/PATRIOTA",
+                                     SG_PARTIDO %in% c("PMDB","MDB")~"PMDB/MDB",
+                                     SG_PARTIDO %in% c("PSDC","DC")~"PSDC/DC",
+                                     SG_PARTIDO %in% c("PR","PL")~"PR/PL",
+                                     SG_PARTIDO %in% c("PRB","REPUBLICANOS")~"PRB/REPUBLICANOS",
+                                     SG_PARTIDO %in% c("PPS","CIDADANIA")~"PPS/CIDADANIA",
+                                     SG_PARTIDO %in% c("PPB","PP")~"PPB/PP",
+                                     SG_PARTIDO %in% c("PJ","PRN","PTC")~"PRN/PTC",
+                                     SG_PARTIDO %in% c("PFL","DEM")~"PFL/DEM",
+                                     SG_PARTIDO %in% c("PSN","PHS")~"PSN/PHS",
+                                     SG_PARTIDO %in% c("PMR","PRB")~"PMR/PRB",
+                                     SG_PARTIDO %in% c("SD","SOLIDARIEDADE")~"SD/SOLIDARIEDADE",
+                                     TRUE~SG_PARTIDO)) %>% 
+  dplyr::group_by(ANO_ELEICAO,SG_PARTIDO) %>% 
+  dplyr::summarise(n=sum(n)) %>% 
+  tidyr::spread(ANO_ELEICAO,n) %>% 
+  dplyr::arrange(SG_PARTIDO) %>% 
+  janitor::adorn_totals("row",
+                        name="Total candidates")
+
+x2<-candidato2 %>% 
+  dplyr::filter(NR_TURNO==1) %>% 
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>%
+  dplyr::select(ANO_ELEICAO,SG_PARTIDO) %>%
+  dplyr::filter(!SG_PARTIDO%in%c("NÃO","SIM")) %>% 
+  dplyr::mutate(n=1,
+                SG_PARTIDO=case_when(SG_PARTIDO %in% c("PTN","PODE")~"PTN/PODEMOS",
+                                     SG_PARTIDO %in% c("PT do B","AVANTE")~"PT do B/AVANTE",
+                                     SG_PARTIDO %in% c("PEN","PATRI")~"PEN/PATRIOTA",
+                                     SG_PARTIDO %in% c("PMDB","MDB")~"PMDB/MDB",
+                                     SG_PARTIDO %in% c("PSDC","DC")~"PSDC/DC",
+                                     SG_PARTIDO %in% c("PR","PL")~"PR/PL",
+                                     SG_PARTIDO %in% c("PRB","REPUBLICANOS")~"PRB/REPUBLICANOS",
+                                     SG_PARTIDO %in% c("PPS","CIDADANIA")~"PPS/CIDADANIA",
+                                     SG_PARTIDO %in% c("PPB","PP")~"PPB/PP",
+                                     SG_PARTIDO %in% c("PJ","PRN","PTC")~"PRN/PTC",
+                                     SG_PARTIDO %in% c("PFL","DEM")~"PFL/DEM",
+                                     SG_PARTIDO %in% c("PSN","PHS")~"PSN/PHS",
+                                     SG_PARTIDO %in% c("PMR","PRB")~"PMR/PRB",
+                                     SG_PARTIDO %in% c("SD","SOLIDARIEDADE")~"SD/SOLIDARIEDADE",
+                                     TRUE~SG_PARTIDO)) %>% 
+  dplyr::distinct() %>%
+  tidyr::spread(ANO_ELEICAO,n) %>% 
+  janitor::adorn_totals("row",
+                        name="Total parties") %>% 
+  dplyr::mutate_at(vars(`2000`:`2018`),
+                   list(~case_when(is.na(.)==F&SG_PARTIDO!="Total parties"~"X",
+                                   TRUE~as.character(.))))
+
+partidos <- x1 %>% 
+  dplyr::bind_rows(x2 %>% 
+                     dplyr::filter(SG_PARTIDO=="Total parties") %>% 
+                     dplyr::mutate_at(vars(`2000`:`2018`),
+                                      list(~as.numeric(.)))) %>% 
+  dplyr::rename(Party=SG_PARTIDO)
+
+# Verificar participantes por eleição
+
+x <- resultado %>% 
+  dplyr::filter(DS_CARGO %in% c("PRESIDENTE","Presidente",
+                                "PREFEITO","Prefeito"),
+                NR_TURNO==1) %>% 
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::group_by(ANO_ELEICAO) %>% 
+  dplyr::summarise(aptos=sum(aptos,na.rm=T),
+                   Turnout=sum(compareceu)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(Year=ANO_ELEICAO+1)
+
+# Verificar o número de eleitores com título cancelado
+# no Brasil
+cancelados <- data.table::fread("F:\\OneDrive\\Doutorado\\Tese\\Bases\\TSE\\evolucao_faltosos_ultimos_3_pleitos.csv",
+                                dec=",") %>% 
+  dplyr::select(-`Abrangência`) %>% 
+  dplyr::group_by(Ano) %>% 
+  dplyr::summarise_all(list(~sum(.))) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(Year=Ano,
+                Voters=`Eleitores(E)`,
+                Cancelled=`Cancelados(C)`,
+                Cancelled2=`Cancelamento | Posterior(CP)`) %>% 
+  dplyr::left_join(x %>% 
+                     dplyr::select(Year,Turnout)) %>% 
+  dplyr::transmute(Year=Year,
+                   Voters=Voters,
+                   Turnout=Turnout,
+                   `Turnout %`=round(Turnout/Voters*100,2),
+                   Canceled=Cancelled+Cancelled2,
+                   `Canceled %`=round(Cancelled/Voters*100,2)) %>% 
+  na.omit
+
+# Verificar vencedores por partido
+
+x <- candidato2 %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>%
+  dplyr::filter(str_detect(DS_SIT_TOT_TURNO,"^ELEITO|MÉDIA")) %>% 
+  dplyr::filter(DS_CARGO %in% c("PREFEITO",
+                                "GOVERNADOR",
+                                "DEPUTADO FEDERAL",
+                                "SENADOR")) %>% 
+  dplyr::mutate(SG_PARTIDO=case_when(SG_PARTIDO %in% c("PTN","PODE")~"PTN/PODEMOS",
+                                     SG_PARTIDO %in% c("PT do B","AVANTE")~"PT do B/AVANTE",
+                                     SG_PARTIDO %in% c("PEN","PATRI")~"PEN/PATRIOTA",
+                                     SG_PARTIDO %in% c("PMDB","MDB")~"PMDB/MDB",
+                                     SG_PARTIDO %in% c("PSDC","DC")~"PSDC/DC",
+                                     SG_PARTIDO %in% c("PR","PL")~"PR/PL",
+                                     SG_PARTIDO %in% c("PRB","REPUBLICANOS")~"PRB/REPUBLICANOS",
+                                     SG_PARTIDO %in% c("PPS","CIDADANIA")~"PPS/CIDADANIA",
+                                     SG_PARTIDO %in% c("PPB","PP")~"PPB/PP",
+                                     SG_PARTIDO %in% c("PJ","PRN","PTC")~"PRN/PTC",
+                                     SG_PARTIDO %in% c("PFL","DEM")~"PFL/DEM",
+                                     SG_PARTIDO %in% c("PSN","PHS")~"PSN/PHS",
+                                     SG_PARTIDO %in% c("PMR","PRB")~"PMR/PRB",
+                                     SG_PARTIDO %in% c("SD","SOLIDARIEDADE")~"SD/SOLIDARIEDADE",
+                                     TRUE~SG_PARTIDO)) %>% 
+  dplyr::group_by(ANO_ELEICAO,DS_CARGO,SG_PARTIDO) %>% 
+  dplyr::summarise(n=sum(n)) %>% 
+  dplyr::group_by(ANO_ELEICAO,DS_CARGO) %>% 
+  dplyr::mutate(pct=n/sum(n)) %>% 
+  dplyr::ungroup() %>% 
+  tidyr::unite("pleito",DS_CARGO,ANO_ELEICAO) %>% 
+  dplyr::select(-n) %>% 
+  tidyr::spread(pleito,pct) %>% 
+  dplyr::mutate_at(-1,
+                   list(~case_when(is.na(.)==T~0,
+                                   TRUE~round(.*100,2))))
+
+ganhadores1 <- x %>% 
+  dplyr::select("SG_PARTIDO",
+                "DEPUTADO FEDERAL_2002","SENADOR_2002",
+                "DEPUTADO FEDERAL_2006","SENADOR_2006",
+                "DEPUTADO FEDERAL_2010","SENADOR_2010",
+                "DEPUTADO FEDERAL_2014","SENADOR_2014",
+                "DEPUTADO FEDERAL_2018","SENADOR_2018") %>% 
+  dplyr::arrange(SG_PARTIDO) 
+
+names(ganhadores1) <- c("Party",rep(c("F. Deputy","Senator"),5))
+
+ganhadores2 <- x %>% 
+  dplyr::select("SG_PARTIDO",
+                "PREFEITO_2000","GOVERNADOR_2002",
+                "PREFEITO_2004","GOVERNADOR_2006",
+                "PREFEITO_2008","GOVERNADOR_2010",
+                "PREFEITO_2012","GOVERNADOR_2014",
+                "PREFEITO_2016","GOVERNADOR_2018") %>% 
+  dplyr::arrange(SG_PARTIDO) %>% 
+  dplyr::rename_all(list(~c("Party",
+                            "Mayor(2000)","Governor(2002)",
+                            "Mayor(2004)","Governor(2006)",
+                            "Mayor(2008)","Governor(2010)",
+                            "Mayor(2012)","Governor(2014)",
+                            "Mayor(2016)","Governor(2018)")))
 
 # Pegar outcomes
 # Pegar resultados para candidatos
@@ -247,6 +479,10 @@ cand_orient <- candidato %>%
   # Renomear variáveis de identificação do município
   dplyr::rename(CD_MUNICIPIO=SG_UE,
                 NM_MUNICIPIO=DS_UE) %>% 
+  # Filtrar para eleições de interesse
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>%
   # Recuperar código dos municípios do IBGE
   dplyr::left_join(censolegis %>%
                      dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO))) %>% 
@@ -262,11 +498,60 @@ cand_orient <- candidato %>%
   # Desagrupar
   dplyr::ungroup()
 
+# Pegar resultados para candidatos por partido
+cand_part <- candidato2 %>%
+  # Renomear variáveis de identificação do município
+  dplyr::rename(CD_MUNICIPIO=SG_UE,
+                NM_MUNICIPIO=DS_UE) %>% 
+  # Filtrar para eleições de interesse
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>%
+  # Recuperar código dos municípios do IBGE
+  dplyr::left_join(censolegis %>%
+                     dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO))) %>% 
+  # Remover informações de canditados fora do nível municipal
+  # (Deputados estaduais, deputadores federais, presidente, senadores e governadores)
+  na.omit %>% 
+  # Agrupar por ano da eleioção, município, cargo e orientação
+  dplyr::group_by(ANO_ELEICAO,COD_IBGE,DS_CARGO,NR_TURNO,SG_PARTIDO) %>%
+  # Verificar o total de candidatos
+  dplyr::summarise(n=sum(n,na.rm=T)) %>%
+  # Verificar o percentual de candidatos
+  dplyr::mutate(pct_cand_part=n/sum(n)) %>% 
+  # Desagrupar
+  dplyr::ungroup()
+
+# Pegar número de candidatos
+n_cand <- candidato2 %>%
+  # Renomear variáveis de identificação do município
+  dplyr::rename(CD_MUNICIPIO=SG_UE,
+                NM_MUNICIPIO=DS_UE) %>% 
+  # Filtrar para eleições de interesse
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  dplyr::filter(DS_SITUACAO_CANDIDATURA%in%c("DEFERIDO","DEFERIDO COM RECURSO","APTO","SUB JUDICE")) %>%
+  # Recuperar código dos municípios do IBGE
+  dplyr::left_join(censolegis %>%
+                     dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO))) %>% 
+  # Remover informações de canditados fora do nível municipal
+  # (Deputados estaduais, deputadores federais, presidente, senadores e governadores)
+  na.omit %>% 
+  # Agrupar por ano da eleioção, município, cargo e orientação
+  dplyr::group_by(ANO_ELEICAO,COD_IBGE,DS_CARGO,NR_TURNO,SG_PARTIDO) %>%
+  # Verificar o total de candidatos
+  dplyr::summarise(n_cand=sum(n,na.rm=T)) %>%
+  # Desagrupar
+  dplyr::ungroup()
+
 # Definir o percentual de votação nos candidatos
 vote_share <- votacao %>%
   # Desagrupar informações
   dplyr::ungroup() %>% 
-  # Transformar a identificaçãod o município em caracter para o join
+  # Filtrar para eleições de interesse
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  # Transformar a identificação do município em caracter para o join
   dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO)) %>% 
   # Pegar o cod_IBGE para os municípios
   dplyr::left_join(censolegis %>%
@@ -282,6 +567,50 @@ vote_share <- votacao %>%
   # Desagrupar
   dplyr::ungroup()
 
+# Definir o percentual de votação nos candidatos
+vote_share_part <- votacao %>%
+  # Desagrupar informações
+  dplyr::ungroup() %>% 
+  # Filtrar para eleições de interesse
+  dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+  dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
+  # Transformar a identificaçãod o município em caracter para o join
+  dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO)) %>% 
+  # Pegar o cod_IBGE para os municípios
+  dplyr::left_join(censolegis %>%
+                     dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO))) %>% 
+  # Retirar informações de votantes do exterior
+  na.omit %>% 
+  # Agrupar pelo ano da eleição, município, cargo e orientação
+  dplyr::group_by(ANO_ELEICAO,COD_IBGE,DS_CARGO,NR_TURNO, SG_PARTIDO) %>%
+  # Verificar o total de votos
+  dplyr::summarise(votos=sum(votos,na.rm=T)) %>%
+  # Verificar o percentual de votos
+  dplyr::mutate(pct_vote_part=votos/sum(votos)) %>%
+  # Desagrupar
+  dplyr::ungroup()
+
+receita_cand <- receitas %>%
+  # Desagrupar informações
+  dplyr::ungroup() %>% 
+  dplyr::rename(CD_MUNICIPIO=SG_UE,
+                ANO_ELEICAO=ANO) %>% 
+  # Transformar a identificaçãod o município em caracter para o join
+  dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO),
+                DS_CARGO=toupper(DS_CARGO)) %>% 
+  # Pegar o cod_IBGE para os municípios
+  dplyr::left_join(censolegis %>%
+                     dplyr::mutate(CD_MUNICIPIO=as.character(CD_MUNICIPIO))) %>% 
+  # Retirar informações de votantes do exterior
+  na.omit %>% 
+  # Agrupar pelo ano da eleição, município, cargo e orientação
+  dplyr::group_by(ANO_ELEICAO,COD_IBGE,DS_CARGO,SG_PARTIDO) %>%
+  # Verificar o total de votos
+  dplyr::summarise(receita=mean(VR_RECEITA,na.rm=T)) %>%
+  # Verificar o percentual de votos
+  # Desagrupar
+  dplyr::ungroup()
+
 # Jutar os dois outcomes
 outcomes_cad_vote <- vote_share %>%
   dplyr::left_join(cand_orient)
@@ -294,6 +623,9 @@ eleic_out <- outcomes_cad_vote %>%
   dplyr::left_join(resultado %>%
                      # Filtrar para os anos de interesse
                      dplyr::filter(ANO_ELEICAO %in% c(2004,2006,2008,2010,2012)) %>%
+                     # Filtrar para eleições de interesse
+                     dplyr::filter(str_detect(DS_ELEICAO,pattern="ELEI[CÇ][OÕ]ES|2008|2012|2014|2016|2018")) %>% 
+                     dplyr::filter(!str_detect(DS_ELEICAO,pattern="NOVA|SUPLEMENTAR|Suplementar")) %>% 
                      # Desagrupar a base
                      dplyr::ungroup() %>%
                      # Transformar o código do município em caracter para o join
@@ -329,10 +661,43 @@ eleic_out <- outcomes_cad_vote %>%
   # Deixar código do IBGE como caracter
   dplyr::mutate(COD_IBGE=as.character(COD_IBGE))
 
+
+# Pegar as informações de participação e juntar a coisa toda
+eleic_out2 <- vote_share_part %>%
+  dplyr::left_join(cand_part) %>% 
+  dplyr::left_join(n_cand) %>% 
+  dplyr::left_join(receita_cand) %>% 
+  # Filtrar para os anos de interesse
+  dplyr::filter(ANO_ELEICAO %in% c(2004,2006,2008,2010,2012)) %>%
+  # Selecionar as variáveis de interesse
+  dplyr::select(ANO_ELEICAO,COD_IBGE,DS_CARGO,NR_TURNO,SG_PARTIDO,
+                pct_cand_part,pct_vote_part,n_cand,receita) %>%
+  # Organizar por município, cargo, orientação e ano da eleição
+  dplyr::arrange(COD_IBGE,DS_CARGO,NR_TURNO,SG_PARTIDO,ANO_ELEICAO) %>% 
+  dplyr::mutate(COD_IBGE=as.character(COD_IBGE))
+
 # Coletar informações do censo e do backhaul
 # juntando com os outcomes
 
 rdd <- eleic_out %>%
+  # Pegar informações do censo
+  dplyr::left_join(censo %>%
+                     dplyr::mutate(COD_IBGE=as.character(COD_IBGE)) %>%
+                     dplyr::select(-localidade)) %>%
+  # Pegar informações do backhaul
+  dplyr::left_join(back_junto,
+                   by=c("COD_IBGE"="COD_IBGE",
+                        "ANO_ELEICAO"="year")) %>%
+  # Manter apenar os municípios passíveis de análise (participantes do Backhaul e os sem atendimento)
+  dplyr::filter(is.na(Velocity)==F) %>%
+  # Criar códigos para as grandes regiões do país
+  dplyr::mutate(regiao=case_when(substr(COD_IBGE,1,1)==1~"Norte",
+                                 substr(COD_IBGE,1,1)==2~"Nordeste",
+                                 substr(COD_IBGE,1,1)==3~"Sudeste",
+                                 substr(COD_IBGE,1,1)==4~"Sul",
+                                 substr(COD_IBGE,1,1)==5~"Centro-oeste"))
+
+rdd2 <- eleic_out2 %>%
   # Pegar informações do censo
   dplyr::left_join(censo %>%
                      dplyr::mutate(COD_IBGE=as.character(COD_IBGE)) %>%
@@ -448,6 +813,13 @@ rdd <- rdd %>%
                                    TEMP_MED) %>%
                      dplyr::mutate(COD_IBGE=as.character(City)))
 
+rdd2 <- rdd2 %>%
+  dplyr::left_join(mapa %>%
+                     dplyr::select(ANO_ELEICAO,NR_TURNO,City,PRECIP_DIA,PRECIP,
+                                   PRECIP_ANTES,PRECIP_DEPOIS,
+                                   TEMP_MED) %>%
+                     dplyr::mutate(COD_IBGE=as.character(City)))
+
 # Pegar informações do Bolsa família, BPC e ipea, PIB e MTE
 rdd <- rdd %>%
   dplyr::mutate(COD_IBGE2=substr(COD_IBGE,1,6)) %>%
@@ -477,12 +849,61 @@ rdd <- rdd %>%
                      dplyr::filter(Ano %in% c(2008,2010,2012)) %>%
                      dplyr::mutate(COD_IBGE=as.character(COD_IBGE),
                                    ANO_ELEICAO=as.numeric(Ano),
-                                   salarios_rais=as.numeric(salarios_rais)) %>%
+                                   salarios_rais=as.numeric(salarios_rais)*12) %>%
                      dplyr::select(COD_IBGE,ANO_ELEICAO,vinculos_rais,salarios_rais),
                    by=c("COD_IBGE2"="COD_IBGE","ANO_ELEICAO"="ANO_ELEICAO")) %>% 
   # Fazer BPC e Bolsa pelo PIB
   dplyr::mutate_at(vars(valor_bolsa,valor_bpc_idoso,salarios_rais),
-                   list(~./(PIB*1000)))
+                   list(~./(PIB*1000))) %>% 
+  dplyr::mutate(fpm=cut(pop_anterior,
+                        c(-Inf,10188,13584,16980,23772,30564,
+                          37356,44148,50940,61128,71316,
+                          81504,91692,101880,115464,129048,
+                          142632,156216,Inf)),
+                fibra=case_when(Technology=="Fibra"~1,
+                                TRUE~0))
+
+rdd2<- rdd2 %>%
+  dplyr::mutate(COD_IBGE2=substr(COD_IBGE,1,6)) %>%
+  dplyr::left_join(BOLSA_anual %>%
+                     dplyr::mutate(Ano=as.numeric(Ano)) %>% 
+                     dplyr::filter(Ano %in% c(2008,2010,2012)),
+                   by=c("COD_IBGE2"="COD_IBGE","ANO_ELEICAO"="Ano")) %>%
+  dplyr::left_join(BPC_anual%>%
+                     dplyr::mutate(Ano=as.numeric(Ano)) %>%
+                     dplyr::filter(Ano %in% c(2008,2010,2012)),
+                   by=c("COD_IBGE2"="COD_IBGE","ANO_ELEICAO"="Ano")) %>%
+  dplyr::left_join(ipea %>%
+                     dplyr::filter(lubridate::year(date) %in% c(2008,2010,2012)) %>%
+                     dplyr::rename(COD_IBGE=tcode) %>%
+                     dplyr::mutate(COD_IBGE=as.character(COD_IBGE),
+                                   ANO_ELEICAO=lubridate::year(date)) %>%
+                     dplyr::select(COD_IBGE,code,value,ANO_ELEICAO) %>%
+                     tidyr::spread(code,value)) %>% 
+  dplyr::left_join(pib %>%
+                     dplyr::filter(Ano %in% c(2008,2010,2012),
+                                   VAR=="Produto Interno Bruto a preços correntes (Mil Reais)") %>%
+                     dplyr::mutate(COD_IBGE=as.character(COD_IBGE),
+                                   ANO_ELEICAO=as.numeric(Ano),
+                                   PIB=as.numeric(PIB)) %>%
+                     dplyr::select(COD_IBGE,ANO_ELEICAO,PIB)) %>% 
+  dplyr::left_join(rais %>%
+                     dplyr::filter(Ano %in% c(2008,2010,2012)) %>%
+                     dplyr::mutate(COD_IBGE=as.character(COD_IBGE),
+                                   ANO_ELEICAO=as.numeric(Ano),
+                                   salarios_rais=as.numeric(salarios_rais)*12) %>%
+                     dplyr::select(COD_IBGE,ANO_ELEICAO,vinculos_rais,salarios_rais),
+                   by=c("COD_IBGE2"="COD_IBGE","ANO_ELEICAO"="ANO_ELEICAO")) %>% 
+  # Fazer BPC e Bolsa pelo PIB
+  dplyr::mutate_at(vars(valor_bolsa,valor_bpc_idoso,salarios_rais),
+                   list(~./(PIB*1000))) %>% 
+  dplyr::mutate(fpm=cut(pop_anterior,
+                        c(-Inf,10188,13584,16980,23772,30564,
+                          37356,44148,50940,61128,71316,
+                          81504,91692,101880,115464,129048,
+                          142632,156216,Inf)),
+                fibra=case_when(Technology=="Fibra"~1,
+                                TRUE~0))
 
 # Verificar descritivas da base
 # Hmisc::describe(rdd %>% 
@@ -694,11 +1115,180 @@ teste_t <- function(Ano){
   dplyr::rename_all(list(~c("Var",paste0("t_", Ano),paste0("p.value_", Ano))))
 }
 
+# Função alternativa
+teste_t2 <- function(Ano){
+  rdd %>%
+    dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                  Technology%in%c("Rádio","Satélite")~0)) %>% 
+    # Filtrar para o ano de interesse
+    dplyr::filter(ANO_ELEICAO==Ano) %>%
+    # Retirar entradas duplicadas
+    dplyr::filter(duplicated(COD_IBGE)==F,
+                  pop_anterior %in% c(16981:19999),
+                  is.na(fibra)==F) %>% 
+    # Aplicar o teste t nas variáveis de interesse
+    dplyr::summarise_at(vars(renda_med_2000,
+                             `60_anos_2000`,
+                             rural_2000,
+                             negro_2000,
+                             radio_2000,
+                             televisao_2000,
+                             ens_sup_2000,
+                             casado_2000,
+                             pea_2000,
+                             renda_med_2010,
+                             `60_anos_2010`,
+                             rural_2010,
+                             negro_2010,
+                             radio_2010,
+                             televisao_2010,
+                             ens_sup_2010,
+                             casado_2010,
+                             pea_2010,
+                             PRECIP_DIA,
+                             TEMP_MED,
+                             valor_bolsa,
+                             valor_bpc_idoso,
+                             PIB,
+                             salarios_rais,
+                             fibra),
+                        # Selecionar o valor da estatística
+                        list(~mean(.))) %>%
+    # Transpor a matriz
+    t() %>%
+    # Transformar resultado em data frame
+    data.frame %>%
+    # Recuperar nome das variáveis
+    tibble::rownames_to_column("var") %>%
+    
+    # Fazer o mesmo processo para pegar o P-valor
+    dplyr::bind_cols(
+      
+      rdd %>%
+        dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                      Technology%in%c("Rádio","Satélite")~0)) %>% 
+        # Filtrar para o ano de interesse
+        dplyr::filter(ANO_ELEICAO==Ano) %>%
+        # Retirar entradas duplicadas
+        dplyr::filter(duplicated(COD_IBGE)==F,
+                      pop_anterior %in% c(20000:23772),
+                      is.na(fibra)==F) %>% 
+        
+        # Aplicar o teste t nas variáveis de interesse
+        dplyr::summarise_at(vars(renda_med_2000,
+                                 `60_anos_2000`,
+                                 rural_2000,
+                                 negro_2000,
+                                 radio_2000,
+                                 televisao_2000,
+                                 ens_sup_2000,
+                                 casado_2000,
+                                 pea_2000,
+                                 renda_med_2010,
+                                 `60_anos_2010`,
+                                 rural_2010,
+                                 negro_2010,
+                                 radio_2010,
+                                 televisao_2010,
+                                 ens_sup_2010,
+                                 casado_2010,
+                                 pea_2010,
+                                 PRECIP_DIA,
+                                 TEMP_MED,
+                                 valor_bolsa,
+                                 valor_bpc_idoso,
+                                 PIB,
+                                 salarios_rais,
+                                 fibra),
+                            # Selecionar o valor da estatística
+                            list(~mean(.))) %>%
+        # Transpor a matriz
+        t() %>%
+        # Transformar resultado em data frame
+        data.frame,
+      
+      
+      
+      rdd %>%
+        dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                      Technology%in%c("Rádio","Satélite")~0)) %>% 
+        dplyr::filter(ANO_ELEICAO==Ano) %>%
+        dplyr::filter(duplicated(COD_IBGE)==F,
+                      is.na(fibra)==F) %>% 
+        
+        dplyr::summarise_at(vars(renda_med_2000,
+                                 `60_anos_2000`,
+                                 rural_2000,
+                                 negro_2000,
+                                 radio_2000,
+                                 televisao_2000,
+                                 ens_sup_2000,
+                                 casado_2000,
+                                 pea_2000,
+                                 renda_med_2010,
+                                 `60_anos_2010`,
+                                 rural_2010,
+                                 negro_2010,
+                                 radio_2010,
+                                 televisao_2010,
+                                 ens_sup_2010,
+                                 casado_2010,
+                                 pea_2010,
+                                 PRECIP_DIA,
+                                 TEMP_MED,
+                                 valor_bolsa,
+                                 valor_bpc_idoso,
+                                 PIB,
+                                 salarios_rais,
+                                 fibra),
+                            list(~t.test(.[pop_anterior %in% c(16500:20000)],
+                                         .[pop_anterior %in% c(20001:23500)])$p.value))%>%
+        t() %>%
+        data.frame) %>% 
+    dplyr::mutate(Diff=case_when(var %in% c("60_anos_2000",
+                                            "rural_2000",
+                                            "negro_2000",
+                                            "radio_2000",
+                                            "televisao_2000",
+                                            "ens_sup_2000",
+                                            "casado_2000",
+                                            "pea_2000",
+                                            "valor_bolsa",
+                                            "valor_bpc_idoso",
+                                            "salarios_rais",
+                                            "ens_sup_2010",
+                                            "60_anos_2010",
+                                            "rural_2010",
+                                            "negro_2010",
+                                            "radio_2010",
+                                            "televisao_2010",
+                                            "ens_sup_2010",
+                                            "casado_2010",
+                                            "pea_2010",
+                                            "ens_sup_2010",
+                                            "fibra")~format(round((`....2`-`....3`)*100,2),nsmall=2,
+                                                            big.mark=",",decimal.mark="."),
+                                 TRUE~format(round(`....2`-`....3`,1),nsmall=1,
+                                             big.mark=",",decimal.mark="."))) %>% 
+    dplyr::mutate(Diff=case_when(`....4`<.1&`....4`>=.05~paste0(Diff,"*"),
+                                 `....4`<.05&`....4`>=.01~paste0(Diff,"**"),
+                                 `....4`<.01~paste0(Diff,"***"),
+                                 TRUE~paste0(Diff))) %>% 
+    dplyr::select(1,5) %>% 
+    dplyr::rename_all(list(~c("Var",paste0("Diff ", Ano))))
+}
+
+
 # Juntar os resultados de cada ano
 t_base <- dplyr::bind_cols(
   teste_t(Ano=2008)[c(1:11,22:28),],
   teste_t(Ano=2010)[c(1,12:28),-1],
   teste_t(Ano=2012)[c(1,12:28),-1])
+
+t_base2 <- dplyr::bind_cols(
+  teste_t2(Ano=2008)[c(1:9,19:25),],
+  `Diff 2010`=teste_t2(Ano=2010)[c(10:25),-1],
+  `Diff 2012`=teste_t2(Ano=2012)[c(10:25),-1])
 
 # Construir uma função para calcular o teste u
 teste_u <- function(Ano){
@@ -798,6 +1388,465 @@ u_base <- dplyr::bind_cols(
 #                   #hvec = c(5000,5000,5000)
 #                   )
 
+
+# Estatísticas descritivas das covariáveis
+descriptives_2008 <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2008,
+                pop_anterior %in% c(25001:45000)) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>% 
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2000`,
+                rural_2000,negro_2000,radio_2000,televisao_2000,
+                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                            "Married",
+                            "College",
+                            "Fiber-optic",
+                            "Black",
+                            "Working Pop.",
+                            "GDP",
+                           "Population",
+                            "Rain (elect. day)",
+                            "Radio",
+                            "Median Income",
+                            "Rural",
+                            "Formal Wages",
+                            "Television",
+                            "Avg. Temperature",
+                            "PBF",
+                            "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+descriptives_2010 <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2010) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>% 
+  dplyr::select(pop_anterior,renda_med_2010,`60_anos_2010`,
+                rural_2010,negro_2010,radio_2010,televisao_2010,
+                ens_sup_2010,casado_2010,pea_2010,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+descriptives_2012 <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2012) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>%
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2010`,
+                rural_2010,negro_2010,radio_2010,televisao_2010,
+                ens_sup_2010,casado_2010,pea_2010,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+
+# Estatísticas descritivas das covariáveis
+descriptives_2008_1c <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2008,
+                pop_anterior<=20000) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>% 
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2000`,
+                rural_2000,negro_2000,radio_2000,televisao_2000,
+                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+descriptives_2008_2c <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2008,
+                pop_anterior %in% c(20001:40000)) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>% 
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2000`,
+                rural_2000,negro_2000,radio_2000,televisao_2000,
+                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+descriptives_2008_3c <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2008,
+                pop_anterior %in% c(40000:60000)) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>% 
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2000`,
+                rural_2000,negro_2000,radio_2000,televisao_2000,
+                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+descriptives_2008_3c <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2008,
+                pop_anterior > 60000) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0)) %>% 
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2000`,
+                rural_2000,negro_2000,radio_2000,televisao_2000,
+                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value") %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::select(1,5,2,6,4,3) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(Average:Max),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1))))
+
+
+
+descriptives_2008_pop <- rdd %>% 
+  dplyr::filter(ANO_ELEICAO==2008) %>% 
+  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+  dplyr::mutate(fibra=case_when(Technology=="Fibra"~1,
+                                #Technology%in%c("Rádio","Satélite")~0
+                                TRUE~0),
+                cortes=cut(pop_anterior,
+                           c(-Inf,20000,40000,60000,Inf),
+                           labels=c("Under 20k",
+                                    "Above 20k to 40k",
+                                    "Above 40k to 60k",
+                                    "Above 60k"))) %>% 
+  dplyr::select(pop_anterior,renda_med_2000,`60_anos_2000`,
+                rural_2000,negro_2000,radio_2000,televisao_2000,
+                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
+                TEMP_MED,valor_bolsa,valor_bpc_idoso,
+                PIB,salarios_rais,fibra,cortes) %>% 
+  dplyr::group_by(cortes) %>% 
+  dplyr::summarise_all(list(V.Obs.=~n(),
+                            V.Average=~mean(.,na.rm=T),
+                            V.Std.Dev.=~sd(.,na.rm=T),
+                            V.Max=~max(.,na.rm=T),
+                            V.Min=~min(.,na.rm=T))) %>% 
+  tidyr::gather("vars","value",2:length(.)) %>% 
+  tidyr::separate(col=vars,
+                  into=c("Variable","stat"),
+                  sep="_V.") %>% 
+  tidyr::spread(stat,value) %>% 
+  dplyr::select(cortes,Variable,Average) %>% 
+  tidyr::spread(cortes,Average) %>% 
+  dplyr::mutate(Variable=c("Pop. over 60 years",
+                           "Married",
+                           "College",
+                           "Fiber-optic",
+                           "Black",
+                           "Working Pop.",
+                           "GDP",
+                           "Population",
+                           "Rain (elect. day)",
+                           "Radio",
+                           "Median Income",
+                           "Rural",
+                           "Formal Wages",
+                           "Television",
+                           "Avg. Temperature",
+                           "PBF",
+                           "BPC")) %>% 
+  dplyr::arrange(Variable) %>% 
+  dplyr::mutate_at(vars(2:5),
+                   list(~case_when(Variable %in% 
+                                     c("Pop. over 60 years","Married",
+                                       "College","Fiber-optic","Black",
+                                       "Working Pop.","Radio",
+                                       "Rural","Formal Wages",
+                                       "Television","PBF",
+                                       "BPC")~round(.*100,1),
+                                   TRUE~round(.,1)))) %>% 
+  dplyr::bind_rows(rdd %>% 
+                     dplyr::filter(ANO_ELEICAO==2008) %>% 
+                     dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
+                     dplyr::mutate(cortes=cut(pop_anterior,
+                                              c(-Inf,20000,40000,60000,Inf),
+                                              labels=c("Under 20k",
+                                                       "Above 20k to 40k",
+                                                       "Above 40k to 60k",
+                                                       "Above 60k"))) %>% 
+                     dplyr::group_by(cortes) %>% 
+                     dplyr::summarise(n=n()) %>% 
+                     dplyr::mutate(Variable="Observations") %>% 
+                     tidyr::spread(cortes,n)) %>% 
+  dplyr::mutate_at(vars(2:5),
+                   list(~case_when(Variable %in% c("GDP","Population",
+                                                   "Observations")~paste0(format(round(.),
+                                                                                 big.mark=",",
+                                                                                 decimal.mark=".")),
+                                   TRUE~paste0(.))))
+
+descritiva_pop <- descriptives_2008_1c %>% 
+  dplyr::select(Variable,Obs.,Average) %>% 
+  dplyr::bind_cols(descriptives_2008_2c %>% 
+                     dplyr::select(Obs.,Average),
+                   descriptives_2008_3c %>% 
+                     dplyr::select(Obs.,Average)) %>% 
+  dplyr::rename_all(list(~c("Variable",
+                            rep(c("Obs.","Average"),3))))
+
+  
+# modelo<-
+# rdmc_adj(Y="participacao",
+#          X="pop_anterior",
+#          C="cut_off",
+#          plot=T,
+#          fuzzy = "Velocity",
+#          data= rdd %>%
+#            dplyr::filter(ANO_ELEICAO==2008,
+#                          NR_TURNO==1) %>%
+#            dplyr::filter(duplicated(COD_IBGE)==F))
+
 # Rodar multiplos tratamentos com:
 # Participação
 
@@ -810,136 +1859,6 @@ covs_2008= "Total_2000+renda_med_2000+60_anos_2000+rural_2000+negro_2000+radio_2
 
 covs_2010= "Total_2010+renda_med_2010+60_anos_2010+rural_2010+negro_2010+radio_2010+televisao_2010+ens_sup_2010+casado_2010+pea_2010+PRECIP_DIA+TEMP_MED+valor_bolsa+valor_bpc_idoso+PIB+salarios_rais"
 
-# Estatísticas descritivas das covariáveis
-descriptives_2008 <- rdd %>% 
-  dplyr::filter(ANO_ELEICAO==2008) %>% 
-  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
-  dplyr::select(Total_2000,renda_med_2000,`60_anos_2000`,
-                rural_2000,negro_2000,radio_2000,televisao_2000,
-                ens_sup_2000,casado_2000,pea_2000,PRECIP_DIA,
-                TEMP_MED,valor_bolsa,valor_bpc_idoso,
-                PIB,salarios_rais) %>% 
-  dplyr::summarise_all(list(V.Obs.=~n(),
-                            V.Average=~mean(.,na.rm=T),
-                            V.Std.Dev.=~sd(.,na.rm=T),
-                            V.Max=~max(.,na.rm=T),
-                            V.Min=~min(.,na.rm=T))) %>% 
-  tidyr::gather("vars","value") %>% 
-  tidyr::separate(col=vars,
-                  into=c("Variable","stat"),
-                  sep="_V.") %>% 
-  tidyr::spread(stat,value) %>% 
-  dplyr::mutate_if(is.numeric,
-                   list(~round(.,2))) %>% 
-  dplyr::mutate(Variable=c("Pop. over 60 years",
-                            "Married",
-                            "College",
-                            "Black",
-                            "Working Pop.",
-                            "GDP",
-                            "Rain (elect. day)",
-                            "Radio",
-                            "Median Income",
-                            "Rural",
-                            "Formal Wages",
-                            "Television",
-                            "Avg. Temperature",
-                            "Population",
-                            "PBF",
-                            "BPC")) %>% 
-  dplyr::select(1,5,2,6,4,3) %>% 
-  dplyr::arrange(Variable)
-
-descriptives_2010 <- rdd %>% 
-  dplyr::filter(ANO_ELEICAO==2010) %>% 
-  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
-  dplyr::select(Total_2010,renda_med_2010,`60_anos_2010`,
-                rural_2010,negro_2010,radio_2010,televisao_2010,
-                ens_sup_2010,casado_2010,pea_2010,PRECIP_DIA,
-                TEMP_MED,valor_bolsa,valor_bpc_idoso,
-                PIB,salarios_rais) %>% 
-  dplyr::summarise_all(list(V.Obs.=~n(),
-                            V.Average=~mean(.,na.rm=T),
-                            V.Std.Dev.=~sd(.,na.rm=T),
-                            V.Max=~max(.,na.rm=T),
-                            V.Min=~min(.,na.rm=T))) %>% 
-  tidyr::gather("vars","value") %>% 
-  tidyr::separate(col=vars,
-                  into=c("Variable","stat"),
-                  sep="_V.") %>% 
-  tidyr::spread(stat,value) %>% 
-  dplyr::mutate_if(is.numeric,
-                   list(~round(.,2))) %>% 
-  dplyr::mutate(Variable=c("Pop. over 60 years",
-                           "Married",
-                           "College",
-                           "Black",
-                           "Working Pop.",
-                           "GDP",
-                           "Rain (elect. day)",
-                           "Radio",
-                           "Median Income",
-                           "Rural",
-                           "Formal Wages",
-                           "Television",
-                           "Avg. Temperature",
-                           "Population",
-                           "PBF",
-                           "BPC")) %>% 
-  dplyr::select(1,5,2,6,4,3) %>% 
-  dplyr::arrange(Variable)
-
-descriptives_2012 <- rdd %>% 
-  dplyr::filter(ANO_ELEICAO==2012) %>% 
-  dplyr::distinct(ANO_ELEICAO,COD_IBGE,.keep_all=T) %>% 
-  dplyr::select(Total_2010,renda_med_2000,`60_anos_2010`,
-                rural_2010,negro_2010,radio_2010,televisao_2010,
-                ens_sup_2010,casado_2010,pea_2010,PRECIP_DIA,
-                TEMP_MED,valor_bolsa,valor_bpc_idoso,
-                PIB,salarios_rais) %>% 
-  dplyr::summarise_all(list(V.Obs.=~n(),
-                            V.Average=~mean(.,na.rm=T),
-                            V.Std.Dev.=~sd(.,na.rm=T),
-                            V.Max=~max(.,na.rm=T),
-                            V.Min=~min(.,na.rm=T))) %>% 
-  tidyr::gather("vars","value") %>% 
-  tidyr::separate(col=vars,
-                  into=c("Variable","stat"),
-                  sep="_V.") %>% 
-  tidyr::spread(stat,value) %>% 
-  dplyr::mutate_if(is.numeric,
-                   list(~round(.,2))) %>% 
-  dplyr::mutate(Variable=c("Pop. over 60 years",
-                           "Married",
-                           "College",
-                           "Black",
-                           "Working Pop.",
-                           "GDP",
-                           "Rain (elect. day)",
-                           "Radio",
-                           "Median Income",
-                           "Rural",
-                           "Formal Wages",
-                           "Television",
-                           "Avg. Temperature",
-                           "Population",
-                           "PBF",
-                           "BPC")) %>% 
-  dplyr::select(1,5,2,6,4,3) %>% 
-  dplyr::arrange(Variable)
-
-# modelo<-
-# rdmc_adj(Y="participacao",
-#          X="pop_anterior",
-#          C="cut_off",
-#          plot=T,
-#          fuzzy = "Velocity",
-#          data= rdd %>%
-#            dplyr::filter(ANO_ELEICAO==2008,
-#                          NR_TURNO==1) %>%
-#            dplyr::filter(duplicated(COD_IBGE)==F))
-
-# Rodar participação
 
 # Criar função para rodar modelos nos resultados
 
@@ -1949,7 +2868,15 @@ r_sig <-
                     Cutoff=as.character(Cutoff),
                     Outcome="Left Vote Share")) %>% 
   dplyr::arrange(Year,Cutoff,Type,Outcome)
-  
+
+
+rm(list=setdiff(ls(),c("backhaul","back_2008","back_junto","descriptives_2008","descriptives_2010",
+                       "descriptives_2012","t_base","r_part","r_dif_part",
+                       "r_pct_bn","r_bn_dif","r_pct_vote","r_sig","smp2009_2018",
+                       "descriptives_2008_pop","t_base2","partidos","cancelados",
+                       "populacao","ganhadores1","ganhadores2")))  
+
+save.image(file = "F:/OneDrive/Doutorado/Tese/tese_1/bases/resultados.rda")
 
 # Testar modelo com os dados da anatel ####
 # anatel <-SCM_2007_2018 %>% 

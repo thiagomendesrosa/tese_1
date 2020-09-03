@@ -21,11 +21,13 @@ header-includes:
 - \usepackage{pdfpages}
 - \usepackage{floatrow}
 - \usepackage{amsmath}
+- \usepackage{bbm}
 - \usepackage{morefloats}
 - \usepackage{pbox}
 - \usepackage{graphicx}
 - \usepackage{tikz}
 - \usepackage{booktabs}
+- \usepackage{xcolor}
 - \usepackage{tabularx}
 - \floatplacement{figure}{H}
 - \floatsetup[figure]{capposition=top}
@@ -49,7 +51,9 @@ fontsize: 12pt
 
 ```{r setup,warning=FALSE,include=FALSE,message=FALSE,echo=FALSE}
 # Load data base
-load("F:/OneDrive/Doutorado/Tese/Bases/paper1.rda")
+#load("F:/OneDrive/Doutorado/Tese/Bases/paper1.rda")
+
+load("F:/OneDrive/Doutorado/Tese/tese_1/bases/resultados.rda")
 
 # Load packages
 library(tidyverse)
@@ -58,22 +62,31 @@ library(xtable)
 library(brazilmaps)
 library(rdmulti)
 library(rdrobust)
+library(rddensity)
 library(data.table)
 library(rdmulti)
-library(rdrobust)
 library(tidyverse)
 library(lubridate)
 library(sf)
+library(ipeadatar)
+library(ggpubr)
+library(lpdensity)
+
+dolar <- ipeadatar::ipeadata("GM366_ERV366") %>% 
+  dplyr::filter(max(ymd(date))==ymd(date)) %>% 
+  dplyr::select(value) %>% 
+  .[[1]]
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, 
-                      message = FALSE, dpi = 600, 
-                      dev = 'png',fig.pos = 'hp',
-                      cache = T)
+                      message = FALSE, dpi = 150, 
+                      dev = 'png',fig.pos = 'H',
+                      cache = FALSE,
+                      crop = knitr::hook_pdfcrop)
 
 options(xtable.comment = FALSE)
 
-source("modelos.R",
-       encoding = "UTF-8")
+# source("modelos.R",
+#        encoding = "UTF-8")
 
 # Evitar confito de pacote com o kable
 options(kableExtra.latex.load_packages = FALSE)
@@ -88,17 +101,24 @@ We investigate the relationship between broadband internet and election outcomes
 **Keywords:** Internet, RDD, elections.
 
 \allsectionsfont{\raggedright}
+
+\clearpage
+
 # Introduction
 
-The way how people get informed about politics has changed dramatically over the years. If in XIX century press was the main source of information, in the beginning of XX's radio took its place, surpassed by television in the middle of the same century. Today, a new type of media seems to be taking the lead: the internet.
+The aim of this paper is to asses the impact of broadband connection velocity on political outcomes: turnout, vote share, types of votes and campaign donations. 
 
-Although the world wide web is a 25 years-old technology, broadband connection is an even recent event. Internet velocity capable of streaming videos became popular just in the XXI century. Social networks, like Facebook, YouTube and Twitter are relatively infant phenomenons^[Facebook was launched in 2004, YouTube in 2005 and Twitter in 2006.], becoming popular globally only in the late of 2000's. Mobile broadband connections, thanks to 3G technology (followed by 4G)  and massification of smartphones, helped internet to reach a greater number of users. New social medias, like WhatsApp, Instagram and Telegram are now everyday tools^[WhatsApp was launched in 2009, Instagram in 2010 and Telegram in 2013.], with popularity increasing in an exponential fashion, being common even for business. A new wave, with 5G technology and the "internet of things" is coming to continue the revolution begun in the past century, with connections speed and quality increasing every day, with new possibilities of business.
+The way how people get informed about politics has changed dramatically over the years [@bimber_information_2003]. If in XIX century press was the main source of information, in the beginning of XX's radio took its place, surpassed by television in the middle of the same century. Today, a new type of media seems to be taking the lead: the internet .
+
+Although the world wide web is an almost 30 years-old technology, broadband connection is an even recent event [@maddux_world_1997]. Internet velocity capable of streaming videos became popular just in the XXI century. Social networks, like Facebook, YouTube and Twitter are relatively infant phenomenons^[Facebook was launched in 2004, YouTube in 2005 and Twitter in 2006.], becoming popular globally only in the late of 2000's. Mobile broadband connections, thanks to 3G technology (followed by 4G)  and massification of smartphones, helped internet to reach a greater number of users. New social medias, like WhatsApp, Instagram and Telegram are now everyday tools^[WhatsApp was launched in 2009, Instagram in 2010 and Telegram in 2013.], with popularity increasing in an exponential fashion, being common even for business. A new wave, with 5G technology and the "internet of things" is coming to continue the revolution begun in the past century, with connections speed and quality increasing every day, with new possibilities of business.
 
 Thus, information dissemination gained range and speed, reaching more people, almost instantaneously, nearly in any part of the world. Geographic barriers were broken and the amount of information are vast. Before these new possibilities, a question arises: how this new  scenario affects social interaction? Furthermore, how do people are doing politics in this new environment? In particular, if people have tools to be more informed, do they increase their participation in elections? Could vote preferences  change with introduction of this new technology? Or, on contrary, have this new possibilities of entertainment deviate people from political discussion? Is it possible that internet did not change politics at all?
 
-These questions are not easy to be answered for several reasons. Availability of internet is not random and characteristics like income, schooling and geographic conditions may determine if an internet service provider will be accessible for individuals. Also, institutional and political backgrounds may possible influence internet-political relationship.
+These questions are not easy to be answered for several reasons. Availability of internet is not random and characteristics like income, schooling and geographic conditions may determine if an internet service provider will be accessible for individuals [@falck_e-lections:_2014; @miner_unintended_2015; @campante_politics_2017]. Also, institutional and political backgrounds may possible influence internet-political relationship.
 
-This is not a novel issue. Relationship between internet and politics has been focus of study in several fields, and this paper aims to contribute with this literature, studying internet impacts on politics in Brazil. Studying a single country, we have best tools to control possible confounders, and taking advantage of a specific rule for broadband roll out, where number of inhabitants determines the internet velocity of municipalities (the backhaul program), we have a robust identification strategy, that creates an ideal instrument to deal with internet endogeneity. Following @cattaneo_analysis_2018, we use multiple cutoffs design to estimate effects.
+This is not a novel issue. Relationship between internet and politics has been focus of study in several fields[@bimber_internet_1998; @campante_politics_2017; @czernich_broadband_2012; @falck_e-lections:_2014; @gavazza_internet_2015; @jaber_broadband_2013; @larson_internet_2004; @poy_internet_2016], and this paper aims to contribute with this literature, studying internet impacts on politics in Brazil. Focusing on a single country, we have best tools to control possible confounders, and taking advantage of a specific rule for broadband roll out, where number of inhabitants determines the internet velocity of municipalities (the backhaul program), we have a robust identification strategy, that creates an ideal instrument to deal with internet velocity endogeneity. Following @cattaneo_analysis_2018, we use multiple cutoffs design to estimate effects.
+
+In the most recent Brazilian presidential election, internet had a major role in result. In 2018, Mr. Bolsonaro, with a little fraction of financial resources used by his opponents^[While Mr. Bolsonaro expended R$ 2.46 million in his campaign, the second place, Mr. Haddad, expended R% 37.5 million, a figure `r round(37.5/2.46)` times higher. Complete figures are available in http://divulgacandcontas.tse.jus.br/.] and with only eight seconds of national advertising time in television^[https://agenciabrasil.ebc.com.br/politica/noticia/2018-08/tse-apresenta-tempos-de-radio-e-tv-de-presidenciaveis] he managed to go to the second round of presidential elections, with 46.03% of votes, and won elections with a 10 p.p. difference. According to Brazilian newspapers, the strength of Mr. Bolsonaro in the social medias was capital to his victory^[https://www.correiobraziliense.com.br/app/noticia/politica/2018/10/28/interna_politica,715584/bolsonaro-fez-das-redes-sociais-o-caminho-certo-para-uma-provavel-vito.shtml, https://g1.globo.com/politica/blog/cristiana-lobo/post/2018/12/31/redes-sociais-mudam-completamente-a-relacao-dos-eleitores-com-seus-representantes.ghtml, https://noticias.uol.com.br/politica/eleicoes/2018/noticias/2018/10/09/como-midias-sociais-e-orcamentos-enxutos-derrubaram-cinco-mitos-eleitorais.htm], which makes Brazil an interesting case of study regarding the relationship between internet and elections.
 
 Results suggests that, in general, broadband internet is not related to political outcome in Brazil. It seems that internet did not influence turnout, blank or null percentage votes and left parties vote share, in 2008, 2010 and 2012 elections, which covers national and local elections. The office considered (president, mayor or deputies) did not make difference in results. These finds are different from previous results reported in the literature, meaning that institutional background may play an important role in studies relating politics and internet. Positive and negative relationship are reported for Germany, Italy and United Kingdom [@campante_politics_2017;  @falck_e-lections:_2014; @gavazza_internet_2015], all of them with distinct political institutional background compared with Brazilian's.
 
@@ -110,9 +130,9 @@ This paper is organized as follows: the first section presents the theoretical f
 
 # Theoretical framework
 
-There are some theories looking to explain why people vote [@aldrich_rational_1993; @downs_economic_1957; @ferejohn_paradox_1974; @riker_theory_1968; @uhlaner_rational_1989]. One approach is to treat as a microeconomic problem in the following way. In elections, individuals' problem is to choose the best candidate(s) according to their preferences. But, there is an asymmetry of information: there are many candidates (not considering uncontested elections), and voters are not fully informed about their abilities. Acquire information about them is costly, since they have to spend resources to consume information (e.g. from television, radio, newspaper, internet or another people), that may include money and time. Show up to cast the vote in the ballot also requires resources (transportation and time). More accurate decision requires more information, which demands more resources, i.e. is more costly. So, it can be viewed as a maximization problem from the microeconomics point of view, which can be solved by equalizing marginal costs and benefits. Benefits can be viewed as the policies the most preferred candidate will conduct, a civil duty or being party of the democratic process.
+There are some theories looking to explain why people vote [@aldrich_rational_1993; @downs_economic_1957; @ferejohn_paradox_1974; @riker_theory_1968; @uhlaner_rational_1989]. One approach is to treat as a microeconomic problem in the following way. In elections, individuals' problem is to choose the best candidate(s) according to their preferences. But, there is an asymmetry of information: there are many candidates (not considering uncontested elections), and voters are not fully informed about their abilities. Acquire information about them is costly, since they have to spend resources to consume information (e.g. from television, radio, newspaper, internet or another people), that may include money and time. Show up to cast the vote in the ballot also requires resources (transportation and time, for example). More accurate decision requires more information, which demands more resources, i.e. is more costly. So, it can be viewed as a maximization problem from the microeconomics point of view, which can be solved by equalizing marginal costs and benefits. Benefits can be viewed as the policies the most preferred candidate will conduct, a civil duty or being party of the democratic process [@ali_why_2013].
 
-This problem changes over time with entrance of new technologies. For example, when radio, television and internet were not available, there were fewer options to people get informed about candidates. Also, there were available less leisure alternatives. With emergence of radio, then television and, finally, internet, these costs and substitution effects may have changed. A first natural question that someone could have is: did these new technologies affect the decision of voters? For newspaper, @gerber_does_2009, @gentzkow_effect_2011 and @drago_meet_2014 report effects on elections participation. According to @stromberg_radios_2004 and @horacio_media_2014, radio affects people perception about politics, while @dellavigna_fox_2007, @enikolopov_media_2011, @durante_partisan_2012, @gentzkow_television_2006 and @oberholzer-gee_media_2009 shows the impact of television (through news) on elections results. 
+This problem changes over time with entrance of new technologies [@gentzkow_television_2006]. For example, when radio, television and internet were not available, there were fewer options to people get informed about candidates. Also, there were available less leisure alternatives. With emergence of radio, then television and, finally, internet, these costs and substitution effects may have changed. A first natural question that someone could have is: did these new technologies affect the decision of voters? For newspaper, @gerber_does_2009, @gentzkow_effect_2011 and @drago_meet_2014 report effects on elections participation. According to @stromberg_radios_2004 and @horacio_media_2014, radio affects people perception about politics, while @dellavigna_fox_2007, @enikolopov_media_2011, @durante_partisan_2012, @gentzkow_television_2006 and @oberholzer-gee_media_2009 shows the impact of television (through news) on elections results. 
 
 How about the internet? Relationship between internet and politics has been investigated since the end of 1990's [@bimber_internet_1998]. The effect on information acquisition may be ambiguous depending on the hypothesis used: if internet makes available new possibilities of entertainment, people may substitute the time spent learning about politics with these new type of leisure; on the other hand, if internet bring to people new sources of politics information and channels of discussion, people may be pushed toward politics. Finally, the cost and the time needed to find candidates information or to find new possibilities of entertainment may have changed relative prices. Once someone has access to internet, it is possible to consume a variety of information with, in general, no additional cost. The same is valid to leisure. A last possibility is that the only thing substituted is the technology used to consume information and leisure, making no difference in resources allocation at all^[If there is no, or little, consumption of politics information with an older  technology, it might be the case that, even with a new technology, there is no preference for this type of information, resulting in no, or limited, shifting in its demand.].
 
@@ -124,7 +144,7 @@ One situation this new scenario brings is the social media consumption of "fake 
 
 <!-- Considering that internet is a requirement for fast and wide fake news diffusion, and that its propagation depends on social media usage, assess the relationship between internet and politics seems to be the natural first step. Fake news mat be viewed as an important mechanism that can affect internet effects on politics. -->
 
-With this framework in mind, we analyse previous researches in the field in order to collect results and identification strategies, pointing resemblances and contrasts between them. Common outcomes between internet and politics relationship are voting turnout, election results, public polices and politician's accountability.
+With this framework in mind, we analyze previous researches in the field in order to collect results and identification strategies, pointing resemblances and contrasts between them. Common outcomes between internet and politics relationship are voting turnout, election results, public polices and politician's accountability.
 
 
 # Literature 
@@ -137,7 +157,7 @@ For Italy, @campante_politics_2017 report a negative effect on turnout in electi
 
 In Malaysian case, @miner_unintended_2015 reports important effects of internet in 2008 election results (vote share of opposition parties), but not in turnout and limited effects in turnover. It is interesting to note that the political background for the Malaysian case is different from the Italian one, although the identification strategy is similar.
 
-A negative effect of internet on turnout is reported by @falck_e-lections:_2014 for Germany. The mechanism is related to an increase in leisure consumption that crowds out television entertainment. The impact reported is heterogeneous: west Germany was affect, while in east Germany no effect was observed, while effects on vote shares were not observed in neither places. On the other hand, @czernich_broadband_2012 found positive effects on participation in German 2002-2005 election.
+A negative effect of internet on turnout is reported by @falck_e-lections:_2014 for Germany. The mechanism is related to an increase in leisure consumption that crowds out television entertainment, since internet can be viewed as a substitute in this kind of consumption^[If we consider that people have a fixed amount of time to enjoy leisure activities, internet enters as a new option to compete with television, potentially reducing the time spent with the latter.]. The impact reported is heterogeneous: west Germany was affect, while in east Germany no effect was observed, while effects on vote shares were not observed in neither places. On the other hand, @czernich_broadband_2012 found positive effects on participation in German 2002-2005 election.
 
 @gavazza_internet_2015 report for UK negative effects of internet on turnout in 2006-2010 elections, with stronger results for less-educated and younger voters. Furthermore, incumbents seems to take advantage, diminishing election competitiveness. Taking a step further, the UK study suggests effects on public policies, lowering public expenses and taxes in areas with higher internet access (with similar heterogeneity effects reported for turnout).
 
@@ -149,23 +169,147 @@ It is important to note that countries have distinct political regimes, which co
 
 To sum up, it is clear that there are different results for different countries (even inside the same country),  with possible changing effects over the time. Also, the majority of studies are concentrated in 2000 decade elections, focusing on the begging of the broadband internet. Few studies report results for elections held in 2010 decade, when smartphone revolution and social media gained strength. Even more, there are no studies about the effects of mobile broadband and smartphones on elections.
 
-In this paper we will address just fixed line broadband roll out, studying the Brazilian case, one of the largest democracies in the world. Unfortunately, mobile broadband technology roll out (3G and 4G) will not be investigated, since information at municipality level is not available. As pointed before, peculiarities of each country seems to be determinant for results, which demands closer analysis of the political system in order to compare our results with those presented before.
+In this paper we will address fixed line broadband roll out, studying the Brazilian case, one of the largest democracies in the world. As pointed before, peculiarities of each country seems to be determinant for results, which demands closer analysis of the political system in order to compare our results with those presented before.
 
 
-# Brazilian's political background
+# Brazilian political institutional background
 
-Brazil is a Federal Republic, with three layers of government: central (or Federal), states and municipalities. It is a young presidential democracy, with bicameral legislative system (Chamber of Deputies and Senate), holding election every four years. President is elected by direct vote since 1989 in national elections, being elected together with national congress, state governors and state assemblies (1994 onward). Local elections, for municipal mayors and local legislators are also held every four years, since 1996^[Brazilian dictatorship ended in 1985, with general election in 1986, except for president (elected indirectly in the previous year). Before 1985, all other elections (except for president) had direct vote, but under military rules. In 1988, a new constitution was promulgated and in 1989 the president was elected by direct vote again, after 29 years. In 1990, there were elections for state governors, state assemblies and national congress. In 1992, municipal mayors and local assembly members were elected. By 1994 onward, national elections (president, state governors, state assembly and national congress) happens every four year, while local elections (municipal mayor and municipal assembly) happens every four years, since 1996. Thus, Brazil has elections every two years since 1994.].
+Brazil is a Federal Republic, with three layers of government: central (or Federal), states and municipalities (see @souza_federalismo_2005 for a discussion about the federalism in Brazil). It is a young presidential democracy, with bicameral legislative system (Chamber of Deputies and Senate, the National Congress), holding election every four years. President is elected by direct vote since 1989 in national elections, as well national congress, state governors and state assemblies (1994 onward). Local elections, for municipal mayors and local legislators are also held every four years, since 1996^[Brazilian dictatorship ended in 1985, with general election in 1986, except for president (elected indirectly in the previous year). Before 1985, all other elections (except for president) had direct vote, but under military rules. In 1988, a new constitution was promulgated and in 1989 the president was elected by direct vote again, after 29 years. In 1990, there were elections for state governors, state assemblies and national congress. In 1992, municipal mayors and local assembly members were elected. By 1994 onward, national elections (president, state governors, state assembly and national congress) happens every four year, while local elections (municipal mayor and municipal assembly) happens every four years, since 1996. Thus, Brazil has elections every two years since 1994.]. While mayors, senators and the president are elected in a majoritarian system, all the other candidates are elected by proportional representation, where voters choose first a party and then a candidate^[There is the option to vote only for a party.]. Also, parties, until 2018, could create coalition^[Altered by the Constitutional Amendment 45, available in \url{http://www.planalto.gov.br/ccivil_03/constituicao/Emendas/Emc/emc97.htm}] to run in proportional elections, while in majoritarian elections, coalitions are still permited. With this system, in 2018, 35 parties ran in the elections. Table \ref{tab:parties} presents all parties and the number of candidates that participated in elections from 2000 to 2018.
 
-In Brazil, voting is mandatory to literate citizens aged 18 to 69. For people aged 16 to 17 and 70 and over voting is optional. Voters absent in election must justify or pay a small fine. If they fail to justify three consecutive pools, some rights are lost (issue or renew passports and national identification, are ineligible for public education, public service and some government social programs). This set raises the question if this rule changes incentives to acquire information about politicians. 
+```{r parties, results='asis'}
+options(knitr.kable.NA = '')
+partidos %>% 
+    knitr::kable("latex",
+                 linesep="",
+               booktabs = T,
+               #digits = c(0,0,0,1,0),
+               caption = "Parties and number of candidates in Brazilian elections, 2000-2018",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position"),
+                            full_width = T,
+                            font_size=9) %>%
+  kableExtra::column_spec(1,width="4cm") %>% 
+  kableExtra::footnote(general_title = "",
+                       general= c("Source: TSE",
+                                  "Obs.: Parties which changed their names are considered as an unique party."),
+                       fixed_small_size=T)
+```
 
-An important aspect of Brazilian suffrage regards campaign advertisement. There are national, free of charges and mandatory programs during campaign time, booth aired daily in radio and television, broadcasting the same content in all regions of the country. There is a fixed amount of time for electoral advertisement in these channels, 2/3 distributed according to current party presence in legislatures and 1/3 among candidates, and only this time is allowed to be used in these channels. Ads on newspaper are also restricted, even though being a less important media compared to TV and radio. Internet is exception, where candidates can use it, almost freely, to reach voters, since 2009, except for anonymously or paid advertisement (which includes social medias like Twitter, Facebook, Instagram and YouTube). 
+Considering that there are a large number of parties in Brazil, to make the vote share analysis manageable, parties were classified as left, center or right orientation based on @power_elite_2012 party index^[The authors construct a party index based on legislative surveys from 1990 to 2009, taking into consideration the ideological position of congress members in their activities.]. Table \ref{tab:parties_orient} presents this organization.
+
+```{r parties_orient, results='asis'}
+dplyr::tibble(Left=c(sort(c("PSTU","PSOL","PC do B",
+                     "PT","PSB","PCO")),
+                     rep("",12)),
+              Center=sort(c("PDT","PV","PCB","PPS/CIDADANIA","PSDB","PMDB/MDB","PTB","PSD","PR/PL","PRONA","PSC","PRB/REPUBLICANOS","PPL","PRP","PSN/PHS","PT do B/AVANTE","PTN/PODEMOS","SD/SOLIDARIEDADE")),
+              Right=c(sort(c("PRN/PTC","PFL/DEM","PSDC/DC",
+                      "PPB/PP","PMN","PSL","PRTB")),
+                      rep("",11))) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               caption = "Party classification according to orientation (left, center or right)",) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position","scale_down"),
+                            full_width = T) %>%
+  kableExtra::footnote(
+    general=c("Obs.: Division of parties based on quantiles of party index (0.25, 0.75, 1)",
+      "Obs.2: Parties out of party index were allocated based on party description available on their internet page."),
+    general_title = "",
+    fixed_small_size = T)
+```
+
+The party index has some aggregation of parties as "others", so another classification criterion was necessary. Parties web pages were consulted to analyze their history and beliefs in order to designate parties to the groups. This methodology may arise questions if some parties labeled as right are actually centrists. To avoid this issue, we focus on left parties vote shares in results section, since their classification are more direct and mostly based on the party index.
+
+The relatively large number of parties in Brazilian makes both elections and politics complex processes [@boulding_political_2015; @pettersson-lidbom_parties_2008]. In order to help understanding this process, Table \ref{tab:ganhadores1} show the winners, by party, in the last five elections, while Table \ref{tab:ganhadores2} shows the same information for state governors and municipalities^[Since 1988, Brazil has 26 states and the Federal District. In 2018, there were 5,568 municipalities, with two districts, the Federal capital and the state Fernando de Noronha, in Pernambuco. National Congress has 513 Federal Deputies and 81 Senators].
+
+```{r ganhadores1,results='asis'}
+names(ganhadores1) <- c("Party",rep(c("Deputy","Senator"),5))
+
+ganhadores1 %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               caption = "Distribuition of winners by party in National Congress, 2002-2018",
+               digits=1) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position","scale_down"),
+                            full_width = T,
+                            font_size=9) %>%
+  kableExtra::column_spec(1,width="4cm") %>% 
+  kableExtra::add_header_above(c("","2002"=2,"2006"=2,
+                                 "2010"=2,"2014"=2,"2018"=2)) %>% 
+  kableExtra::footnote(
+    general=c("Source: TSE",
+      "Obs.: Parties which changed their names are considered as an unique party."),
+    general_title = "",
+    fixed_small_size = T) 
+  
+```
+
+
+```{r ganhadores2,results='asis'}
+names(ganhadores2) <- c("Party",rep(c("Mayor","Gov."),5))
+
+ganhadores2 %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               caption = "Distribuition of winners by party in National Congress, 2002-2018",
+               digits=1) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position","scale_down"),
+                            full_width = T,
+                            font_size=9) %>%
+  kableExtra::column_spec(1,width="4cm") %>% 
+  kableExtra::add_header_above(c("","2000/2002"=2,"2004/2006"=2,
+                                 "2008/2010"=2,"2012/2014"=2,"2016/2018"=2)) %>% 
+  kableExtra::footnote(
+    general=c("Source: TSE",
+      "Obs.: Parties which changed their names are considered as an unique party."),
+    general_title = "",
+    fixed_small_size = T) 
+  
+```
+
+Table \ref{tab:ganhadores1} shows that no party had more than 20% of the deputies. The workers party (PT), who won four out of five last elections (2002 to 2014), did not have the majority of the congress in any year.In the Senate, the party with more seats had around 1/4 of the house until 2010, with more competitive elections since then, specially in 2018. So, in order to run the country, the president needs to build alliance, otherwise it is unlikely to pass its bills. The number of parties necessary to form at least 60% of the deputies^[Bills that alter constitution require at least 308 votes of deputies and 49 votes of senators, i.e. 60% of the National Congress, in two rounds.] has risen from  four to eight, including both situation and opposition parties, which means that the necessary number of parties required to rule is even higher. In the senate, the number has risen from three to seven.
+
+Competitiveness observed in National Congress elections is also present in subnational suffrage. Table \ref{tab:ganhadores2} shows that most dominant party has around 20% of mayors and 25% of governors, not necessary the same party in each election, adding another layer of complexity in the Brazilian Federal System (see @cancela_explaining_2016 for a discussion about coordination in multilevel elections in Brazil).
+
+
+Until 2017, parties had the Party Fund^[The *Fundo Partidário*, created by the Law 9,096/1995, available in \url{http://www.tse.jus.br/legislacao/codigo-eleitoral/lei-dos-partidos-politicos/lei-dos-partidos-politicos-lei-nb0-9.096-de-19-de-setembro-de-1995}.] and private donations (since 2016, companies are not allowed to donate for elections^[According to a Supreme Court (STF) decision, ADI 4,650/2015 and the Law 13,165/2015. Available in \url{http://redir.stf.jus.br/paginadorpub/paginador.jsp?docTP=TP&docID=10329542} and \url{http://www.planalto.gov.br/ccivil_03/_Ato2015-2018/2015/Lei/L13165.htm}]), which includes own resources from candidates. There are maximum values allowed to be expend by candidates in campaign, stipulated each year by the Supreme Electoral Court (TSE - *Supreto Tribunal Eleitoral*). The Party Fund is distributed by the following rule: 5% is equally given to registered parties^[In 2017, the Constitution Amend 33 created the rules to access the Party Fund, so called *Cláusula de Barreira* (Barrier Clause). In 2019, the party must had 1.5% of valid votes for deputies in 2018, distributed at least in 1/3 of the states and with at least 1% of the votes in each one, or had nine deputies in at least 1/3 of the states. This rule will be more rigid in 2023, with 2% of the votes or 11 deputies, under the same rules. In 2027, the figures will be 2.5% (and at least 1.5% in 1/3 of the states) or 13 deputies and in 2031, they will be 3% (and at least 2% in 1/3 of the state) or 15 deputies.] and 95% according to votes won in the last deputies elections. In 2017, with
+prohibition of companies donation, another fund was created, the Electoral Fund^[Called *Fundo Especial de Financiamento de Campanha*, it was created by the Laws 13,487/2017 and 13,488/2017. Available in \url{http://www.planalto.gov.br/ccivil_03/_Ato2015-2018/2017/Lei/L13487.htm} and \url{http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2017/lei/L13488.htm}.], which is distributed with following rule: 2% equally between registered parties; 35% to parties with, at least, one deputy; 48% according to deputies proportion; and 15% according to senators proportion. For example, in 2018, the Fund Party was R\$ 888.7 million (US\$ `r round(888.7/dolar)` million), while the Electoral Fund was R$ 1.7 billion (US\$ `r round(1700/dolar,1)` million). 
+
+Another important aspect of Brazilian suffrage regards campaign advertisement. There are national, free of charges and mandatory programs during campaign time, booth aired daily in radio and television, broadcasting the same content in all regions of the country. There is a fixed amount of time for electoral advertisement in these channels, 2/3 distributed according to current party presence in legislatures and 1/3 among candidates^[The same rules of the *Cláusula de Barreira* (Barrier Clause) is also applied here.], and only this time is allowed to be used in these channels. Ads on newspaper are also restricted, even though being a less important media compared to TV and radio. Internet is exception, where candidates can use it, almost freely, to reach voters, since 2009, except for anonymously or paid advertisement (which includes social medias like Twitter, Facebook, Instagram and YouTube)^[There is a set of other rules stipulated by the Supreme Electoral Court in each election, like size of advertisement material, schedule for rallies etc.].
+
+So, all this set of rules concentrate resources for some parties and candidates, making the internet an important alternative in elections. As aforementioned, in the presidential election of 2018, internet was pointed out as crucial for the result.
+
+Looking now to electorate, in Brazil, voting is mandatory to literate citizens aged 18 to 69. For people aged 16 to 17 and 70 and over, voting is optional. Voters absent in election must justify or pay a small fine. If they fail to justify three consecutive polls, voter registration is canceled and some rights are lost (issue or renew passports and national identification, receive wages as public servant or from any institution linked to government, participate in public competition for resources, request loans from institutions held by the government, apply to jobs as public servant, enroll in public education or engage in any public act that requests military service or income task discharge). This set raises the question if this rule changes incentives to acquire information about politicians and participate in elections. Table \ref{tab:cancelados} shows the total number of voters as well total population with voter registration canceled from 2005 to 2019.
+
+```{r cancelados,results='asis'}
+cancelados %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+knitr::kable("latex",
+                 linesep="",
+               booktabs = T,
+               #digits = c(0,0,0,1,0),
+               caption = "Total of volters and voter registration canceled, 2005 to 2009",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position"),
+                            full_width = T,
+                            font_size=9) %>%
+  kableExtra::column_spec(1,width="4cm") %>% 
+  kableExtra::footnote(general_title = "",
+                       general= c("Source: TSE",
+                                  "Obs.1: Includes voters registered in Brazil and abroad.",
+                                  "Obs.2: Turnout in the last elections."),
+                       fixed_small_size=T)
+```
+
+Despite the mandatory voting rule, turnout was `r round(mean(cancelados %>% pull("Turnout %")),2)`% in average from 2004 to 2018, and only `r round(mean(cancelados %>% pull("Canceled %")),2)`% of voters registration were canceled, which means that more than 90% of those who did not turnout took actions to regularize their electoral obligations. Anyhow, turnout is pretty high when compared to USA or European countries. 
 
 According to @downs_economic_1957, low probability to be pivotal in elections explain the "rational ignorance" of voters and low preference to turn out. On the other hand, mandatory vote could change these incentives, making people more inclined to vote [@lijphart_unequal_1997]. @de_leon_test_2014 finds that, for Brazilian case, mandatory voting seems not change people incentives to be more informed in voting decision. It seems the case that providing more information about candidates [@banerjee_informed_2011], hence lowering the costs for collect information, is more effective than compulsory voting system.
 
-Following @fujiwara_habit_2016, we also consider possible persistent habits on voting pattern, incorporating raining information in election days in each municipality.
+Following @fujiwara_habit_2016, we also consider possible persistent habits on voting pattern, incorporating raining information in election days in each municipality. The authors find that rainfall, both in current and past election day, reduces turnout and may possible affect consumption value of voting. Considering the continental size of Brazil, it may be an important contribution for analysis.
 
-
-# Empirical strategy and data bases
+# Empirical strategy and databases
 
 In this section we describe in detail the empirical strategy, relied on the Backhaul program rules, and the databases that support the analysis.
 
@@ -173,15 +317,17 @@ In this section we describe in detail the empirical strategy, relied on the Back
 
 As a glimpse of Brazilian communication consumption, Figure \ref{fig:0} presents internet and cell phone usage from 2008 to 2017.
 
-```{r internet_usage,fig.cap="Internet and cell phone usage in Brazil, % of 16+ years-old population, 2008-2009 and 2011-2017 \\label{fig:0}"}
+```{r internet_usage,fig.cap="Internet and cell phone usage in Brazil, % of 16+ years-old population, 2008-2009 and 2011-2017 \\label{fig:0}",fig.width=8,fig.height=5}
 data.table::fread("F:/OneDrive/Doutorado/Tese/Bases/temp.csv",
                   dec=",") %>%  
   dplyr::filter(resposta=="Sim")%>%
   ggplot(aes(x=Ano,y=pct,color=var, linetype=var), size=1)+
   geom_line()+
   geom_point()+
+  geom_text(aes(y=pct+0.02, label=paste0(round(pct*100,1),"%")),
+            show.legend = F) +
   scale_y_continuous(labels=scales::percent)+
-  scale_x_continuous(breaks = 2008:2017) +
+  scale_x_continuous(breaks = 2008:2018) +
   labs(x="Year",
        y="%",
        caption = "Source: National Household Survey (PNAD e PNADc)\nObs1.: Usage of internet in the last 3 months (survey date month as reference)\nObs2.: Cell phone ownership for personal use\nObs.3: No value for 2010 (Census year)")+
@@ -195,9 +341,9 @@ data.table::fread("F:/OneDrive/Doutorado/Tese/Bases/temp.csv",
         plot.caption = element_text(hjust = 0,size = 8))
 ```
 
-In 2008, 30% of Brazilians (16 years-old or above, i.e. population in voting age) declared to have used internet at least once in the last three months (September as reference), while almost 60% declared cell phone ownership for personal usage. In order to increase these figures, the government carried out a national plan in the begging of 2008. In 2011, these figures rose to 44% and 73%, respectively, indicating an increasing communication market in Brazil. Even in 2017, there is room remaining for internet and cell phone expansion in the country.
+In 2008, around 1/3 of Brazilians (16 years-old or above, i.e. population in voting age) declared to have used internet at least once in the last three months (September as reference), while almost 58% declared cell phone ownership for personal usage. In order to increase these figures, the government carried out a national plan in the begging of 2008. In 2011, these figures rose to 44% and 73%, respectively, indicating an increasing communication market in Brazil. Even in 2018, there is room remaining for internet and cell phone expansion in the country (around 25% and 18%, respectively).
 
-Hence, this expressive change in communication consumption may have changed how Brazilians face politics, possibly increasing opportunities for information acquisition and social interaction about this matter, or, on the other hand, widening leisure alternatives.
+Hence, this expressive change in communication consumption may have changed how Brazilians face politics, possibly increasing opportunities for information acquisition and social interaction about this matter, or, on the other hand, widening leisure alternatives and lowering politics information consumption.
 
 ## Backhaul Program (National Broadband Plan)
 
@@ -224,11 +370,15 @@ dplyr::tibble(`Population Size`=c("Up to 20,000",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position"),
                             full_width = T) %>%
+  kableExtra::column_spec(1,width="5.cm") %>% 
   kableExtra::footnote(general_title = "",
-                       general= "Source: Anatel, 2010.")
+                       general= "Source: Anatel",
+                       fixed_small_size=T)
 ```
 
 According to the National Agency of Telecommunication (Anatel^[*Agência Nacional de Telecomunicações* in Portuguese.]) [@anatel_relatorio_2010], the majority of municipalities to be covered by Backhaul program were up to 20,0000 inhabitants, which is more than half of total municipalities of Brazil^[Today, Brazil has 5,570 municipalities. By the time when the program was created, six municipalities did not exist yet.]. The minimal required velocity (8 Mbps^[Megabit per second.]) guarantee improvement in navigation quality, allowing, for example, streaming (music and videos). 
+
+The program had three types of technology to be deployed: fiber, radio and satellite. The first is installed by cables of fiver optic, with less interference and in higher distances, being connected directly to the household (FTTH) or to a concentrating point (FTTC), either with a higher cost of installation and maintenance. The second one is usually easier to be installed, by antennas, maintained and reaches broader areas, like rural locales, but have limitations of interference, due to physical barriers, and in internet velocity, due to distance. Finally, the third needs a satellite, an antenna in the household and a base antenna to intermediate communication, a set with high costs of installation and maintenance, but capable to reach broader areas, like rural, and being susceptible to weather interference. Considering the cost, radio was the main technology chosen, for 71% of the cities, followed by fiber, for 26%, and satellite for only 3%. 
 
 Out of 5,570 municipalities, by 2015, only 85 remained uncovered (Table \ref{tab:desc_back}) and 2,125 (`r round(2125/5570*100)`%) already had broadband infrastructure before the program, mainly larger cities. We notice that the program focused on small cities, with average population under 15,000.   
 
@@ -242,7 +392,7 @@ backhaul %>%
                                  TRUE~"Covered before")) %>%
   dplyr::group_by(Situation=Situao) %>%
   dplyr::summarise(`# Munic`=n(),
-                   `Avg Velocity`=mean(backhaul,na.rm=T),
+                   #`Avg Velocity`=mean(backhaul,na.rm=T),
                    `Avg Pop.`=mean(popIBGE_anoantes,na.rm=T)) %>%
   janitor::adorn_totals("row") %>%
   dplyr::mutate(`Avg Pop.`=case_when(
@@ -255,11 +405,12 @@ backhaul %>%
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position"),
                             full_width = T) %>%
-  kableExtra::footnote(general = "Municipalities by backhaul status",
-                       general_title = "")
+  kableExtra::footnote(general = "Source: Anatel and IBGE",
+                       general_title = "",
+                       fixed_small_size=T)
 ```
 
-According to program schedule, 100% of Brazilians' municipalities should has backhaul infrastructure in 2010. However, by this year `r round((2125+1388+495)/5570*100)`% of the goal was achieved. Table \ref{tab:backhaul_implementation} presents the roll out of the program by year.
+According to program schedule, 100% of Brazilians' municipalities should has backhaul infrastructure in 2010. However, by this year, only `r round((2125+1388+495)/5570*100)`% of the goal was achieved. Table \ref{tab:backhaul_implementation} presents the roll out of the program by year.
 
 ```{r backhaul_implementation, results='asis'}
 options(knitr.kable.NA = '')
@@ -286,58 +437,54 @@ backhaul %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position"),
                             full_width = T) %>%
   kableExtra::footnote(general=c("Source: Anatel.", 
-                                 "Obs.: No velocity information for 2014 and 2015."),
-                       general_title="number")
+                                 "Obs.1: No velocity information for 2014 and 2015.",
+                                 "Obs.2: Information only for program participants cities."),
+                       general_title="",
+                       fixed_small_size=T)
 ```
 
-The main point of our identification strategy relies on the velocity discontinuity, which is further analysed in Figures \ref{fig:1} to \ref{fig:1.5}, by region^[Since Brazil is a continental country with important regional inequalities, regional visualization improve analysis.]. North and Northeast regions are poorer, while South and Southeast are richer^[For example, the state of São Paulo was responsible for almost 1/3 of Brazilian GDP in 2017. Per capita household income of the richest state (Federal District) was `r round(2280/593,2)` times greater than the poorest (Alagoas), according to 2014 National Household Survey (IBGE/PNAD). Brazilian Gini index for the same year was 0.517.], making a common practice disaggregated analysis in Brazil. 
+The main point of our identification strategy relies on the velocity discontinuity, which is further analyzed in Figure \ref{fig:1} geographically,^[Since Brazil is a continental country with important regional inequalities, regional visualization improve analysis.]. North and Northeast regions are poorer, while South and Southeast are richer^[For example, the state of São Paulo was responsible for almost 1/3 of Brazilian GDP in 2017. Per capita household income of the richest state (Federal District) was `r round(2280/593,2)` times greater than the poorest (Alagoas), according to 2014 National Household Survey (IBGE/PNAD). Brazilian Gini index for the same year was 0.517.], being important to analyze how the programs are deployed in the territory.
 
-```{r mapa, fig.cap="Internet velocity in backhaul program by municipality population, North region \\label{fig:1}",fig.height=8,fig.width=14}
-# back_2008 <- backhaul %>%
-#   # Retirar da análise municípios que já possuiam infraestrutura anteriormente
-#   dplyr::filter(Situao %in% c("Atendido","Não atendido")) %>%
-#   # Agrupar por município
-#   dplyr::group_by(fk_cod_municipio) %>% 
-#   # Recuperar a velocidade do backhaul para todas as linhas,
-#   dplyr::mutate(backhaul=max(backhaul,na.rm=T)) %>% 
-#   # Desagrupar
-#   dplyr::ungroup() %>% 
-#   # Ficar somente com a informação de um período.
-#   # Queremos saber somente a velocidade e o ano de implementação do backhaul
-#   dplyr::filter(ano==2009) %>% 
-#   # Colocal como colunas o ano de implementação do backhaul com a velocidade
-#   tidyr::spread(backhaul_ano, backhaul,sep="_") %>%
-#   # Colocar como zero quem não teve backhaul implementado em 2008
-#   # e, caso contrário, a velocidade implantada
-#   dplyr::mutate(Velocity=case_when(is.na(backhaul_ano_2008)==T~0,
-#                                      TRUE~as.numeric(backhaul_ano_2008)),
-#                 COD_IBGE=as.character(fk_cod_municipio)) %>%
-#   # Ficar somente com a informação de velocidade e o código do município
-#   dplyr::select(COD_IBGE,Velocity) %>%
-#   # Recuperar as informações de população
-#   dplyr::left_join(populacao %>%
-#                      dplyr::select(COD_IBGE,pop_2007)) %>%
-#   # Renomear a variável de população
-#   dplyr::rename(pop_anterior=pop_2007) %>%
-#   # Retirar os municípios sem população (criados após 2007)
-#   dplyr::filter(is.na(pop_anterior)==F) %>%
-#   # Criar as faixas de população, os cutoffs, um marcador para internet e o ano
-#   dplyr::mutate(faixa_pop=cut(pop_anterior,
-#                               c(-Inf,20000,40000,60000,Inf),
-#                               labels = c("Up to 20k",
-#                                          "from 20k to 40k",
-#                                          "from 40k to 60k",
-#                                          "Above 60k"),
-#                               ordered_result = T),
-#                 cut_off=case_when(pop_anterior<=30000~20000,
-#                                   pop_anterior %in% c(30001:50000)~40000,
-#                                   pop_anterior>=50001~60000),
-#                 cut_off2=case_when(pop_anterior %in% c(15000:25000)~20000,
-#                                    pop_anterior %in% c(35000:45000)~40000,
-#                                    pop_anterior %in% c(55000:65000)~60000),
-#                 internet=case_when(Velocity>0~1,
-#                                    TRUE~0),
-#                 year=2008)
+```{r mapa, fig.cap="Internet velocity in backhaul program by municipality population, North region, 2008 \\label{fig:1}",fig.width=8,fig.height=4,eval=F}
+# get_brmap("City") %>% 
+#   dplyr::mutate(City=as.character(City)) %>%
+#   dplyr::left_join(back_junto,
+#                    by=c("City" = "COD_IBGE")) %>% 
+#   dplyr::filter(is.na(Velocity)==F) %>%
+#   dplyr::mutate(Velocity=factor(Velocity)) %>% 
+#   ggplot() +
+#   geom_sf(aes(fill = Velocity),
+#           colour = "grey", size = 0.001,
+#           alpha=0.8) +
+#   #muda escala de cores
+#   scale_fill_viridis_d(option = 1,
+#                        direction = -1) +
+#   # scale_fill_brewer(palette="RdBu",direction = 1
+#   #   )+
+#     # scale_fill_manual(values=c("#d1cdcd",
+#     #                            "#fc0303",
+#     #                            "#d2fc03",
+#     #                            "#a503fc",
+#     #                            "#0314fc",
+#     #                            "#0c5204",
+#     #                            "#5c054c")
+#     # )+
+#   
+#   geom_sf(data = filter(get_brmap("State")),
+#           fill = "transparent",
+#           colour = "black", size = 0.5) +
+#   
+#   # tira sistema cartesiano
+#   theme(panel.grid = element_line(colour = "transparent"),
+#         panel.background = element_blank(),
+#         axis.text = element_blank(),
+#         axis.ticks = element_blank(),
+#         legend.position = "bottom",
+#         strip.background = element_blank(),
+#         strip.text=element_text(face="bold"))+
+#   facet_wrap(~year)
+
+
 
 grafico_regiao <- function(regiao) {
 
@@ -350,25 +497,36 @@ get_brmap("City") %>%
                    by=c("City" = "COD_IBGE")) %>% 
   dplyr::filter(is.na(Velocity)==F,
                 Region==regiao) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
   ggplot() +
   geom_sf(aes(fill = Velocity),
-          colour = "black", size = 0.05, alpha=0.5) +
+          colour = "#f5faf9", 
+          size = 0.0001,
+          alpha=0.8) +
   #muda escala de cores
   # scale_fill_viridis_d(option = 3,
   #                      direction = -1) +
-  scale_fill_distiller(palette="Blues",
-                       direction = 1)+
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+    scale_fill_manual(values=c("#d1cdcd",
+                               "#fc0303",
+                               "#d2fc03",
+                               "#a503fc",
+                               "#0314fc")
+    )+
   
   geom_sf(data = filter(get_brmap("State"),Region==regiao),
           fill = "transparent",
-          colour = "black", size = 0.8) +
+          colour = "black", size = 0.5) +
   
   # tira sistema cartesiano
   theme(panel.grid = element_line(colour = "transparent"),
         panel.background = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        legend.position = "bottom") +
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold")) +
   facet_wrap(~faixa_pop)+
   ggtitle(titulo)
 }
@@ -384,31 +542,364 @@ grafico_regiao(1)
 ```
 
 
-```{r mapa2, fig.cap="Internet velocity in backhaul program by municipality population, Northeast region \\label{fig:1.2}",fig.height=8,fig.width=14}
+```{r mapa2, fig.cap="Internet velocity in backhaul program by municipality population, Northeast region, 2008 \\label{fig:1.2}",fig.width=8,fig.height=4,eval=FALSE}
 
 grafico_regiao(2)
 
 ```
 
-```{r mapa3, fig.cap="Internet velocity in backhaul program by municipality population, Southeast region \\label{fig:1.3}",fig.height=8,fig.width=14}
+```{r mapa3, fig.cap="Internet velocity in backhaul program by municipality population, Southeast region, 2008 \\label{fig:1.3}",fig.width=8,fig.height=4,eval=FALSE}
 
 grafico_regiao(3)
 
 ```
 
-```{r mapa4, fig.cap="Internet velocity in backhaul program by municipality population, South region \\label{fig:1.4}",fig.height=8,fig.width=14}
+```{r mapa4, fig.cap="Internet velocity in backhaul program by municipality population, South region, 2008 \\label{fig:1.4}",fig.width=8,fig.height=4,eval=FALSE}
 
 grafico_regiao(4)
 
 ```
 
-```{r mapa5, fig.cap="Internet velocity in backhaul program by municipality population, Center-West region \\label{fig:1.5}",fig.height=8,fig.width=14}
+```{r mapa5, fig.cap="Internet velocity in backhaul program by municipality population, Center-West region, 2008 \\label{fig:1.5}",fig.width=7,fig.height=4,eval=FALSE}
 
 grafico_regiao(5)
 ```
 
 
-```{r descontinuity, fig.cap="Discontinuity in Backhaul program velocity by population cut-offs: 20,000; 40,000; 60,000 \\label{fig:2}", results='asis'}
+```{r, fig.height=10,fig.width=6,eval=FALSE}
+m1<-
+  get_brmap("City") %>% 
+  dplyr::mutate(City=as.character(City)) %>%
+  dplyr::left_join(back_junto %>% 
+                     dplyr::filter(faixa_pop=="Up to 20k",
+                                   year %in% c(2012)),
+                   by=c("City" = "COD_IBGE")) %>% 
+  dplyr::filter(is.na(Velocity)==F) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Velocity),
+          colour = "#c7c7c7", 
+          size = 0.0001,
+          alpha=0.8) +
+  #muda escala de cores
+  # scale_fill_viridis_d(option = 3,
+  #                      direction = -1) +
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+  scale_fill_manual(values=c("#d1cdcd",
+                             "#fc0303",
+                             #"#d2fc03",
+                             "#a503fc",
+                             "#0314fc",
+                             "#1a8a1e",
+                             "#43d9c7")
+  )+
+  
+  geom_sf(data = get_brmap("State"),
+          fill = "transparent",
+          colour = "black", size = 0.5) +
+  
+  # tira sistema cartesiano
+  theme(panel.grid = element_line(colour = "transparent"),
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold"))
+  #facet_wrap(~back_ano)
+
+m2<-
+  get_brmap("City") %>% 
+  dplyr::mutate(City=as.character(City)) %>%
+  dplyr::left_join(back_junto %>% 
+                     dplyr::filter(faixa_pop=="from 20k to 40k",
+                                   year %in% c(2012)),
+                   by=c("City" = "COD_IBGE")) %>% 
+  dplyr::filter(is.na(Velocity)==F) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Velocity),
+          colour = "#c7c7c7", 
+          size = 0.0001,
+          alpha=0.8) +
+  #muda escala de cores
+  # scale_fill_viridis_d(option = 3,
+  #                      direction = -1) +
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+  scale_fill_manual(values=c("#d1cdcd",
+                             #"#fc0303",
+                             "#d2fc03",
+                             "#a503fc",
+                             "#0314fc",
+                             "#1a8a1e",
+                             "#43d9c7")
+  )+
+  
+  geom_sf(data = get_brmap("State"),
+          fill = "transparent",
+          colour = "black", size = 0.5) +
+  #facet_wrap(~back_ano)+
+  # tira sistema cartesiano
+  theme(panel.grid = element_line(colour = "transparent"),
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold")) 
+
+m3<-
+  get_brmap("City") %>% 
+  dplyr::mutate(City=as.character(City)) %>%
+  dplyr::left_join(back_junto %>% 
+                     dplyr::filter(faixa_pop=="from 40k to 60k",
+                                   year %in% c(2012)),
+                   by=c("City" = "COD_IBGE")) %>% 
+  dplyr::filter(is.na(Velocity)==F) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Velocity),
+          colour = "#c7c7c7", 
+          size = 0.0001,
+          alpha=0.8) +
+  #muda escala de cores
+  # scale_fill_viridis_d(option = 3,
+  #                      direction = -1) +
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+  scale_fill_manual(values=c("#d1cdcd",
+                             #"#fc0303",
+                             #"#d2fc03",
+                             "#a503fc",
+                             "#0314fc",
+                             "#1a8a1e",
+                             "#43d9c7")
+  )+
+  
+  geom_sf(data = get_brmap("State"),
+          fill = "transparent",
+          colour = "black", size = 0.5) +
+  #facet_wrap(~back_ano)+
+  # tira sistema cartesiano
+  theme(panel.grid = element_line(colour = "transparent"),
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold")) 
+
+
+m4<-
+  get_brmap("City") %>% 
+  dplyr::mutate(City=as.character(City)) %>%
+  dplyr::left_join(back_junto %>% 
+                     dplyr::filter(faixa_pop=="Above 60k",
+                                   year %in% c(2012)),
+                   by=c("City" = "COD_IBGE")) %>% 
+  dplyr::filter(is.na(Velocity)==F) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Velocity),
+          colour = "#c7c7c7", 
+          size = 0.0001,
+          alpha=0.8) +
+  #muda escala de cores
+  # scale_fill_viridis_d(option = 3,
+  #                      direction = -1) +
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+  scale_fill_manual(values=c("#d1cdcd",
+                             #"#fc0303",
+                             #"#d2fc03",
+                             #"#a503fc",
+                             "#0314fc",
+                             "#1a8a1e",
+                             "#43d9c7",
+                             "#fa0aba")
+  )+
+  
+  geom_sf(data = get_brmap("State"),
+          fill = "transparent",
+          colour = "black", size = 0.5) +
+  #facet_wrap(~back_ano)+
+  # tira sistema cartesiano
+  theme(panel.grid = element_line(colour = "transparent"),
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold"))
+
+m5 <-
+  get_brmap("City") %>% 
+  dplyr::mutate(City=as.character(City)) %>%
+  dplyr::left_join(back_junto %>% 
+                     dplyr::filter(year==2012),
+                   by=c("City" = "COD_IBGE")) %>% 
+  dplyr::filter(is.na(Velocity)==F) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Velocity),
+          colour = "#232423", 
+          size = 0.001,
+          alpha=0.8) +
+  #muda escala de cores
+  # scale_fill_viridis_d(option = 3,
+  #                      direction = -1) +
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+  scale_fill_manual(values=c("#d1cdcd",
+                             "#fc0303",
+                             "#d2fc03",
+                             "#a503fc",
+                             "#0314fc",
+                             "#1a8a1e",
+                             "#43d9c7",
+                             "#fa0aba")
+  )+
+  
+  geom_sf(data = get_brmap("State"),
+          fill = "transparent",
+          colour = "black", size = 0.5) +
+  labs(caption="Source: Anatel and IBGE")+
+  #facet_wrap(~back_ano)+
+  # tira sistema cartesiano
+  theme(panel.grid = element_line(colour = "transparent"),
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold"),
+        plot.caption = element_text(hjust = 0))
+
+ggpubr::ggarrange(m1,m2,m3,m4, 
+                  align='h', 
+                  labels=c('Under 20k', 
+                           '20k to 40k',
+                           '40k to 60k',
+                           'Above 60k'),
+                  common.legend = T,
+                  legend.grob=ggpubr::get_legend(m5),
+                  ncol=2,
+                  nrow=2,
+                  font.label = list(size = 10, 
+                                    color = "black", 
+                                    face = "bold"),
+                  legend="bottom")
+```
+
+
+
+```{r, fig.cap="Internet velocity in backhaul program by municipality \\label{fig:1}", fig.width=6,fig.height=6,crop=T}
+
+m5 <-
+  get_brmap("City") %>% 
+  dplyr::mutate(City=as.character(City)) %>%
+  dplyr::left_join(back_junto %>% 
+                     dplyr::filter(year==2012),
+                   by=c("City" = "COD_IBGE")) %>% 
+  dplyr::filter(is.na(Velocity)==F) %>%
+  dplyr::mutate(Velocity=factor(Velocity)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = Velocity),
+          colour = "#c7c7c7", 
+          size = 0.0001,
+          alpha=0.8) +
+  #muda escala de cores
+  # scale_fill_viridis_d(option = 3,
+  #                      direction = -1) +
+  # scale_fill_brewer(palette="RdBu",direction = 1
+  #   )+
+  scale_fill_manual(values=c("#d1cdcd",
+                             "#fc0303",
+                             "#d2fc03",
+                             "#a503fc",
+                             "#0314fc",
+                             "#1a8a1e",
+                             "#43d9c7",
+                             "#fa0aba")
+  )+
+  
+  geom_sf(data = get_brmap("State"),
+          fill = "transparent",
+          colour = "black", size = 0.5) +
+  labs(caption="Source: Anatel and IBGE")+
+  #facet_wrap(~back_ano)+
+  # tira sistema cartesiano
+  theme(panel.grid = element_line(colour = "transparent"),
+        panel.background = element_rect(fill = "transparent"), 
+        plot.background = element_rect(fill = "transparent", color = NA), 
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "right",
+        strip.background = element_blank(),
+        strip.text=element_text(face="bold"),
+        plot.caption = element_text(hjust = 0),
+        plot.margin = unit(c(1,1,1,1), "cm"),
+        rect = element_rect(fill = "transparent",
+                            colour=NA))
+
+# ggsave(m5,filename="teste.png",bg = "transparent",
+#        width=15,height=15,units="cm")
+
+m5
+
+```
+
+
+
+
+Figure \ref{fig:1} shows that a big portion of cities in the south and center-west were covered before (blank areas), while the northeast had the largest number of cities in the program. Also, the north region (the Amazon area) had a lot of cities uncovered by the program (grey areas). The most common velocity was 8 Mbps, as showed before in Table \ref{tab:program_backhauk}, corresponding to cities under 20,000 inhabitants. 
+
+## Methodology
+
+Following @cattaneo_analysis_2018, each municipality has a running variable $X_i$ (the size of population) with potential outcomes $Y_i(0)$ (a lower internet velocity) and $Y_i(1)$ (higher internet velocity). Municipalities face three possible cutoffs $C_i \in C$, with $C = {c_1 ... c_J}$. The effect for each cutoff, $\tau(c)= \mathbb{E}[Y_i(1)-Y_i(0)|X_i=c,C_i=c]$ is identified by:
+
+\begin{equation}
+\tau(c)= \lim\limits_{x \downarrow c}\mathbb{E}[Y_i|X_i=c,C_i=c]-\lim\limits_{x \uparrow c}\mathbb{E}[Y_i|X_i=c,C_i=c]
+\label{eq:1}
+\end{equation}
+
+For the pooled regression discontinuity estimate, running variable is recentered, $\tilde X_i=X_i-C_i$, normalizing the cutoff at zero:
+
+\begin{equation}
+\tau_p= \lim\limits_{x \downarrow 0}\mathbb{E}[Y_i| \tilde X_i=x]-\lim\limits_{x \uparrow 0}\mathbb{E}[Y_i|\tilde X_i=x]
+\label{eq:2}
+\end{equation}
+
+where
+
+\begin{equation}
+\tau_p= \sum\limits_{c \in C}\tau(c) \omega(c)
+\label{eq:3}
+\end{equation}
+
+and 
+
+\begin{equation}
+\omega(c) = \frac{f_{X|C}(c|c)\mathbb{P}[C_i=c]}{\sum\limits_{c \in C} f_{X|C}(c|c)\mathbb{P}[C_i=c]}
+\label{eq:4}
+\end{equation}
+
+Equation \ref{eq:4}, given a bandwidth $h>0$, and considering that $\omega(c)=\mathbb{P}[C_i = c|\tilde X_i = 0]$, can be estimated by:
+
+\begin{equation}
+ \hat \omega(c) = \frac{\sum_{i} \mathbbm{1} (C_i=c,-h \leq \tilde X_i \leq h) } {\sum_{i} \mathbbm{1} (-h \leq \tilde X_i \leq h)}
+\label{eq:5}
+\end{equation}
+
+In the fuzzy design, which is our case here, the velocity of internet is not necessarily the same defined in the program for each municipality. So, there is a first stage to determine if a municipality had the velocity foreseen by the program, with $T_i \in \{0,1\}$, where $T_i=1$ denotes if the velocity of the program was deployed and $T_i=0$ otherwise, and $\mathbb{P}[T_i=1 |Xi = c,Ci = c]$.
+
+All the three cut-offs are considered (20,000, 40,000 and 60,000), with optimal bandwidth chosen following @imbens_optimal_2012. Regressions are performed in R software, with rdd package^[Drew Dimmery (2016). rdd: Regression Discontinuity Estimation. R package version 0.57. https://CRAN.R-project.org/package=rdd] and rdmulti package^[Matias D. Cattaneo, Rocio Titiunik and Gonzalo Vazquez-Bare (2020). rdmulti: Analysis of RD Designs with Multiple Cutoffs or Scores. R package version 0.5. https://CRAN.R-project.org/package=rdmulti].
+
+Figure \ref{fig:2} shows a clear jump in velocity cut-offs for the entire period. The jump around cut-offs are clear, where municipalities just below the population size established in the program face lower internet velocities. The first cut-off must be preferable due to sample size, as well as pooled weighted estimations, which will also be presented in results section.
+
+```{r discontinuity, fig.cap="Discontinuity in Backhaul program velocity by population cut-offs: 20,000; 40,000; 60,000 \\label{fig:2}", results='asis'}
 
 backtemp <- backhaul %>%
   dplyr::filter(ano==2013, popIBGE_anoantes<=70000) %>%
@@ -428,15 +919,208 @@ rdmcplot_adj(backtemp$backhaul,
                   )
 ```
 
-Figure \ref{fig:2} shows a clear jump in velocity cut-offs for the entire period. The jump around cut-offs are clear, where municipalities just below the population size established in the program face lower internet velocities. The first cut-off must be preferable due to sample size, as well as pooled weighted estimations, which will also be presented.
+The McCrary manipulation test of cutoffs [@mccrary_manipulation_2008] looks if there is a selection into treatment, analysing the density distribution of the running variable around the cutoff. An alternative test was developed by @cattaneo_simple_2019 and @cattaneo_local_2020, where confidence bands are provided, well suited for RDD designs. Results for this test are presented in Table \ref{tab:test_tab} Figure \ref{fig:test_plot} for all three cutoffs.
+
+```{r test_tab}
+backtemp <- backhaul %>%
+  dplyr::filter(ano==2013) %>%
+  dplyr::mutate(cut_off=case_when(popIBGE_anoantes <=30000~20000,
+                                  popIBGE_anoantes %in% c(30001:50000)~40000,
+                                  popIBGE_anoantes>=50001~60000)) %>%
+  na.omit
+
+source("rdplotdensity2.R")
+
+c<-20000
+
+x<-backtemp[backtemp$cut_off==c,]$popIBGE_anoantes
+
+h <- r_part %>%
+  dplyr::filter(Year==2008,
+                Cutoff==c) %>%
+  dplyr::select(Bw) %>%
+  dplyr::distinct() %>%
+  .[[1]]
+
+t1<-
+  rddensity::rddensity(X=x,
+                       c=c,
+                       h=h)
+
+p1<-
+rdplotdensity2(
+  t1,x)
+
+c<-40000
+
+x<-backtemp[backtemp$cut_off==c,]$popIBGE_anoantes
+
+h <- r_part %>%
+  dplyr::filter(Year==2008,
+                Cutoff==c) %>%
+  dplyr::select(Bw) %>%
+  dplyr::distinct() %>%
+  .[[1]]
+
+t2<- rddensity::rddensity(X=x,
+                             c=c,
+                             h=h)
+
+p2<-
+rdplotdensity2(
+  t2,x)
+
+c<-60000
+
+x<-backtemp[backtemp$cut_off==c,]$popIBGE_anoantes
+
+h <- r_part %>%
+  dplyr::filter(Year==2008,
+                Cutoff==c) %>%
+  dplyr::select(Bw) %>%
+  dplyr::distinct() %>%
+  .[[1]]
+
+t3<-rddensity::rddensity(X=x,
+                       c=c,
+                       h=h)
+
+p3<-
+rdplotdensity2(
+  t3,x)
+
+dplyr::tibble(Cutoff=c(t1$opt$c,t2$opt$c,t3$opt$c),
+                         Bw=c(t1$h$left,t2$h$left,t3$h$left),
+                         N=c(t1$N$full,t2$N$full,t3$N$full),
+                         Nl=c(t1$N$eff_left,t2$N$eff_left,t3$N$eff_left),
+                         Nr=c(t1$N$eff_right,t2$N$eff_right,t3$N$eff_right),
+                         `T (jackknife)`=c(t1$test$t_jk,t2$test$t_jk,t3$test$t_jk),
+                         P.value=c(t1$test$p_jk,t2$test$p_jk,t3$test$p_jk)) %>% 
+    knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               caption = "Cattaneo, Jansson and Ma manipulation test of cutoffs",
+               format.args=list(big.mark=",",
+                                decimal.marf="."),
+               digits=c(0,0,0,0,0,3,3)) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position","scale_down"),
+                            full_width = T) %>%
+  kableExtra::column_spec(6, width="3cm") %>% 
+  kableExtra::footnote(
+    general=c("Obs.1: Optimum bandwidht selection following Imbens & Kalyanaraman (2012).",
+      "Obs.2: Unrestricted density estimation, triangular Kernel and VCE by jackknife.",
+      "Obs.3: Bw=bandwidth; N, Nl and Nr are total n# of obs., n# on the left and n# on the right."),
+    general_title = "",
+    fixed_small_size = T)
+```
+
+```{r test_plot, fig.cap="Density plot - Cattaneo, Jansson and Ma manipulation test of cutoffs \\label{fig:test_plot}", fig.height=5,fig.width=8.5}
+  ggpubr::annotate_figure(ggpubr::ggarrange(p1$Estplot,
+                  p2$Estplot,
+                  p3$Estplot, 
+                  align='h', 
+                  labels=c('Cutoff: 20,000', 
+                           'Cutoff: 40,000',
+                           'Cutoff: 60,000'),
+                  ncol=1,
+                  font.label = list(size = 10, 
+                                    color = "black", 
+                                    face = "bold")),
+                bottom=text_grob("Obs.: Optimum bandwidht selection following Imbens & Kalyanaraman (2012).\n Unrestricted density estimation, triangular Kernel and VCE by jackknife.",
+                                 size=8,
+                                 hjust=0.9))
+
+```
+
+The manipulation test suggests that our identification strategy is valid, for all three cutoffs, although the last one in a lower significant level, the cutoff with a lower number of observations. As we can see on Figure \ref{fig:test_plot}, the visual inspect confirms the test results. However, Brazil has an odd population distribution, with unexpected jumps in some population ranges. @monasterio_o_2013 shows that these jumps occurs due to a legislation regarding Federal transfers  of resources to municipalities (*Fundo de Participação dos Municípios - FPM*), based on the population size.^[According to the Decree-Law 1,881/1981, there are 17 ranges of population, with increasing resources being distributed for each range. The cuts are: `r paste(format(c(10188,13584,16980,23772,30564,  37356,44148,50940,61128,71316,81504,91692,101880,115464,129048,142632,156216),big.mark=",",decimal.mark="."), collapse="; ")`. Available in \url{http://www.planalto.gov.br/ccivil_03/Decreto-Lei/1965-1988/Del1881.htm}]. Despite there are no intersections of Backhaul and FPM's cutoffs, we control for the later one, in order to avoid any confounder effect regarding this situation in results.
+
+## Databases
+
+Outcomes are election results, organized by Superior Election Court (TSE)^[*Tribunal Superior Eleitoral* in Portuguese.]. We will analyze 2008, 2010 and 2012 elections, covering two municipal and one national suffrage. The main outcomes are: turnout, percentage of blank or null votes^[In Brazilian election, people may put a blank vote, which are not computed for any candidate and is not considered for official results, as well null votes. The difference consists in the way the registration of these votes are made: the blank vote is available as a button in the electronic ballot, while the null vote occurs when someone enters an invalid candidate number into the ballot and confirms the vote.] and vote shares, for left wing, center or right wing parties (as mentioned before, and using @power_elite_2012 party index from Brazilian Legislative Survey^[Version 7, available in https://dataverse.harvard.edu/dataverse/bls;jsessionid=992eedb7e954a17ef718c7078cf5?widget=dataverse%40harvard&q=&types=dataverses%3Afiles%3Adatasets&sort=dateSort&order=desc&page=3], left wing parties are those up to quantile 0.25 of the index, center parties are those between 0.25 and 0.75 and right wing are those above). 
+
+Despite the clear discontinuities in the running variable, a set of covariates were collected, in order to control for any further confounders that might remain. Lack of information at municipal level is one of the weakness in Brazilian researches at this territory level. Census occurs only every ten years^[When not delayed. The 1990 census was postponed to 1991, as well as 2020 census is postponed to 2021.], remaining just few administrative data in the between years, some of them with low quality (mainly for small cities). Even tough, considering that this is the only source of the main socioeconomic variables, we use information from the last two censuses (2000 and 2010), organized by Brazilian Institute of Statistics and Geography (IBGE). Also from IBGE, we collect total population estimates and GDP. Considering that direct cash transfers are important in Brazil, we collect data from the two major programs: *Bolsa Família* (PBF) and *Benefício de Prestação Continuada* for elders (BPC), booth organized by Ministry of Citizenship^[PBF is one of the biggest conditional cash transfer program in the world. The target are families under the extreme poverty and poverty lines (in 2020, families earning up to R\$ 89 by person, or U\$ `r round(89/dolar)`, by month are considered extremely poor, while families above that amount and up to R\$ 178, or U\$ `r round(178/dolar)`, are considered poor), focused one children. As counter part, school attendance and vaccination are required. PBF reaches around 14 million families in Brazil in 2020. On the other hand, BPC is a program for elderly and handicapped. The poor population in this profile (people aged 65 or over and all handicapped) are eligible for a minimum wage paycheck.]. In addition, we collect the mass of wages (formal labour market) from RAIS database, organized by Ministry of Economy^[In Brazil, every formal company have to fill the Annual Relation of Social Information (RAIS), with the profile of all workers they had in the calendar year, including wages.]. We also collected information from National Institute of Meteorology, to control for rain and temperature in election day, following @fujiwara_habit_2016. Municipalities were joined by the nearest distance between the center of the city and the closest meteorological station. Table \ref{tab:variables} summarises each variable and source.
+
+<!-- In addition, we collected data from Ministry of Health regarding homicide and suicide, but, due to poor quality of data (missing values), we had to discard them. Public finance data were collected too, but discarded due to missing problem and for being highly correlated with other covariates (like GDP and population). In fact, some of covariates were discarded due to high correlation (for example electricity, car and computer ownership). Finally, we collected fiscal data, from Ministry of Economy, regarding public expenses (current expenses and investments), but again due to missing data and high correlation with other covariates (like GDP and mass of wages) these variables were dropped too.  -->
+
+
+
+```{r variables, results='asis'}
+options(knitr.kable.NA = '')
+
+dplyr::tibble(`Category`=c(rep("Outcome",4),
+                           "Running",
+                           rep("Controls",17)),
+  
+              `Variable`=c("Turnout",
+                           "Vote share",
+                           "Blank and null votes",
+                           "Donations",
+                           "Population",
+                           "Black",
+                           "College",
+                           "Married",
+                           "Income",
+                           "Population over 60 years",
+                           "Radio",
+                           "Rural",
+                           "Television",
+                           "Working age population",
+                           "GDP",
+                           "BPC",
+                           "PBF",
+                           "Formal wage",
+                           "Temperature",
+                           "Rain",
+                           "Fibra-optic",
+                           "FPM"),
+           `Description`=c("Participation percentage of total electorate",
+                           "Vote share of parties and/or orientation of parties (left, center or right)",
+                           "Percentage of blank and null votes in total",
+                           "Declared donation received for campaign purpose",
+                           "Estimated population",
+                           "Percentage of blacks in population",
+                           "Percentage of people with college degree",
+                           "Percetage of people married",
+                           "Median household income",
+                           "Percentage of population over 60 years in population",
+                           "Percentage of households with radio",
+                           "Percentage of population in rural areas",
+                           "Percentage of households with television",
+                           "Percentage of population in working age",
+                           "Gross Domestic Product",
+                           "Ratio of BPC payments and GDP",
+                           "Ratio of PBF payments and GDP",
+                           "Ratio of formal wages (sum) and GDP",
+                           "Average temperature a week before and after election day",
+                           "Rain preciptation in election day",
+                           "Fibra-optic internet infrasctructure in municipality",
+                           "Dummy according to FPM range"
+                           ),
+           `Source`=c(rep("TSE",4),
+                      rep("IBGE",11),
+                      rep("MC and IBGE",2),
+                      "ME and IBGE",
+                      rep("Inmet",2),
+                      "Anatel",
+                      "DL 1,881/1981")) %>%
+  knitr::kable("latex",
+               booktabs = T,
+               caption = "Description of varibles by type and source",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position"),
+                            full_width = T,
+                            font_size=9) %>%
+  kableExtra::column_spec(1,width="1.5cm") %>% 
+  kableExtra::column_spec(2,width="3.5cm") %>% 
+  # kableExtra::column_spec(3,width="8cm") %>% 
+  kableExtra::column_spec(4,width="2.5cm") %>% 
+  kableExtra::collapse_rows(1,latex_hline="major") %>% 
+  kableExtra::footnote(general_title = "",
+                       general= "Source: TSE, IBGE, Inmet, ME (Ministry of Economy), MC (Ministry of Citizenship) and Anatel.")
+```
 
 ## Descriptive statistics
 
-Despite these clear discontinuities, a set of covariates were collected, in order to control for any further confounders that might remain. Lack of information at municipal level is one of the weakness in Brazilian researches at this territory level. Census occurs only every ten years, remaining just few administrative data in the between years, some of them with low quality (mainly for small cities). Even tough, considering that this is the only source of the main socioeconomic variables, we use information from the last two censuses (2000 and 2010), organized by Brazilian Institute of Statistics and Geography (IBGE). Also from IBGE, we collect total population estimates and GDP. Considering that direct cash transfers are important in Brazil, we collect data from the two major programs: Bolsa Família (PBF) and Benefício de Prestação Continuada for elders (BPC), booth organized by Ministry of Citizenship^[PBF is one of the biggest conditional cash transfer program in the world. The target are families under the extreme poverty and poverty lines (in 2020, families earning up to R\$ 89 by person, or U\$ `r round(89/5.80)`, by month are considered extremely poor, while families above that amount and up to R\$ 178, or U\$ `r round(178/5.80)`, are considered poor), focused one children. As counter part, school attendance and vaccination are required. PBF reaches around 14 million families in Brazil in 2020. On the other hand, BPC is a program for elderly and handicapped. The poor population in this profile (people aged 65 or over and all handicapped) are eligible for a minimum wage paycheck.]. In addition, we collect the mass of wages (formal labour market) from RAIS database, organized by Ministry of Economy^[In Brazil, every formal company have to fill the Annual Relation of Social Information (RAIS), with the profile of all workers they had in the calendar year, including wages.]. We also collected information from National Institute of Meteorology, to control for rain and temperature in election day, following @fujiwara_habit_2016. Municipalities were joined by the nearest distance between the center of the city and the closest meteorological station. 
-
-In addition, we collected data from Ministry of Health regarding homicide and suicide, but, due to poor quality of data (missing values), we had to discard them. Public finance data were collected too, but discarded due to missing problem and for being highly correlated with other covariates (like GDP and population). In fact, some of covariates were discarded due to high correlation (for example electricity, car and computer ownership). Finally, we collected fiscal data, from Ministry of Economy, regarding public expenses (current expenses and investments), but again due to missing data and high correlation with other covariates (like GDP and mass of wages) these variables were dropped too. 
-
-Outcomes are election results, organized by Superior Election Court (TSE)^[*Tribunal Superior Eleitoral* in Portuguese.]. We will analyze 2008, 2010 and 2012 elections, covering two municipal and one national suffrage. The main outcomes we will analyze are: turnout, percentage of blank or null votes^[In Brazilian election, people may put a blank vote, which are not computed for any candidate and is not considered for official results, as well null votes. The difference consists in the way the registration of these votes are made: the blank vote is available as a button in the electronic ballot, while the null vote occurs when someone enters an invalid candidate number into the ballot and confirms the vote.] and vote shares, for left wing, center or right wing parties (following @power_elite_2012 and the party index from Brazilian Legislative Survey^[Version 7, available in https://dataverse.harvard.edu/dataverse/bls;jsessionid=992eedb7e954a17ef718c7078cf5?widget=dataverse%40harvard&q=&types=dataverses%3Afiles%3Adatasets&sort=dateSort&order=desc&page=3]. Left wing parties are those up to quantile 0.25 of the party index, center parties are those between 0.25 and 0.75 and right wing parties are those above). 
 
 Descriptive statistics are separated by year (2008, 2010 and 2012), considering 2000 Census data for 2008 statistics and 2010 Census for 2010 and 2012. All the other variables refers to the respective year.
 
@@ -452,22 +1136,37 @@ Descriptive statistics are separated by year (2008, 2010 and 2012), considering 
 # source_lines("F:/OneDrive/Doutorado/Tese/tese_1/modelos.R",
 #              808:845)
 
-descriptives_2008 %>% 
+# descriptives_2008 %>% 
+#   knitr::kable("latex",
+#                linesep = "",
+#                booktabs = T,
+#                digits = c(0,0,rep(2,5)),
+#                caption = "Descriptive Statistics, 2008",
+#                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+#   kableExtra::kable_styling(latex_options = c("HOLD_position"),
+#                             full_width = T) %>%
+#   kableExtra::column_spec(1,width = "4cm" ) %>%
+#   kableExtra::footnote(general="Source: IBGE, Inmet, ME and MC.",
+#                        general_title="",
+#                        fixed_small_size = T)
+
+descriptives_2008_pop %>% 
   knitr::kable("latex",
                linesep = "",
                booktabs = T,
                digits = c(0,0,rep(2,5)),
-               caption = "Descriptive Statistics, 2008",
+               caption = "Descriptive statistics by population size of municipality, 2008",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position"),
                             full_width = T) %>%
   kableExtra::column_spec(1,width = "4cm" ) %>%
-  kableExtra::footnote(general="Source: IBGE, Inmet, ME and MC.",
+  kableExtra::footnote(general="Source: IBGE, Inmet, ME, MC and Anatel.",
                        general_title="",
                        fixed_small_size = T)
+
 ```
 
-```{r desc.2010, results='asis'}
+```{r desc.2010, results='asis', eval=FALSE}
 # source_lines("F:/OneDrive/Doutorado/Tese/tese_1/modelos.R",
 #              847:884)
 
@@ -487,7 +1186,7 @@ descriptives_2010 %>%
 ```
 
 
-```{r desc.2012, results='asis'}
+```{r desc.2012, results='asis', eval=FALSE}
 # source_lines("F:/OneDrive/Doutorado/Tese/tese_1/modelos.R",
 #              886:923)
 
@@ -515,38 +1214,53 @@ In order to clarify identification validity, Table \ref{tab:t.test} presents a s
 # source_lines("F:/OneDrive/Doutorado/Tese/tese_1/modelos.R",
 #              608:695)
 
-t_base %>% 
-  dplyr::rename_all(list(~c("Variable","t 2008","p value 2008",
-                            "t 2010","p value 2010",
-                            "t 2012","p value 2012"))) %>% 
-    dplyr::mutate(Variable=c("Turnout",
-                             "Population",
-                             "Median Income",
-                             "Pop. over 60 years",
-                             "Rural",
-                             "Black",
-                             "Radio",
-                             "Television",
-                             "College",
-                             "Married",
-                             "Working Pop.",
-                             "Rain (elect. day)",
-                             "Avg. Temperature",
-                             "PBF",
-                             "BPC",
-                             "GDP",
-                             "Formal Wages",
-                             "Velocity")) %>% 
+# t_base %>% 
+#   dplyr::rename_all(list(~c("Variable","t 2008","p value 2008",
+#                             "t 2010","p value 2010",
+#                             "t 2012","p value 2012"))) %>% 
+#     dplyr::mutate(Variable=c("Turnout",
+#                              "Population",
+#                              "Median Income",
+#                              "Pop. over 60 years",
+#                              "Rural",
+#                              "Black",
+#                              "Radio",
+#                              "Television",
+#                              "College",
+#                              "Married",
+#                              "Working Pop.",
+#                              "Rain (elect. day)",
+#                              "Avg. Temperature",
+#                              "PBF",
+#                              "BPC",
+#                              "GDP",
+#                              "Formal Wages",
+#                              "Velocity")) %>% 
+#   knitr::kable("latex",
+#                linesep = "",
+#                booktabs = T,
+#                digits = c(0,rep(3,6)),
+#                caption = "Covariates t-test for 20,000 cut-off, 2008, 2010 and 2012",
+#                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+#   kableExtra::kable_styling(latex_options = c("HOLD_position"),
+#                             full_width = T) %>%
+#   kableExtra::footnote(general=c("Source: IBGE, Inmet, ME and MC",
+#                                  "Obs.: Null hypotheses is no difference."),
+#                        general_title="")
+
+t_base2 %>% 
   knitr::kable("latex",
                linesep = "",
                booktabs = T,
                digits = c(0,rep(3,6)),
-               caption = "Covariates t-test for 20,000 cut-off, 2008, 2010 and 2012",
+               caption = "Covariates means difference test for 20,000 cutoff, 2008, 2010 and 2012",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position"),
                             full_width = T) %>%
-  kableExtra::footnote(general=c("Source: IBGE, Inmet, ME and MC",
-                                 "Obs.: Null hypotheses is no difference."),
+  kableExtra::footnote(general=c("Source: IBGE, Inmet, ME, MC and Anatel.",
+                                 "Obs.1: Null hypotheses is no difference.",
+                                 "Obs.2: * = significant at 10%; ** = significant at 5%; *** = significant at 1%.",
+                                 "Obs.3: Bandwidth: 3,500"),
                        general_title="")
 
 ```
@@ -555,7 +1269,7 @@ Results for 2008 year in Table \ref{tab:t.test} (which, indeed, refers to 2000 c
 
 # Results
 
-We begin our analysis of results looking the effects of broadband in participation. Considering that there are two rounds for two types of offices, mayor and president, and some municipalities might not have a second round, we focus only in the first one, using, hence, the larger sample size as possible. All the three cut-offs are considered (20,000, 40,000 and 60,000), with optimal bandwidth chosen following @imbens_optimal_2012. Regressions are performed in R software, with rdd package^[Drew Dimmery (2016). rdd: Regression Discontinuity Estimation. R package version 0.57. https://CRAN.R-project.org/package=rdd] and rdmulti package^[Matias D. Cattaneo, Rocio Titiunik and Gonzalo Vazquez-Bare (2020). rdmulti: Analysis of RD Designs with Multiple Cutoffs or Scores. R package version 0.5. https://CRAN.R-project.org/package=rdmulti], for pooled regression with multiple cutoffs, following @cattaneo_analysis_2018.
+We begin our analysis of results looking the effects of broadband in participation. Considering that there are two rounds for two types of offices, mayor and president, and some municipalities might not have a second round, we focus only in the first one, using, hence, the larger sample size as possible.
 
 Results in Table \ref{tab:reg.part} suggest no relationship between broadband internet and participation in elections. For all regressions, considering the three cutoffs, and pooled results, only two showed significant relationship. Since participation in elections is mandatory in Brazil, and turnout is relatively high (around 80%), there is no much room to improve this situation. These results are in line with @menezes_internet_2015 for Brazil, as well as results reported by @miner_unintended_2015 for Malaysia, but differs from results reported in USA and European countries [@campante_politics_2017; @falck_e-lections:_2014; @gavazza_internet_2015; @jaber_broadband_2013]. Another way to look to this relationship is the difference in turnout between elections, presented in Table \ref{tab:reg.part.dif}. 
 
@@ -639,7 +1353,7 @@ r_bn_dif %>%
                linesep="",
                booktabs = T,
                digits = c(0,0,0,0,0,3,3,3,3),
-               caption = "RDD regression results for blank of null votes. Election years: 2008, 2010 and 2012",
+               caption = "RDD regression results for difference in blank of null votes. Election years: 2008, 2010 and 2012",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position")) %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
@@ -656,29 +1370,6 @@ r_bn_dif %>%
 In last presidential elections (2018), polarization was dramatic in Brazil. Left versus Right debate was at the center of the presidential run, with the last four times presidential winner party (the left wing Workers Party -- PT) being the main target. In fact, 2014 elections was one of the closest seen in Brazil, when Mrs. Rouseff defeated Mr. Neves (from central right Brazilian Social Democracy Party -- PSDB) with only 51.64% of the valid votes in the second round. Internet may had a important role in this scenario, since, back in 2010, Mr. Lula da Silva, the first president of Workers Party, had 80% of presidency approval, the highest value ever recorded.^[A news about these figures are available in: http://g1.globo.com/politica/noticia/2010/12/popularidade-de-lula-bate-recorde-e-chega-87-diz-ibope.html]
 
 Hence, a closer look at the relationship between broadband and vote share of left parties since 2008 might shed light into this turnaround in Brazil. As pointed before, vote shares were classified as left, center or right based on @power_elite_2012 party index. Table \ref{tab:parties} presents this organization.
-
-```{r parties, results='asis'}
-dplyr::tibble(Left=c("PSTU","PSOL","PC do B",
-                     "PT","PSB","PCO",
-                     "","","","","","",""),
-              Center=c("PDT","PV","PCB","PPS","PSDB","PMDB",
-                       "PTB","PSD","PL","PRONA","PR","PSC","PRB"),
-              Right=c("PRN","PFL","DEM","PDS","PPR","PDC",
-                      "PPB","PP","PMN","PSL","","","")) %>% 
-  knitr::kable("latex",
-               linesep="",
-               booktabs = T,
-               caption = "Party classification based on party index",) %>%
-  kableExtra::kable_styling(latex_options = c("HOLD_position","scale_down"),
-                            full_width = T) %>%
-  kableExtra::footnote(
-    general=c("Division of parties based on quantiles of party index (0.25, 0.75, 1)",
-      "Parties out of party index were allocated based on party description available on their internet page."),
-    general_title = "",
-    fixed_small_size = T)
-```
-
-The party index has some aggregation of parties as "others", so another classification criterion was necessary. Parties web pages were consulted to analyse their history and beliefs in order to designate parties to the groups. This methodology may arise questions if some parties labeled as right are actually centrists. To avoid this issue, we focus on left parties vote shares, since their classification are more direct and mostly based on the party index.
 
 Results suggests, once again, that there is no clear relationship between broadband internet and the vote received by left wing parties in elections for mayors and president (Table \ref{tab:r.pct.vote}). So, unlike results reported by previous studies, there is little evidence of important effects of internet on vote shares, at least when fixed broadband is considered [@campante_politics_2017; @falck_e-lections:_2014; @gavazza_internet_2015; @jaber_broadband_2013].
 
