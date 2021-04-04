@@ -1,0 +1,556 @@
+\clearpage
+
+# Appendix {-}
+
+```{r reg.fs2, results='asis'}
+options(knitr.kable.NA = '')
+# r_part %>% 
+resultados_first_final %>% 
+  dplyr::arrange(Year,Cutoff,Outcome) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+    dplyr::filter(Type=="With covariates") %>% 
+  dplyr::select(-Type) %>% 
+  knitr::kable("latex",
+               linesep="",
+               longtable=T,
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "First stage of Fuzzy-RDD regressions for all outcomes",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size=10) %>%
+  kableExtra::column_spec(c(1:2,4:8),"1.3cm") %>% 
+  kableExtra::column_spec(3,"4cm") %>% 
+  kableExtra::column_spec(4,"1.8cm") %>% 
+  kableExtra::collapse_rows(c(1,2), latex_hline = "major",
+                            target=2) %>% 
+  #kableExtra::collapse_rows(1, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions. Optimal bandwidth (Bw) selection by Mean Square",
+    "             Error following Calonico, Cattaneo and Titiunik (2014).",
+    "             Triangular kernel with quadratic local-polynomial.",
+    "             Turnout for the first round.",
+    "             Results with controls listed in Table 10"),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable=F) 
+```
+
+
+```{r reg.fs, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_part %>% 
+resultados_first_final %>% 
+  dplyr::arrange(Year,Cutoff,Outcome) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  knitr::kable("latex",
+               linesep="",
+               longtable=T,
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "First stage of Fuzzy-RDD regressions for all outcomes (without controls) ",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size=10) %>%
+  kableExtra::column_spec(c(1:2,4:8),"1.3cm") %>% 
+  kableExtra::column_spec(3,"4cm") %>% 
+  kableExtra::column_spec(4,"1.8cm") %>% 
+  kableExtra::collapse_rows(c(1,2), latex_hline = "major",
+                            target=2) %>% 
+  #kableExtra::collapse_rows(1, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions. Optimal bandwidth (Bw) selection by Mean Square",
+    "             Error following Calonico, Cattaneo and Titiunik (2014).",
+    "             Triangular kernel with quadratic local-polynomial.",
+    "             Turnout for the first round.",
+    "             Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable=F) 
+```
+
+```{r reg.part2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_part %>% 
+resultados_part_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "Fuzzy-RDD regression results for turnout. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Turnout for the first round. Results without controls"),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+```{r r.pct.bn2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_bn %>% 
+resultados_bn_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "RDD-fuzzy regression results for blank or null votes. Election years: 2008, 2010 and 2012. Offices: president and mayors (without controls).",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+
+```{r r.pct.vote2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_vote %>% 
+resultados_vse_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-c(Type)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "Fuzzy-RDD regression results for left wing parties vote share. Election years: 2008, 2010 and 2012. Offices: president and mayors (without controls).",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+```{r r.pct.psol2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_bn %>% 
+resultados_pt_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "RDD-fuzzy regression results for PSOL vote share. Election years: 2008, 2010 and 2012. Offices: local legislator and federal deputy (without covariates).",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+```{r r.votos_jovens2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_bn %>% 
+resultados_votos_jovem_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "RDD-fuzzy regression results for young candidates (under 30 years-old). Election years: 2008, 2010 and 2012. Offices: local legislator and federal deputy (without controls).",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+
+
+
+```{r r.pct.ncand2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_bn %>% 
+resultados_ncand_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "RDD-fuzzy regression results for number of candidates. Election years: 2008, 2010 and 2012. Offices: local legislator and federal deputy (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+
+
+
+```{r r.pct.receita2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_bn %>% 
+resultados_receita_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "RDD-fuzzy regression results for PSOL campaign budget Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+
+```{r r.receita_jovens2, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_pct_bn %>% 
+resultados_receita_jovem_cc %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(Year, Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-Type) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,0,3,3,3),
+               caption = "RDD-fuzzy regression results for young candidates (under 30 years-old) budget. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(2, latex_hline = "none") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+
+```{r r.par2,results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_sig %>% 
+resultados_parametrico %>% 
+  dplyr::arrange(Outcome,Year,Cutoff,Type) %>% 
+  dplyr::filter(Model%in% c("Linear","Quadratic"),
+                Type=="Without covariates") %>% 
+  dplyr::select(-c(Type,Bw)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               longtable=T,
+               digits = c(0,0,0,0,3,3,3,3),
+               caption = "Parametric Fuzzy-RDD regression for all outcomes. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size = 10) %>%
+  kableExtra::column_spec(1:8,"1.5cm") %>% 
+  #kableExtra::column_spec(8,"4.5cm") %>% 
+  kableExtra::collapse_rows(c(1,8), 
+                            latex_hline = "major",
+                            target=1) %>% 
+  kableExtra::footnote(general = 
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+      "     Results without controls"),
+    general_title = "",
+    fixed_small_size = T) 
+
+```
+
+
+
+```{r r.sig2,results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_sig %>% 
+resultados_sig %>% 
+  dplyr::arrange(Outcome,Year,Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates") %>% 
+  dplyr::select(-c(Type,Bw)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               longtable=T,
+               digits = c(0,0,0,0,3,3,3,3),
+               caption = "Significant Fuzzy-RDD regression with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size = 10) %>%
+  kableExtra::column_spec(c(1,2,4:7),"1.2cm") %>% 
+  kableExtra::column_spec(3,"1.8cm") %>% 
+  kableExtra::column_spec(8,"4cm") %>% 
+  kableExtra::collapse_rows(c(1,8), 
+                            latex_hline = "major",
+                            target=1) %>% 
+  kableExtra::footnote(general = 
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+      "     Results without controls."),
+    general_title = "",
+    fixed_small_size = T) 
+
+```
+
+
+```{r r.pooled2,results='asis', eval=FALSE}
+resultados_part_cc %>% 
+  dplyr::mutate(Outcome="Turnout") %>% 
+  dplyr::bind_rows(
+    resultados_bn_cc %>% 
+      dplyr::mutate(Outcome="Blank or Null votes"),
+    resultados_vse_cc %>% 
+      dplyr::mutate(Outcome="Left wing vote share"),
+    resultados_ncand_cc %>% 
+      dplyr::mutate(Outcome="N. cand."),
+    resultados_pt_cc %>% 
+      dplyr::mutate(Outcome="PSOL vote share"),
+    resultados_receita_cc %>% 
+      dplyr::mutate(Outcome="PSOL budget"),
+    resultados_votos_jovem_cc %>% 
+      dplyr::mutate(Outcome="Young votes"),
+    resultados_receita_jovem_cc %>% 
+      dplyr::mutate(Outcome="Young budget")) %>% 
+  dplyr::filter(Type=="Without covariates",
+                Cutoff=="Pooled") %>% 
+  dplyr::select(-c(Cutoff,Type)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = c(0,0,0,3,3,3,3),
+               caption = "RDD-fuzzy pooled regressions for all outcomes. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position")) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  #kableExtra::collapse_rows(1, latex_hline = "major") %>% 
+  kableExtra::collapse_rows(7, latex_hline = "major") %>% 
+  kableExtra::footnote(general=
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results without controls."),
+    general_title="",
+    fixed_small_size = T,
+    threeparttable = T)
+```
+
+```{r, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_sig %>% 
+resultados_parametrico %>% 
+    dplyr::mutate(Outcome=factor(Outcome,
+                               levels=c("Turnout",
+                                        "Blank or Null votes",
+                                        "Left wing vote share",
+                                        "N. cand.",
+                                        "PSOL vote share",
+                                        "PSOL budget",
+                                        "Young votes",
+                                        "Young budget"))) %>%
+  dplyr::arrange(Outcome,Year,Cutoff,Type) %>% 
+  dplyr::filter(Model%in% c("Linear","Quadratic"),
+                Type=="With covariates",
+                Cutoff=="Pooled") %>% 
+  dplyr::select(-c(Type,Bw,Cutoff)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               longtable=T,
+               digits = c(0,0,0,3,3,3,3,3),
+               caption = "Parametric Fuzzy-RDD pooled regression for all outcomes. Election years: 2008, 2010 and 2012",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size = 10) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  #kableExtra::column_spec(7,"4.5cm") %>% 
+  kableExtra::collapse_rows(c(1,7), latex_hline = "major",
+                            target=1) %>% 
+  kableExtra::footnote(general = 
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+      "     Results with controls listed in Table 10."),
+    general_title = "",
+    fixed_small_size = T) 
+```
+
+
+```{r, results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_sig %>% 
+resultados_parametrico %>% 
+    dplyr::mutate(Outcome=factor(Outcome,
+                               levels=c("Turnout",
+                                        "Blank or Null votes",
+                                        "Left wing vote share",
+                                        "N. cand.",
+                                        "PSOL vote share",
+                                        "PSOL budget",
+                                        "Young votes",
+                                        "Young budget"))) %>%
+  dplyr::arrange(Outcome,Year,Cutoff,Type) %>% 
+  dplyr::filter(Model%in% c("Linear","Quadratic"),
+                Type=="Without covariates",
+                Cutoff=="Pooled") %>% 
+  dplyr::select(-c(Type,Bw,Cutoff)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               longtable=T,
+               digits = c(0,0,0,3,3,3,3,3),
+               caption = "Parametric Fuzzy-RDD pooled regression for all outcomes. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size = 10) %>%
+  kableExtra::column_spec(1:7,"1.9cm") %>% 
+  #kableExtra::column_spec(7,"4.5cm") %>% 
+  kableExtra::collapse_rows(c(1,7), latex_hline = "major",
+                            target=1) %>% 
+  kableExtra::footnote(general = 
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+      "     Results without controls"),
+    general_title = "",
+    fixed_small_size = T) 
+```
+
+
+```{r ,results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_sig %>% 
+resultados_sig %>% 
+    dplyr::mutate(Outcome=factor(Outcome,
+                               levels=c("Turnout",
+                                        "Blank or Null votes",
+                                        "Left wing vote share",
+                                        "N. cand.",
+                                        "PSOL vote share",
+                                        "PSOL budget",
+                                        "Young votes",
+                                        "Young budget"))) %>%
+  dplyr::arrange(Outcome,Year,Cutoff,Type) %>% 
+  dplyr::filter(Type=="With covariates",
+                Cutoff=="Pooled") %>% 
+  dplyr::select(-c(Type,Bw,Cutoff)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               longtable=T,
+               digits = c(0,0,0,3,3,3,3,3),
+               caption = "Significant Fuzzy-RDD pooled regression with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size = 10) %>%
+  kableExtra::column_spec(1:6,"1.8cm") %>% 
+  kableExtra::column_spec(7,"3.5cm") %>% 
+  kableExtra::collapse_rows(7, latex_hline = "major") %>% 
+  kableExtra::footnote(general = 
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+      "     Results with controls listed in Table 10."),
+    general_title = "",
+    fixed_small_size = T)
+
+```
+
+
+```{r ,results='asis', eval=FALSE}
+options(knitr.kable.NA = '')
+# r_sig %>% 
+resultados_sig %>% 
+    dplyr::mutate(Outcome=factor(Outcome,
+                               levels=c("Turnout",
+                                        "Blank or Null votes",
+                                        "Left wing vote share",
+                                        "N. cand.",
+                                        "PSOL vote share",
+                                        "PSOL budget",
+                                        "Young votes",
+                                        "Young budget"))) %>%
+  dplyr::arrange(Outcome,Year,Cutoff,Type) %>% 
+  dplyr::filter(Type=="Without covariates",
+                Cutoff=="Pooled") %>% 
+  dplyr::select(-c(Type,Bw,Cutoff)) %>% 
+  dplyr::mutate(Year=as.character(Year)) %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               longtable=T,
+               digits = c(0,0,0,3,3,3,3,3),
+               caption = "Significant Fuzzy-RDD pooled regression with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012 (without controls)",
+               format.args = list(decimal.mark = '.', big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
+                            font_size = 10) %>%
+  kableExtra::column_spec(1:6,"1.8cm") %>% 
+  kableExtra::column_spec(7,"3.5cm") %>% 
+  kableExtra::collapse_rows(7, latex_hline = "major") %>% 
+  kableExtra::footnote(general = 
+    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+      "     Results without controls"),
+    general_title = "",
+    fixed_small_size = T)
+
+```

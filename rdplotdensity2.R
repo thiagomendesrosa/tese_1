@@ -387,7 +387,7 @@ lpdensity.plot2<- function (..., alpha = NULL, type = NULL, lty = NULL, lwd = NU
   index <- sort.int(legendGroups, index.return = TRUE)$ix
   temp_plot <- temp_plot + scale_color_manual(values = col_all[index]) + 
     scale_linetype_manual(values = lty_all[index]) + scale_shape_manual(values = pty_all[index]) + 
-    scale_x_continuous(labels=function(x) format(x,
+    scale_x_continuous(labels=function(x) format(round(x),
                                                  big.mark=",",
                                                  decimal.mark="."))+
     scale_y_continuous(labels=scales::comma)+

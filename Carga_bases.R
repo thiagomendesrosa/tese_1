@@ -1,6 +1,7 @@
 # Carregar os pacotes necessários
 library(tidyverse)
 library(data.table)
+library(lubridate)
 
 rm(list = ls())
 gc()
@@ -66,6 +67,7 @@ for(a in anos){
                                                                 "ENSINO MÉDIO COMPLETO")~"medio")) %>%
         dplyr::group_by(ANO,COD_MUNICIPIO_TSE,MUNICIPIO,var) %>%
         dplyr::summarise(n=sum(QTD_ELEITORES_NO_PERFIL)) %>%
+        dplyr::ungroup() %>% 
         na.omit,
       
       base %>%
@@ -80,6 +82,7 @@ for(a in anos){
                                                         "SUPERIOR A 79 ANOS")~"facult_idoso")) %>%
         dplyr::group_by(ANO,COD_MUNICIPIO_TSE,MUNICIPIO,var) %>%
         dplyr::summarise(n=sum(QTD_ELEITORES_NO_PERFIL)) %>%
+        dplyr::ungroup() %>% 
         na.omit,
       
       base %>%
@@ -88,6 +91,7 @@ for(a in anos){
                                     TRUE~"sex_na")) %>%
         dplyr::group_by(ANO,COD_MUNICIPIO_TSE,MUNICIPIO,var) %>%
         dplyr::summarise(n=sum(QTD_ELEITORES_NO_PERFIL)) %>%
+        dplyr::ungroup() %>% 
         na.omit)  %>%
       tidyr::spread(var,n)
     
@@ -110,6 +114,7 @@ base <- bind_rows(
                                                                "ENSINO MÉDIO COMPLETO")~"medio")) %>%
     dplyr::group_by(ANO,COD_MUNICIPIO_TSE,MUNICIPIO,var) %>%
     dplyr::summarise(n=sum(QTD_ELEITORES_NO_PERFIL)) %>%
+    dplyr::ungroup() %>% 
     na.omit,
   
   base %>%
@@ -124,6 +129,7 @@ base <- bind_rows(
                                         "SUPERIOR A 79 ANOS")~"facult_idoso")) %>%
     dplyr::group_by(ANO,COD_MUNICIPIO_TSE,MUNICIPIO,var) %>%
     dplyr::summarise(n=sum(QTD_ELEITORES_NO_PERFIL)) %>%
+    dplyr::ungroup() %>% 
     na.omit,
   
   base %>%
@@ -132,6 +138,7 @@ base <- bind_rows(
                                 TRUE~"sex_na")) %>%
     dplyr::group_by(ANO,COD_MUNICIPIO_TSE,MUNICIPIO,var) %>%
     dplyr::summarise(n=sum(QTD_ELEITORES_NO_PERFIL)) %>%
+    dplyr::ungroup() %>% 
     na.omit)  %>%
     tidyr::spread(var,n)}
 
@@ -238,10 +245,13 @@ base <-
                    compareceu=sum(QT_COMPARECIMENTO),
                    abstencao=sum(QT_ABSTENCOES),
                    brancos=sum(QT_VOTOS_BRANCOS),
-                   nulos=sum(QT_VOTOS_NULOS)) %>%
+                   nulos=sum(QT_VOTOS_NULOS),
+                   legenda=sum(QT_VOTOS_LEGENDA),
+                   anulados=sum(QT_VOTOS_ANULADOS)) %>%
   dplyr::mutate(participacao=compareceu/aptos_tot,
                 pct_nulos=nulos/compareceu,
-                pct_brancos=brancos/compareceu)
+                pct_brancos=brancos/compareceu) %>% 
+  dplyr::ungroup() 
 
 resultado <<- rbind(resultado,base)
 
@@ -263,7 +273,8 @@ indexparty <- bls %>%
                 party_survey=as.character(party_survey)) %>%
   dplyr::group_by(party_survey) %>%
   dplyr::summarise(index=weighted.mean(czideo,pweight ,na.rm = T)) %>%
-  dplyr::arrange(index) 
+  dplyr::arrange(index) %>% 
+  dplyr::ungroup()
 
 # Armazenar 
 left_parties <- indexparty[indexparty$index<=quantile(indexparty$index, na.rm=T,0.25),]$party_survey
@@ -311,6 +322,23 @@ for (i in anos){
 # Descompactar arquivos
 filenames <- list.files("./TSE/Resultado/Partidos", pattern=".zip", full.names=TRUE)
 lapply(filenames,unzip, exdir = "./TSE/Resultado/Partidos",junkpaths=T)
+
+# Endereço dos dados de eleitorado
+dwlpath <- "http://agencia.tse.jus.br/estatistica/sead/odsele/votacao_candidato_munzona/votacao_candidato_munzona_"
+
+dir.create("./TSE/Resultado/nominal")
+
+# looping para baixar os dados
+for (i in anos){
+  tf <- paste0(dwlpath, i, ".zip")
+  td <- paste0("./TSE/Resultado/nominal/","detalhe",i, ".zip")
+  print(i)
+  download.file(tf, td, mode="wb")
+}
+
+# Descompactar arquivos
+filenames <- list.files("./TSE/Resultado/nominal", pattern=".zip", full.names=TRUE)
+lapply(filenames,unzip, exdir = "./TSE/Resultado/nominal",junkpaths=T)
 
 
 # Selecionar anos de interesse
@@ -382,15 +410,51 @@ base <- base %>%
                                      SG_PARTIDO %in% direita~"Direita",
                                      TRUE~"Outros")) %>%
   dplyr::group_by(ANO_ELEICAO,CD_MUNICIPIO,NM_MUNICIPIO,DS_CARGO,NR_TURNO,SG_PARTIDO,orientacao) %>%
-  dplyr::summarise(votos=sum(votos))
+  dplyr::summarise(votos=sum(votos)) %>% 
+  dplyr::ungroup() 
 
 votacao <<- rbind(votacao,base)
 
   }
 }
 
+# Construir objeto para receber valores
+votacao2 <- c()
+
+# Iniciar loop
+for(a in anos){
+  
+  for(i in if(a%in%c(1994,seq(1996,format(Sys.Date(),"%Y"),4))){ufs}else{if(a%in%c(1998,2002)){ufs2}else{ufs3}}){
+    
+    base <- data.table::fread(paste0(initp,a,"_",i,if (a >= 2014){".csv"}else{".txt"}),
+                              encoding = "Latin-1",
+                              integer64="character")
+    
+    
+    if(a<=2012){
+      
+      base <- base %>%
+        
+        dplyr::rename_all(funs(eval(names2012)))} else{}
+    
+    base <- base %>%
+      dplyr::mutate(votos_nom=if(a>=2014){QT_VOTOS_NOMINAIS}else{TOTAL_VOTOS},
+                    orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                         SG_PARTIDO %in% centro~"Centro",
+                                         SG_PARTIDO %in% direita~"Direita",
+                                         TRUE~"Outros")) %>%
+      dplyr::group_by(ANO_ELEICAO,SG_UE,CD_MUNICIPIO,NM_MUNICIPIO,DS_CARGO,NR_TURNO,SQ_CANDIDATO,NM_CANDIDATO,SG_PARTIDO,orientacao) %>%
+      dplyr::summarise(votos_nom=sum(votos_nom)) %>%
+      dplyr::ungroup()
+    
+    votacao2 <<- rbind(votacao2,base)
+    
+  }
+}
+
 # Remover arquivos descompactados
 file.remove(list.files("TSE/Resultado/Partidos",pattern = ".txt|csv",full.names = T))
+file.remove(list.files("TSE/Resultado/nominal",pattern = ".txt|csv",full.names = T))
 
 #############################################################
 ########## Carregar a base de Candidatos ####################
@@ -485,7 +549,8 @@ base %>%
                                      SG_PARTIDO %in% direita~"Direita",
                                      TRUE~"Outros")) %>%
   dplyr::count(ANO_ELEICAO,SG_UF,SG_UE,DS_UE,DS_CARGO,NR_TURNO,
-               DS_ELEICAO,DS_SITUACAO_CANDIDATURA,orientacao,DS_SIT_TOT_TURNO)
+               DS_ELEICAO,DS_SITUACAO_CANDIDATURA,orientacao,DS_SIT_TOT_TURNO) %>% 
+  dplyr::ungroup()
 
 
 candidato <<- rbind(candidato,base)
@@ -529,10 +594,62 @@ for(a in anos){
                                          SG_PARTIDO %in% direita~"Direita",
                                          TRUE~"Outros")) %>%
       dplyr::count(ANO_ELEICAO,SG_UF,SG_UE,DS_UE,DS_CARGO,NR_TURNO,
-                   DS_ELEICAO,DS_SITUACAO_CANDIDATURA,orientacao,SG_PARTIDO,DS_SIT_TOT_TURNO)
+                   DS_ELEICAO,DS_SITUACAO_CANDIDATURA,orientacao,SG_PARTIDO,DS_SIT_TOT_TURNO) %>% 
+      dplyr::ungroup() 
     
     
     candidato2 <<- rbind(candidato2,base)
+    
+    
+  }
+}
+
+candidato3 <- c()
+
+for(a in anos){
+  
+  for(i in if(a==1994){ufs2}else{if(a %in% c(seq(1998,format(Sys.Date(),"%Y"),4))){ufs3}else{ufs}}){
+    
+    base <- data.table::fread(paste0(initp,a,"_",i,if (a >= 2014){".csv"}else{".txt"}),
+                              encoding = "Latin-1",
+                              integer64="character")
+    
+    if(a<=2010){
+      
+      base <- base %>%
+        
+        dplyr::rename_all(funs(eval(names2010)))} else{
+          
+          if(a==2012){
+            
+            base <- base %>%
+              
+              dplyr::rename_all(funs(eval(names2012)))}  else{
+                
+                base <- base %>%
+                  dplyr::rename(DS_UE=NM_UE)
+                
+              }
+        }
+    
+    base <-
+      base %>%
+      dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                         SG_PARTIDO %in% centro~"Centro",
+                                         SG_PARTIDO %in% direita~"Direita",
+                                         TRUE~"Outros"),
+                    DT_NASCIMENTO=case_when(str_detect(DT_NASCIMENTO,"[-]\\d\\d$")==TRUE~paste0(str_sub(DT_NASCIMENTO,1,7),"19",str_sub(DT_NASCIMENTO,8,9)),
+                                            TRUE~DT_NASCIMENTO),
+                    idade=floor(interval(lubridate::dmy(DT_NASCIMENTO),
+                                         lubridate::dmy(paste("31","12",ANO_ELEICAO)))/years(1)),
+                    jovem=case_when(idade<=29~"Jovem",
+                                    idade>29~"Não jovem"))# %>%
+    # dplyr::select(ANO_ELEICAO,SG_UF,SG_UE,DS_UE,DS_CARGO,NR_TURNO,
+    #              DS_ELEICAO,DS_SITUACAO_CANDIDATURA,SG_PARTIDO,
+    #              SQ_CANDIDATO,orientacao,jovem,DS_SIT_TOT_TURNO,idade,NM_CANDIDATO)
+    
+    
+    candidato3 <<- rbind(candidato3,base,fill=TRUE)
     
     
   }
@@ -595,7 +712,8 @@ for(a in c(2002,2004,2006)){
                     ANO=a,
                     SG_UE=as.character(SG_UE)) %>% 
       dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao) %>% 
-      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))
+      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+      dplyr::ungroup()
     
     receitas <<- rbind(receitas,base)
     
@@ -615,7 +733,8 @@ for(a in c(2002,2004,2006)){
                                        TRUE~"Outros"),
                   ANO=a) %>% 
     dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao) %>% 
-    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))
+    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+    dplyr::ungroup() 
   
   receitas <<- rbind(receitas,base)
 
@@ -631,7 +750,8 @@ base <- data.table::fread("./TSE/Contas/receitas_candidatos_2008_brasil.csv") %>
                 ANO=2008,
                 SG_UE=as.character(SG_UE)) %>%
   dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao) %>% 
-  dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))
+  dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+  dplyr::ungroup() 
 
 receitas <<- rbind(receitas,base)
 
@@ -648,7 +768,8 @@ for(u in list.files("./TSE/Contas/candidato")){
                                        TRUE~"Outros"),
                   ANO=2010) %>% 
     dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao) %>% 
-    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))
+    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+    dplyr::ungroup() 
     
     receitas <<- rbind(receitas,base)
   
@@ -671,7 +792,8 @@ for(u in ufs){
                   ANO=a,
                   SG_UE=as.character(SG_UE)) %>% 
     dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao) %>% 
-    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))
+    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+    dplyr::ungroup() 
   
   receitas <<- rbind(receitas,base)
 
@@ -695,17 +817,170 @@ for(a in c(2014,2018)){
                                          TRUE~"Outros"),
                     ANO=a) %>% 
       dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao) %>% 
-      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))
+      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+      dplyr::ungroup() 
     
     receitas <<- rbind(receitas,base)
     
   }
 }
 
+receitas_cand <- c()
+
+for(a in c(2002,2004,2006)){
+  
+  if(a==2004){
+    
+    base <- data.table::fread(paste0("./TSE/Contas/",
+                                     a,"/Candidato/Receita/ReceitaCandidato.csv"),
+                              integer64="character") %>% 
+      dplyr::select(DS_CARGO,
+                    SG_PARTIDO=SG_PART,
+                    SG_UE,
+                    VR_RECEITA) %>% 
+      dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                         SG_PARTIDO %in% centro~"Centro",
+                                         SG_PARTIDO %in% direita~"Direita",
+                                         TRUE~"Outros"),
+                    ANO=a,
+                    SG_UE=as.character(SG_UE),
+                    SQ_CANDIDATO=NA) %>% 
+      dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao,SQ_CANDIDATO) %>% 
+      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+      dplyr::ungroup()
+    
+    receitas_cand <<- rbind(receitas_cand,base)
+    
+    
+    
+  }else{
+    
+    base <- data.table::fread(paste0("./TSE/Contas/prestacao_contas_",
+                                     a,"/",a, "/Candidato/Receita/ReceitaCandidato.csv")) %>% 
+      dplyr::select(DS_CARGO=if(a==2002){"DS_CARGO"}else{"DESCRICAO_CARGO"},
+                    SG_PARTIDO=if(a==2002){"SG_PART"}else{"SIGLA_PARTIDO"},
+                    SG_UE=if(a==2002){"SG_UF"}else{"UNIDADE_ELEITORAL_CANDIDATO"},
+                    VR_RECEITA=if(a==2002){"VR_RECEITA"}else{"VALOR_RECEITA"},
+                    SQ_CANDIDATO=SEQUENCIAL_CANDIDATO) %>% 
+      dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                         SG_PARTIDO %in% centro~"Centro",
+                                         SG_PARTIDO %in% direita~"Direita",
+                                         TRUE~"Outros"),
+                    ANO=a,
+                    SQ_CANDIDATO=as.character(SQ_CANDIDATO)) %>% 
+      dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao,SQ_CANDIDATO) %>% 
+      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))%>% 
+      dplyr::ungroup()
+    
+    receitas_cand <<- rbind(receitas_cand,base)
+    
+  }
+}
+
+
+base <- data.table::fread("./TSE/Contas/receitas_candidatos_2008_brasil.csv",
+                          integer64="character") %>% 
+  dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                     SG_PARTIDO %in% centro~"Centro",
+                                     SG_PARTIDO %in% direita~"Direita",
+                                     TRUE~"Outros"),
+                ANO=2008,
+                SG_UE=as.character(SG_UE),
+                SQ_CANDIDATO=as.character(SEQUENCIAL_CANDIDATO)) %>%
+  dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao,SQ_CANDIDATO) %>% 
+  dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))%>% 
+  dplyr::ungroup()
+
+receitas_cand <<- rbind(receitas_cand,base)
+
+for(u in list.files("./TSE/Contas/candidato")){
+  
+  base <- data.table::fread(paste0("./TSE/Contas/candidato/",u,"/ReceitasCandidatos.txt"),
+                            integer64="character") %>% 
+    dplyr::select(DS_CARGO=Cargo,
+                  SG_PARTIDO=`Sigla Partido`,
+                  SG_UE=UF,
+                  VR_RECEITA=`Valor receita`,
+                  SQ_CANDIDATO=`Sequencial Candidato`) %>% 
+    dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                       SG_PARTIDO %in% centro~"Centro",
+                                       SG_PARTIDO %in% direita~"Direita",
+                                       TRUE~"Outros"),
+                  ANO=2010) %>% 
+    dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao,SQ_CANDIDATO) %>% 
+    dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))%>% 
+    dplyr::ungroup()
+  
+  receitas_cand <<- rbind(receitas_cand,base)
+  
+}
+
+for(a in c(2012,2016)){
+  
+  
+  for(u in ufs){
+    
+    base <- data.table::fread(paste0("./TSE/Contas/receitas_candidatos_",a,"_",u,".txt"),
+                              integer64="character") %>% 
+      dplyr::select(DS_CARGO=Cargo,
+                    SG_PARTIDO=`Sigla  Partido`,
+                    SG_UE=if(a==2012){"Numero UE"}else{"Sigla da UE"},
+                    VR_RECEITA=`Valor receita`,
+                    SQ_CANDIDATO=`Sequencial Candidato`) %>% 
+      dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                         SG_PARTIDO %in% centro~"Centro",
+                                         SG_PARTIDO %in% direita~"Direita",
+                                         TRUE~"Outros"),
+                    ANO=a,
+                    SG_UE=as.character(SG_UE)) %>% 
+      dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao,SQ_CANDIDATO) %>% 
+      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA))))%>% 
+      dplyr::ungroup()
+    
+    receitas_cand <<- rbind(receitas_cand,base)
+    
+  }
+}
+
+
+for(a in c(2014,2018)){
+  
+  
+  for(u in c(ufs3,"BRASIL")){
+    
+    base <- data.table::fread(paste0("./TSE/Contas/receitas_candidatos_",a,"_",u,if(a==2014){".txt"}else{".csv"}),
+                              integer64="character") %>% 
+      dplyr::select(DS_CARGO=if(a==2014){"Cargo"}else{"DS_CARGO"},
+                    SG_PARTIDO=if(a==2014){"Sigla  Partido"}else{"SG_PARTIDO"},
+                    SG_UE=if(a==2014){"UF"}else{"SG_UF"},
+                    VR_RECEITA=if(a==2014){"Valor receita"}else{"VR_RECEITA"},
+                    SQ_CANDIDATO=if(a==2014){"Sequencial Candidato"}else{"SQ_CANDIDATO"}) %>% 
+      dplyr::mutate(orientacao=case_when(SG_PARTIDO %in% esquerda~"Esquerda",
+                                         SG_PARTIDO %in% centro~"Centro",
+                                         SG_PARTIDO %in% direita~"Direita",
+                                         TRUE~"Outros"),
+                    ANO=a) %>% 
+      dplyr::group_by(ANO,SG_UE,DS_CARGO,SG_PARTIDO,orientacao,SQ_CANDIDATO) %>% 
+      dplyr::summarise(VR_RECEITA=sum(as.numeric(gsub(",",".",VR_RECEITA)))) %>% 
+      dplyr::ungroup()
+    
+    receitas_cand <<- rbind(receitas_cand,base)
+    
+  }
+}
+
+
 file.remove(grep(list.files(path="./TSE/Contas/",full.names=T), 
                  pattern='.zip', 
                  invert=TRUE, 
                  value=TRUE))
+
+unlink(grep(list.files(path="./TSE/Contas/",full.names=T), 
+            pattern='.zip', 
+            invert=TRUE, 
+            value=TRUE), 
+       recursive=TRUE)
+
 
 
 #################################################################
@@ -775,7 +1050,8 @@ SCM_2007_2010 <- data.table::fread("Acessos_SCM_2007-2010_-_Total.csv",
                   #Tecnologia,
                   Faixa,Ano) %>%
   dplyr::summarise(valor=sum(valor)) %>%
-  dplyr::arrange(`Município`,Ano)
+  dplyr::arrange(`Município`,Ano) %>% 
+  dplyr::ungroup()
 
 # Carregar dados de internet de 2011 a 2012
 SCM_2011_2012 <- data.table::fread("Acessos_SCM_2011-2012_-_Total.csv",
@@ -791,7 +1067,8 @@ SCM_2011_2012 <- data.table::fread("Acessos_SCM_2011-2012_-_Total.csv",
                   #Tecnologia,
                   Faixa,Ano) %>%
   dplyr::summarise(valor=sum(valor)) %>%
-  dplyr::arrange(`Município`,Ano)
+  dplyr::arrange(`Município`,Ano) %>% 
+  dplyr::ungroup()
   
 # Carregar dados de internet de 2013 e 2014 
 SCM_2013_2014 <- data.table::fread("Acessos_SCM_2013-2014_-_Total.csv",
@@ -808,7 +1085,8 @@ SCM_2013_2014 <- data.table::fread("Acessos_SCM_2013-2014_-_Total.csv",
                   #Tecnologia,
                   Faixa,Ano) %>%
   dplyr::summarise(valor=sum(valor)) %>%
-  dplyr::arrange(`Município`,Ano)
+  dplyr::arrange(`Município`,Ano) %>% 
+  dplyr::ungroup()
 
 # Carregar dados de internet de 2015 até hoje
 SCM_2015_2018 <- data.table::fread("Acessos_SCM_2015-2018_-_Total.csv",
@@ -825,7 +1103,8 @@ SCM_2015_2018 <- data.table::fread("Acessos_SCM_2015-2018_-_Total.csv",
                   #Tecnologia,
                   Faixa,Ano) %>%
   dplyr::summarise(valor=sum(valor)) %>%
-  dplyr::arrange(`Município`,Ano)
+  dplyr::arrange(`Município`,Ano)%>% 
+  dplyr::ungroup()
 
 # Juntar a porra toda
 SCM_2007_2018 <- SCM_2007_2010 %>%
@@ -849,7 +1128,8 @@ smp_200902_2014 <- data.table::fread("Acessos_SMP_200902-2014_-_Total.csv") %>%
   tidyr::gather("Ref","valor",8:length(.)) %>%
   dplyr::mutate(Ano=stringr::str_sub(Ref,1,4)) %>%
   dplyr::group_by(DDD,Tipo,Ano) %>%
-  dplyr::summarise(Valor=sum(valor)/12)
+  dplyr::summarise(Valor=sum(valor)/12)%>% 
+  dplyr::ungroup()
 
 # Carregar dados de 2015 até hoje
 smp_2015_2018 <- data.table::fread("Acessos_SMP_2015-2018_-_Total.csv") %>%
@@ -859,7 +1139,8 @@ smp_2015_2018 <- data.table::fread("Acessos_SMP_2015-2018_-_Total.csv") %>%
   tidyr::gather("Ref","valor",9:length(.)) %>%
   dplyr::mutate(Ano=stringr::str_sub(Ref,1,4)) %>%
   dplyr::group_by(DDD,Tipo,Ano) %>%
-  dplyr::summarise(Valor=sum(valor)/12)
+  dplyr::summarise(Valor=sum(valor)/12)%>% 
+  dplyr::ungroup()
 
 # Juntar a porra toda
 smp2009_2018 <- smp_200902_2014 %>%
@@ -997,7 +1278,8 @@ sample_cetic %>%
   srvyr::filter(idade %in% c(18:69)) %>%
   srvyr::group_by(C7_D) %>%
   srvyr::summarise(n=survey_total(vartype="ci"),
-                   pct=survey_mean(vartype = "ci"))
+                   pct=survey_mean(vartype = "ci"))%>% 
+  dplyr::ungroup()
 
 
 # Baixar base de dados BPC
@@ -1032,7 +1314,8 @@ BOLSA_anual <- BOLSA %>%
   dplyr::group_by(ibge,Ano) %>% 
   dplyr::summarise(qtd_fam_bolsa=round(mean(qtd_familias_beneficiarias_bolsa_familia)),
                    valor_bolsa=sum(valor_repassado_bolsa_familia)) %>%
-  dplyr::rename(COD_IBGE=ibge)
+  dplyr::rename(COD_IBGE=ibge)%>% 
+  dplyr::ungroup()
 
 BPC_anual <- BPC %>% 
   dplyr::mutate(Ano=substr(anomes,1,4),
@@ -1042,7 +1325,8 @@ BPC_anual <- BPC %>%
                    qtd_bpc_pcd=round(mean(bpc_pcd_ben)),
                    valor_bpc_idoso=sum(bpc_idoso_val),
                    valor_bpc_pcd=sum(bpc_pcd_val)) %>%
-  dplyr::rename(COD_IBGE=ibge)
+  dplyr::rename(COD_IBGE=ibge)%>% 
+  dplyr::ungroup()
 
 BPC_anual %>%
   dplyr::group_by(Ano) %>%
@@ -1055,14 +1339,16 @@ BPC_anual %>%
                 total=n_idoso+n_pcd,
                 b_idoso=b_idoso/1000000,
                 b_pcd=b_pcd/1000000,
-                total_b=b_idoso+b_pcd)
+                total_b=b_idoso+b_pcd)%>% 
+  dplyr::ungroup()
 
 BOLSA_anual %>%
   dplyr::group_by(Ano) %>%
   dplyr::summarise(n_fam=sum(qtd_fam_bolsa),
                    n_valor=sum(valor_bolsa)) %>%
   dplyr::mutate(n_valor=n_valor/1000000000,
-                n_fam=n_fam/1000000)
+                n_fam=n_fam/1000000)%>% 
+  dplyr::ungroup()
 
 pib <- data.table::fread("pibmun.csv",encoding = "UTF-8")
 
@@ -1147,4 +1433,28 @@ ipea <- ipeadatar::ipeadata(c("THOMIC","TSUICID",
   dplyr::filter(uname=="Municipality")
 
 
+# Carregar dados do FPM
+fpm <- data.table::fread("https://www.tesourotransparente.gov.br/ckan/dataset/3b5a779d-78f5-4602-a6b7-23ece6d60f27/resource/d69ff32a-6681-4114-81f0-233bb6b17f58/download/FPM-por-Municipio.csv")
 
+download.file("https://www.tesourotransparente.gov.br/ckan/dataset/abb968cb-3710-4f85-89cf-875c91b9c7f6/resource/eebb3bc6-9eea-4496-8bcf-304f33155282/download/TABMUN-SIAFI.xlsx",
+              destfile="TABMUN-SIAFI.xlsx",
+              mode="wb")
+
+codigos <- readxl::read_excel("TABMUN-SIAFI.xlsx")
+
+fpm_filtrado <- fpm %>% 
+  na.omit %>% 
+  dplyr::mutate_at(vars(6:NCOL(.)),
+                   list(~as.numeric(gsub(",",".", gsub("[.]","",.))))) %>% 
+  dplyr::left_join(codigos %>% 
+                     dplyr::mutate(COD_MUN=as.numeric(`CÓDIGO SIAFI`)) %>% 
+                     dplyr::select(COD_MUN,COD_IBGE=`CÓDIGO IBGE`)) %>% 
+  dplyr::group_by(COD_IBGE) %>% 
+  dplyr::summarise_at(vars(7:NCOL(.)-1),
+                      list(~sum(.,na.rm=T))) %>% 
+  tidyr::gather("Ano","fpm_valor",-1)%>% 
+  dplyr::ungroup()
+
+rm(codigos,fpm)
+                   
+                   

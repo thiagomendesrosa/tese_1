@@ -5,8 +5,8 @@
 \documentclass[
   12pt,
 ]{article}
+\usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
@@ -44,7 +44,7 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in]{geometry}
-\usepackage{graphicx,grffile}
+\usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
@@ -62,6 +62,9 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{5}
 \setlength\parindent{24pt}
+\setlength{\textfloatsep}{0.5cm}
+\setlength{\floatsep}{0.5cm}
+\usepackage[bottom]{footmisc}
 \usepackage{indentfirst}
 \usepackage{datetime}
 \usepackage{setspace}
@@ -82,26 +85,62 @@
 \floatsetup[table]{capposition=top}
 \usepackage[bf]{caption}
 \captionsetup{justification=raggedright,singlelinecheck=false}
+\captionsetup[table]{belowskip=0pt}
 \usepackage{placeins}
 \usepackage{rotating}
 \usepackage[hyphenbreaks]{breakurl}
 \usepackage{pdflscape}
 \usepackage{sectsty} \allsectionsfont{\centering}
 \usepackage{tabu}
+\usepackage{longtable}
 \usepackage{threeparttable}
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{multirow}
 \usepackage{afterpage}
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \title{Broadband connection and election in Brazil: what is role of the
 internet?}
 \author{Thiago Mendes Rosa\footnote{Universidade de Brasília,
   \href{mailto:thiagomendesrosa@outlook.com}{\nolinkurl{thiagomendesrosa@outlook.com}}}}
-\date{2020-09-02}
+\date{2021-04-04}
 
 \begin{document}
 \maketitle
+
+\let\oldthebibliography\thebibliography
+\let\endoldthebibliography\endthebibliography
+\renewenvironment{thebibliography}[1]{
+  \begin{oldthebibliography}{#1}
+    \setlength{\itemsep}{0em}
+    \setlength{\parskip}{0em}
+}
+{
+  \end{oldthebibliography}
+}
 
 \allsectionsfont{\centering}
 
@@ -109,16 +148,18 @@ internet?}
 \section*{Abstract}\label{abstract}}
 \addcontentsline{toc}{section}{Abstract}
 
-We investigate the relationship between broadband internet and election
-outcomes in Brazil (2008, 2010 and 2012). Using a robust identification
-strategy, a RDD applied to the roll out of Backhaul program, we explore
-jumps in internet velocity according to population size as
-identification strategy. Results indicate no relationship between
-internet and political outcomes -- turnout, blank and null percentage
-votes and left parties vote share. Our findings diverge from some
-results reported before, usually applied to democracies with
-institutional backgrounds distinct of the one observed in Brazil,
-suggesting that this relationship may be context dependent.
+We investigate the relationship between broadband internet velocity and
+election outcomes in Brazil (2008, 2010 and 2012). Using a robust
+identification strategy, a RDD applied to the roll out of Backhaul
+program, we explore jumps in internet velocity according to population
+size as identification strategy. Results indicate no relationship
+between internet speed and political outcomes -- turnout, blank and null
+percentage votes, left parties vote share, small party or young
+candidate vote share and campaign budget. Our findings diverge from some
+positive/negative results reported before, usually applied to
+democracies with institutional backgrounds distinct of the one observed
+in Brazil, suggesting that the relationship between internet and
+electoral outcomes does not apply everywhere.
 
 \textbf{Keywords:} Internet, RDD, elections.
 
@@ -127,17 +168,18 @@ suggesting that this relationship may be context dependent.
 \clearpage
 
 \hypertarget{introduction}{%
-\section{Introduction}\label{introduction}}
+\section*{Introduction}\label{introduction}}
+\addcontentsline{toc}{section}{Introduction}
 
-The aim of this paper is to asses the impact of broadband connection
+The aim of this paper is to asses the impact of broadband internet
 velocity on political outcomes: turnout, vote share, types of votes and
-campaign donations.
+campaign budget.
 
 The way how people get informed about politics has changed dramatically
-over the years (Bimber 2003). If in XIX century press was the main
+over the years (Bimber 2003). If in XIX century newspaper was the main
 source of information, in the beginning of XX's radio took its place,
 surpassed by television in the middle of the same century. Today, a new
-type of media seems to be taking the lead: the internet .
+type of media seems to be taking the lead: the internet.
 
 Although the world wide web is an almost 30 years-old technology,
 broadband connection is an even recent event (Maddux \& Johnson 1997).
@@ -146,15 +188,15 @@ XXI century. Social networks, like Facebook, YouTube and Twitter are
 relatively infant phenomenons\footnote{Facebook was launched in 2004,
   YouTube in 2005 and Twitter in 2006.}, becoming popular globally only
 in the late of 2000's. Mobile broadband connections, thanks to 3G
-technology (followed by 4G) and massification of smartphones, helped
-internet to reach a greater number of users. New social medias, like
-WhatsApp, Instagram and Telegram are now everyday tools\footnote{WhatsApp
-  was launched in 2009, Instagram in 2010 and Telegram in 2013.}, with
-popularity increasing in an exponential fashion, being common even for
-business. A new wave, with 5G technology and the ``internet of things''
-is coming to continue the revolution begun in the past century, with
-connections speed and quality increasing every day, with new
-possibilities of business.
+technology (followed by 4G) and massification of smartphones\footnote{The
+  first Iphone was launched in 2007.}, helped internet to reach a
+greater number of users. New social medias, like WhatsApp, Instagram and
+Telegram are now everyday tools\footnote{WhatsApp was launched in 2009,
+  Instagram in 2010 and Telegram in 2013.}, with popularity increasing
+in an exponential fashion, being common even for business. A new wave,
+with 5G technology and the ``internet of things'' is coming to continue
+the revolution begun in the past century, with connections speed and
+quality increasing every day, with new possibilities of business.
 
 Thus, information dissemination gained range and speed, reaching more
 people, almost instantaneously, nearly in any part of the world.
@@ -177,55 +219,60 @@ political backgrounds may possible influence internet-political
 relationship.
 
 This is not a novel issue. Relationship between internet and politics
-has been focus of study in several fields(Bimber 1998; Larson 2004;
+has been focus of study in several fields (Bimber 1998; Larson 2004;
 Czernich 2012; Jaber 2013; Falck \emph{et al.} 2014; Gavazza \emph{et
 al.} 2015; Poy \& Schüller 2016; Campante \emph{et al.} 2017), and this
-paper aims to contribute with this literature, studying internet impacts
-on politics in Brazil. Focusing on a single country, we have best tools
-to control possible confounders, and taking advantage of a specific rule
-for broadband roll out, where number of inhabitants determines the
-internet velocity of municipalities (the backhaul program), we have a
-robust identification strategy, that creates an ideal instrument to deal
-with internet velocity endogeneity. Following Cattaneo \emph{et al.}
-(2018), we use multiple cutoffs design to estimate effects.
+paper aims to contribute with this literature, studying internet
+velocity impacts on politics in Brazil. Focusing on a single country, we
+have best tools to control for possible confounders, and taking
+advantage of a specific rule for broadband roll out, where number of
+inhabitants determines the internet velocity of municipalities (the
+backhaul program), we have a robust identification strategy, which
+creates an ideal instrument to deal with internet velocity endogeneity.
+Following Cattaneo \emph{et al.} (2018), we use multiple cumulative
+cutoffs design to estimate effects.
 
 In the most recent Brazilian presidential election, internet had a major
 role in result. In 2018, Mr.~Bolsonaro, with a little fraction of
 financial resources used by his opponents\footnote{While Mr.~Bolsonaro
   expended R\$ 2.46 million in his campaign, the second place,
-  Mr.~Haddad, expended R\% 37.5 million, a figure 15 times higher.
+  Mr.~Haddad, expended R\$ 37.5 million, a figure 15 times higher.
   Complete figures are available in
   \url{http://divulgacandcontas.tse.jus.br/}.} and with only eight
-seconds of national advertising time in television\footnote{\url{https://agenciabrasil.ebc.com.br/politica/noticia/2018-08/tse-apresenta-tempos-de-radio-e-tv-de-presidenciaveis}}
-he managed to go to the second round of presidential elections, with
-46.03\% of votes, and won elections with a 10 p.p. difference. According
-to Brazilian newspapers, the strength of Mr.~Bolsonaro in the social
-medias was capital to his victory\footnote{\url{https://www.correiobraziliense.com.br/app/noticia/politica/2018/10/28/interna_politica,715584/bolsonaro-fez-das-redes-sociais-o-caminho-certo-para-uma-provavel-vito.shtml},
+seconds of national advertising time in television\footnote{\url{https://agenciabrasil.ebc.com.br/politica/noticia/2018-08/tse-apresenta-tempos-de-radio-e-tv-de-presidenciaveis}},
+managed to go to the second round of presidential elections, with
+46.03\% of votes, and won elections with a 10 p.p. margin difference.
+According to Brazilian newspapers, the strength of Mr.~Bolsonaro in the
+social medias was capital to his victory\footnote{\url{https://www.correiobraziliense.com.br/app/noticia/politica/2018/10/28/interna_politica,715584/bolsonaro-fez-das-redes-sociais-o-caminho-certo-para-uma-provavel-vito.shtml},
   \url{https://g1.globo.com/politica/blog/cristiana-lobo/post/2018/12/31/redes-sociais-mudam-completamente-a-relacao-dos-eleitores-com-seus-representantes.ghtml},
   \url{https://noticias.uol.com.br/politica/eleicoes/2018/noticias/2018/10/09/como-midias-sociais-e-orcamentos-enxutos-derrubaram-cinco-mitos-eleitorais.htm}},
 which makes Brazil an interesting case of study regarding the
 relationship between internet and elections.
 
-Results suggests that, in general, broadband internet is not related to
-political outcome in Brazil. It seems that internet did not influence
-turnout, blank or null percentage votes and left parties vote share, in
-2008, 2010 and 2012 elections, which covers national and local
-elections. The office considered (president, mayor or deputies) did not
-make difference in results. These finds are different from previous
-results reported in the literature, meaning that institutional
-background may play an important role in studies relating politics and
-internet. Positive and negative relationship are reported for Germany,
-Italy and United Kingdom (Falck \emph{et al.} 2014; Gavazza \emph{et
-al.} 2015; Campante \emph{et al.} 2017), all of them with distinct
-political institutional background compared with Brazilian's.
+We go back a little in time and study if the beginning of broadband
+internet played a role in election outcomes. Results suggests that, in
+general, broadband internet speed is not related to political outcome in
+Brazil. It seems that internet velocity did not influence turnout, blank
+or null percentage votes, left parties vote share, the number of
+candidates, a small party and young candidates vote share and campaign
+budget, in 2008, 2010 and 2012 elections, which covers a national and
+two local suffrage. The offices considered (president, mayor, deputies
+or local legislators) did not make difference in results. These finds
+are different from previous results reported in the literature, meaning
+that institutional background or local idiosyncrasies may play an
+important role in studies relating politics and internet. Positive and
+negative relationship are reported for Germany, Italy and United Kingdom
+(Falck \emph{et al.} 2014; Gavazza \emph{et al.} 2015; Campante \emph{et
+al.} 2017), all of them with distinct political institutional background
+compared with Brazilian's.
 
 This paper is organized as follows: the first section presents the
 theoretical framework linking internet to political outcomes, while the
 next one reports the previous findings regarding its application. The
-third section reviews the Brazilian political background, followed by
-the section with empirical strategy, data bases and descriptive. The
-fifth section presents our results, with a final discussion in the sixth
-and last section.
+third section reviews the Brazilian institutional political background,
+followed by the section with empirical strategy, data bases and
+descriptive statistics. The fifth section presents our results, with a
+final discussion in the sixth and last section.
 
 \hypertarget{theoretical-framework}{%
 \section{Theoretical framework}\label{theoretical-framework}}
@@ -240,14 +287,13 @@ elections), and voters are not fully informed about their abilities.
 Acquire information about them is costly, since they have to spend
 resources to consume information (e.g.~from television, radio,
 newspaper, internet or another people), that may include money and time.
-Show up to cast the vote in the ballot also requires resources
-(transportation and time, for example). More accurate decision requires
-more information, which demands more resources, i.e.~is more costly. So,
-it can be viewed as a maximization problem from the microeconomics point
-of view, which can be solved by equalizing marginal costs and benefits.
-Benefits can be viewed as the policies the most preferred candidate will
-conduct, a civil duty or being party of the democratic process (Ali \&
-Lin 2013).
+Show up to cast the ballot also requires resources (transportation and
+time, for example). More accurate decision requires more information,
+which demands more resources, i.e.~is more costly. So, it can be viewed
+as a maximization problem from the microeconomics point of view, which
+can be solved by equalizing marginal costs and benefits. Benefits can be
+viewed as the policies the most preferred candidate will conduct, a
+civil duty or being party of the democratic process (Ali \& Lin 2013).
 
 This problem changes over time with entrance of new technologies
 (Gentzkow 2006). For example, when radio, television and internet were
@@ -255,7 +301,7 @@ not available, there were fewer options to people get informed about
 candidates. Also, there were available less leisure alternatives. With
 emergence of radio, then television and, finally, internet, these costs
 and substitution effects may have changed. A first natural question that
-someone could have is: did these new technologies affect the decision of
+someone could ask is: did these new technologies affect the decision of
 voters? For newspaper, Gerber \emph{et al.} (2009), Gentzkow \emph{et
 al.} (2011) and Drago \emph{et al.} (2014) report effects on elections
 participation. According to Strömberg (2004) and Horacio \& Monteiro
@@ -296,22 +342,22 @@ development.
 While newspaper, radio and TV content production are more restricted and
 with barrier entries, internet have opened doors to virtually anyone
 produce information and media, interact with people and organize groups
-of common interest, everything at a lower cost. Thus, it is likely to
-exist a shift both in the demand and supply of information and
+of common interest, everything at a lower cost and time. Thus, it is
+likely to exist a shift both in the demand and supply of information and
 entertainment with internet arrival. It can potentially alter the manner
 of how politics are made, since, with internet, politicians can reach
 more people, quickly and at lower costs when compared with other medias.
 
 One situation this new scenario brings is the social media consumption
-of ``fake news''\footnote{Fake news is a term the popular term to
-  define, in general, the spread of misleading or false information like
-  if it were real. See Lazer \emph{et al.} (2018) for a brief
-  discussion.} and its possible impact on elections. In the problem
-treated here, misleading information may have a market that deviate
-people from optimal choice (see Allcott \& Gentzkow 2017 for a
-theoretical framework). Media capture by politicians put an additional
-flavor to this discussion (Besley \& Prat 2006), where internet could
-break other types of media control or enhance an existing control.
+of ``fake news''\footnote{Fake news is a popular term to define, in
+  general, the spread of misleading or false information like if it were
+  real. See Lazer \emph{et al.} (2018) for a brief discussion.} and its
+possible impact on elections. In the problem treated here, misleading
+information may have a market that deviate people from optimal choice
+(see Allcott \& Gentzkow 2017 for a theoretical framework). Media
+capture by politicians put an additional flavor to this discussion
+(Besley \& Prat 2006), where internet could break other types of media
+control or enhance an existing control.
 
 With this framework in mind, we analyze previous researches in the field
 in order to collect results and identification strategies, pointing
@@ -342,7 +388,7 @@ Czernich (2012) and Falck \emph{et al.} (2014) for Germany, Gavazza
 Brazil. With slightly different approach, Lelkes \emph{et al.} (2017)
 explore variation in state laws related to internet infrastructure to
 study influence of this technology on polarization in USA, while Poy \&
-Schüller (2016) use similar strategy to analyse broadband effects on
+Schüller (2016) use similar strategy to analyze broadband effects on
 turnout and vote share in rural and sparse areas in Italy.
 
 For Italy, Campante \emph{et al.} (2017) report a negative effect on
@@ -386,12 +432,12 @@ heterogeneity effects reported for turnout).
 In Brazilian case, Menezes (2015) shows that internet is associated with
 increases in vote share of small candidates in 2010 elections, but no
 relation with turnout nor with no candidates votes (blank votes). This
-is an important result once the winner of last Brazilian presidential
-election (2018) won with a very limited advertisement time on radio and
-television in the first round.
+is an important result once the victorious of last Brazilian
+presidential election (2018) won with a very limited advertisement time
+on radio and television in the first round.
 
 For USA, results presented by Lelkes \emph{et al.} (2017) seems to bring
-light to mechanisms underlying the effects of internet one politics
+light to mechanisms underlying the effects of internet on politics
 outcomes. States with less restrictive laws (and more likely to have
 broadband coverage) induces people to be exposed to partisan information
 and be more extreme in partisan preferences. This mechanism is
@@ -404,12 +450,13 @@ and online elections news reading are more likely to vote.
 
 It is important to note that countries have distinct political regimes,
 which could potentially affect results reported. Minard \& Landriault
-(2015) bring this to discussion analysing how maturity of democracy
+(2015) bring this to discussion analyzing how maturity of democracy
 regimes in Asia responds to internet availability. Immature regimes
-seems to be more affect by internet than solid democracies according to
-2006 cross-country analysis. Hence, the cross country variation suggests
-that there are institutional factors playing action on internet-politics
-relationship, which puts caution to external validity of results.
+seems to be more affected by internet than solid democracies according
+to 2006 cross-country analysis. Hence, the cross country variation
+suggests that there are institutional factors playing action on
+internet-politics relationship, which puts caution to external validity
+of results.
 
 To sum up, it is clear that there are different results for different
 countries (even inside the same country), with possible changing effects
@@ -431,38 +478,46 @@ order to compare our results with those presented before.
 background}\label{brazilian-political-institutional-background}}
 
 Brazil is a Federal Republic, with three layers of government: central
-(or Federal), states and municipalities (see Souza (2005) for a
-discussion about the federalism in Brazil). It is a young presidential
-democracy, with bicameral legislative system (Chamber of Deputies and
-Senate, the National Congress), holding election every four years.
-President is elected by direct vote since 1989 in national elections, as
-well national congress, state governors and state assemblies (1994
-onward). Local elections, for municipal mayors and local legislators are
-also held every four years, since 1996\footnote{Brazilian dictatorship
-  ended in 1985, with general election in 1986, except for president
-  (elected indirectly in the previous year). Before 1985, all other
-  elections (except for president) had direct vote, but under military
-  rules. In 1988, a new constitution was promulgated and in 1989 the
-  president was elected by direct vote again, after 29 years. In 1990,
-  there were elections for state governors, state assemblies and
-  national congress. In 1992, municipal mayors and local assembly
-  members were elected. By 1994 onward, national elections (president,
-  state governors, state assembly and national congress) happens every
-  four year, while local elections (municipal mayor and municipal
-  assembly) happens every four years, since 1996. Thus, Brazil has
-  elections every two years since 1994.}. While mayors, senators and the
-president are elected in a majoritarian system, all the other candidates
-are elected by proportional representation, where voters choose first a
-party and then a candidate\footnote{There is the option to vote only for
-  a party.}. Also, parties, until 2018, could create coalition\footnote{Altered
-  by the Constitutional Amendment 45, available in
+(or Federal), states and municipalities\footnote{Brazil was under
+  Portugal's control from 1500 to 1824, when its indecency was declared
+  and Dom Pedro, son of Portugal's king, became the ruler.} (see Souza
+(2005) for a discussion about the federalism in Brazil). It is a young
+presidential democracy\footnote{Brazilian Republic was proclaimed in
+  1889, initially ruled by military and then by São Paulo, Rio de
+  Janeiro and Minas Gerais oligarchies alternating power until 1930. In
+  1930, Getúlio Vargas took the power until 1945, and, after that, the
+  country had free elections until 1960.}, with bicameral legislative
+system (Chamber of Deputies and Senate, the National Congress), holding
+election every four years. President is elected by direct vote since
+1989 in national elections, as well national congress, state governors
+and state assemblies (1994 onward). Local elections, for municipal
+mayors and local legislators are also held every four years, since
+1996\footnote{Brazilian dictatorship begun in 1964 and ended in 1985,
+  with general election in 1986, except for president (elected
+  indirectly in the previous year). Before 1985, all other elections
+  (except for president) had direct vote, but under military rules. In
+  1988, a new constitution was promulgated and in 1989 the president was
+  elected by direct vote again, after 29 years. In 1990, there were
+  elections for state governors, state assemblies and national congress.
+  In 1992, municipal mayors and local assembly members were elected. By
+  1994 onward, national elections (president, state governors, state
+  assembly and national congress) happens every four year, while local
+  elections (municipal mayor and municipal assembly) happens every four
+  years, since 1996. Thus, Brazil has elections every two years since
+  1994.}. While mayors, senators and the president are elected in a
+majoritarian system, all the other candidates are elected by
+proportional representation, where voters choose first a party and then
+a candidate\footnote{There is the option to vote only for a party.}.
+Also, parties, until 2018, could create coalition\footnote{Altered by
+  the Constitutional Amendment 45, available in
   \url{http://www.planalto.gov.br/ccivil_03/constituicao/Emendas/Emc/emc97.htm}}
 to run in proportional elections, while in majoritarian elections,
-coalitions are still permited. With this system, in 2018, 35 parties ran
-in the elections. Table \ref{tab:parties} presents all parties and the
-number of candidates that participated in elections from 2000 to 2018.
+coalitions are (and still) permitted. With this system, in 2018, 35
+parties ran in the elections. Table \ref{tab:parties} presents all
+parties and the number of candidates that participated in elections from
+2000 to 2018.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:parties}Parties and number of candidates in Brazilian elections, 2000-2018}
 \centering
@@ -471,46 +526,46 @@ number of candidates that participated in elections from 2000 to 2018.
 \toprule
 Party & 2000 & 2002 & 2004 & 2006 & 2008 & 2010 & 2012 & 2014 & 2016 & 2018\\
 \midrule
-NOVO &  &  &  &  &  &  &  &  & 133 & 336\\
-PAN & 414 & 287 & 597 & 359 &  &  &  &  &  & \\
-PC do B & 261 & 73 & 478 & 215 & 633 & 581 & 1,251 & 589 & 674 & 585\\
-PCB & 82 & 6 & 98 & 36 & 107 & 22 & 150 & 43 & 93 & 28\\
-PCO & 28 & 71 & 156 & 41 & 16 & 3 & 6 & 12 & 15 & 11\\
-PDT & 922 & 552 & 862 & 813 & 878 & 618 & 1,136 & 609 & 864 & 523\\
-PEN/PATRIOTA &  &  &  &  &  &  &  & 625 & 893 & 862\\
-PFL/DEM & 745 & 359 & 702 & 418 & 750 & 375 & 914 & 301 & 828 & 356\\
-PGT & 417 & 368 &  &  &  &  &  &  &  & \\
-PMB &  &  &  &  &  &  &  &  & 664 & 327\\
-PMDB/MDB & 972 & 568 & 844 & 696 & 679 & 617 & 906 & 658 & 838 & 581\\
-PMN & 516 & 154 & 657 & 359 & 532 & 403 & 785 & 312 & 850 & 462\\
-PPB/PP & 805 & 423 & 806 & 346 & 693 & 445 & 1,013 & 363 & 790 & 439\\
-PPL &  &  &  &  &  &  & 311 & 256 & 612 & 400\\
-PPS/CIDADANIA & 841 & 514 & 810 & 665 & 893 & 490 & 1,151 & 382 & 909 & 369\\
-PR/PL & 866 & 665 & 908 & 503 & 703 & 413 & 920 & 492 & 715 & 472\\
-PRB/REPUBLICANOS &  &  &  & 54 & 534 & 363 & 858 & 436 & 928 & 608\\
-PRN/PTC & 303 & 98 & 532 & 299 & 489 & 577 & 939 & 460 & 954 & 495\\
-PRONA & 443 & 311 & 592 & 355 &  &  &  &  &  & \\
-PROS &  &  &  &  &  &  &  & 215 & 659 & 831\\
-PRP & 489 & 216 & 517 & 385 & 575 & 349 & 924 & 609 & 1,008 & 683\\
-PRTB & 469 & 271 & 414 & 258 & 359 & 301 & 727 & 397 & 953 & 695\\
-PSB & 878 & 739 & 960 & 703 & 756 & 697 & 1,135 & 789 & 827 & 488\\
-PSC & 882 & 378 & 672 & 533 & 811 & 585 & 1,095 & 639 & 1,002 & 587\\
-PSD & 511 & 244 &  &  &  &  & 679 & 303 & 907 & 362\\
-PSDB & 717 & 427 & 815 & 534 & 838 & 520 & 934 & 606 & 981 & 439\\
-PSDC/DC & 516 & 196 & 636 & 320 & 516 & 236 & 970 & 473 & 924 & 398\\
-PSL & 480 & 222 & 611 & 284 & 666 & 559 & 868 & 472 & 934 & 935\\
-PSN/PHS & 470 & 254 & 656 & 328 & 619 & 341 & 907 & 606 & 1,086 & 658\\
-PSOL &  &  &  & 249 & 503 & 587 & 892 & 676 & 689 & 829\\
-PST & 503 & 277 &  &  &  &  &  &  &  & \\
-PSTU & 120 & 107 & 168 & 38 & 76 & 29 & 60 & 120 & 69 & 51\\
-PT & 743 & 866 & 989 & 743 & 876 & 747 & 1,192 & 780 & 600 & 668\\
-PT do B/AVANTE & 528 & 299 & 495 & 382 & 549 & 382 & 838 & 524 & 708 & 785\\
-PTB & 963 & 526 & 722 & 581 & 804 & 609 & 942 & 583 & 908 & 389\\
-PTN/PODEMOS & 396 & 129 & 625 & 215 & 611 & 373 & 1,037 & 377 & 1,125 & 598\\
-PV & 656 & 478 & 1,017 & 752 & 875 & 918 & 1,194 & 726 & 1,029 & 581\\
-REDE &  &  &  &  &  &  &  &  & 525 & 429\\
-SD/SOLIDARIEDADE &  &  &  &  &  &  &  & 342 & 880 & 571\\
-Total candidates & 16,936 & 10,078 & 17,339 & 11,464 & 16,341 & 12,140 & 24,734 & 14,775 & 26,574 & 17,831\\
+NOVO &  &  &  &  &  &  &  &  & 137 & 390\\
+PAN & 1,382 & 393 & 3,030 & 465 &  &  &  &  &  & \\
+PC do B & 1,978 & 181 & 4,499 & 338 & 7,119 & 757 & 12,200 & 752 & 11,173 & 745\\
+PCB & 171 & 19 & 453 & 87 & 666 & 73 & 395 & 97 & 203 & 60\\
+PCO & 60 & 112 & 313 & 95 & 31 & 9 & 11 & 23 & 45 & 43\\
+PDT & 24,465 & 996 & 22,272 & 1,189 & 22,334 & 909 & 25,317 & 900 & 23,960 & 853\\
+PEN/PATRIOTA &  &  &  &  &  &  &  & 780 & 9,366 & 1,077\\
+PFL/DEM & 42,481 & 803 & 32,644 & 848 & 25,346 & 703 & 21,139 & 537 & 20,023 & 622\\
+PGT & 1,465 & 504 &  &  &  &  &  &  &  & \\
+PMB &  &  &  &  &  &  &  &  & 4,082 & 386\\
+PMDB/MDB & 49,231 & 1,112 & 40,331 & 1,192 & 39,377 & 1,085 & 42,266 & 1,089 & 40,754 & 977\\
+PMN & 4,901 & 325 & 6,538 & 565 & 6,034 & 606 & 7,142 & 466 & 6,733 & 655\\
+PPB/PP & 33,177 & 805 & 27,613 & 622 & 24,837 & 743 & 28,086 & 664 & 25,775 & 691\\
+PPL &  &  &  &  &  &  & 1,896 & 388 & 3,265 & 522\\
+PPS/CIDADANIA & 19,388 & 823 & 21,159 & 937 & 15,748 & 724 & 16,698 & 556 & 15,408 & 593\\
+PR/PL & 19,551 & 920 & 25,101 & 701 & 19,757 & 636 & 20,913 & 689 & 20,791 & 658\\
+PRB/REPUBLICANOS &  &  &  & 80 & 8,610 & 516 & 12,764 & 651 & 16,526 & 793\\
+PRN/PTC & 1,194 & 164 & 4,893 & 449 & 4,669 & 741 & 7,109 & 649 & 8,058 & 724\\
+PRONA & 1,284 & 357 & 2,595 & 460 &  &  &  &  &  & \\
+PROS &  &  &  &  &  &  &  & 395 & 10,093 & 1,000\\
+PRP & 4,607 & 313 & 6,053 & 489 & 5,048 & 492 & 7,564 & 762 & 7,853 & 864\\
+PRTB & 2,689 & 409 & 4,182 & 363 & 3,767 & 479 & 5,928 & 584 & 5,954 & 847\\
+PSB & 15,599 & 1,139 & 16,649 & 1,035 & 19,612 & 999 & 24,588 & 1,147 & 24,786 & 841\\
+PSC & 8,221 & 568 & 8,803 & 690 & 10,843 & 770 & 15,202 & 822 & 15,148 & 791\\
+PSD & 10,308 & 363 &  &  &  &  & 22,414 & 596 & 27,066 & 629\\
+PSDB & 38,131 & 964 & 33,810 & 1,040 & 30,675 & 976 & 33,254 & 951 & 32,843 & 829\\
+PSDC/DC & 3,532 & 285 & 6,141 & 477 & 4,910 & 338 & 6,857 & 627 & 6,923 & 655\\
+PSL & 5,198 & 340 & 6,522 & 408 & 6,131 & 661 & 9,349 & 678 & 9,662 & 1,334\\
+PSN/PHS & 2,863 & 338 & 5,756 & 568 & 5,160 & 515 & 7,805 & 808 & 10,926 & 894\\
+PSOL &  &  &  & 535 & 2,679 & 771 & 4,262 & 1,056 & 4,479 & 1,170\\
+PST & 4,639 & 471 &  &  &  &  &  &  &  & \\
+PSTU & 347 & 210 & 546 & 102 & 213 & 108 & 272 & 234 & 258 & 133\\
+PT & 25,829 & 1,495 & 36,600 & 1,144 & 31,765 & 1,243 & 40,022 & 1,190 & 21,842 & 1,126\\
+PT do B/AVANTE & 3,103 & 389 & 4,503 & 492 & 4,472 & 516 & 7,155 & 653 & 6,842 & 942\\
+PTB & 30,268 & 863 & 25,919 & 802 & 22,833 & 894 & 23,819 & 813 & 20,653 & 584\\
+PTN/PODEMOS & 1,919 & 223 & 4,353 & 299 & 4,473 & 444 & 6,775 & 528 & 8,952 & 844\\
+PV & 6,021 & 609 & 10,887 & 970 & 13,322 & 1,154 & 17,464 & 918 & 15,619 & 811\\
+REDE &  &  &  &  &  &  &  &  & 3,435 & 762\\
+SD/SOLIDARIEDADE &  &  &  &  &  &  &  & 465 & 13,711 & 723\\
+Total candidates & 364,002 & 16,493 & 362,165 & 17,442 & 340,431 & 17,862 & 428,666 & 21,468 & 453,344 & 25,568\\
 Total parties & 30 & 30 & 27 & 29 & 27 & 27 & 29 & 32 & 35 & 35\\
 \bottomrule
 \multicolumn{11}{l}{\rule{0pt}{1em}Source: TSE}\\
@@ -526,7 +581,7 @@ index\footnote{The authors construct a party index based on legislative
   position of congress members in their activities.}. Table
 \ref{tab:parties_orient} presents this organization.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:parties_orient}Party classification according to orientation (left, center or right)}
 \centering
@@ -570,15 +625,16 @@ classification are more direct and mostly based on the party index.
 The relatively large number of parties in Brazilian makes both elections
 and politics complex processes (Pettersson-Lidbom 2008; Boulding \&
 Brown 2015). In order to help understanding this process, Table
-\ref{tab:ganhadores1} show the winners, by party, in the last five
-elections, while Table \ref{tab:ganhadores2} shows the same information
-for state governors and municipalities\footnote{Since 1988, Brazil has
-  26 states and the Federal District. In 2018, there were 5,568
-  municipalities, with two districts, the Federal capital and the state
-  Fernando de Noronha, in Pernambuco. National Congress has 513 Federal
-  Deputies and 81 Senators}.
+\ref{tab:ganhadores1} shows the winners, by party, in the last five
+elections for the national congress, while Table \ref{tab:ganhadores2}
+shows the same information for state governors and
+municipalities\footnote{Since 1988, Brazil has 26 states and the Federal
+  District. In 2018, there were 5,568 municipalities, with two
+  districts, the Federal capital and the district of Fernando de
+  Noronha, in Pernambuco. National Congress has 513 Federal Deputies and
+  81 Senators}.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:ganhadores1}Distribuition of winners by party in National Congress, 2002-2018}
 \centering
@@ -627,13 +683,13 @@ REDE & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.2 & 9.3\\
 SD/SOLIDARIEDADE & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 2.9 & 0.0 & 2.5 & 1.9\\
 \bottomrule
 \multicolumn{11}{l}{\rule{0pt}{1em}Source: TSE}\\
-\multicolumn{11}{l}{\rule{0pt}{1em}Obs.: Parties which changed their names are considered as an unique party.}\\
+\multicolumn{11}{l}{\rule{0pt}{1em}Obs.: Parties that changed their names are considered as an unique party.}\\
 \end{tabu}}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!h]
 
-\caption{\label{tab:ganhadores2}Distribuition of winners by party in National Congress, 2002-2018}
+\caption{\label{tab:ganhadores2}Distribuition of winners by party in local executive elections, 2002-2018}
 \centering
 \resizebox{\linewidth}{!}{
 \fontsize{9}{11}\selectfont
@@ -680,28 +736,29 @@ REDE & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.1 & 0.0\\
 SD/SOLIDARIEDADE & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 1.1 & 0.0\\
 \bottomrule
 \multicolumn{11}{l}{\rule{0pt}{1em}Source: TSE}\\
-\multicolumn{11}{l}{\rule{0pt}{1em}Obs.: Parties which changed their names are considered as an unique party.}\\
+\multicolumn{11}{l}{\rule{0pt}{1em}Obs.: Parties that changed their names are considered as an unique party.}\\
 \end{tabu}}
 \end{table}
 
 Table \ref{tab:ganhadores1} shows that no party had more than 20\% of
 the deputies. The workers party (PT), who won four out of five last
-elections (2002 to 2014), did not have the majority of the congress in
-any year.In the Senate, the party with more seats had around 1/4 of the
-house until 2010, with more competitive elections since then, specially
-in 2018. So, in order to run the country, the president needs to build
-alliance, otherwise it is unlikely to pass its bills. The number of
-parties necessary to form at least 60\% of the deputies\footnote{Bills
-  that alter constitution require at least 308 votes of deputies and 49
-  votes of senators, i.e.~60\% of the National Congress, in two rounds.}
-has risen from four to eight, including both situation and opposition
-parties, which means that the necessary number of parties required to
-rule is even higher. In the senate, the number has risen from three to
-seven.
+presidential elections (2002 to 2014), did not have the majority of the
+congress in any year (at least, without building a block of parties). In
+the Senate, the party with more seats had around 1/4 of the house until
+2010, with more competitive elections since then, specially in 2018. So,
+in order to run the country, the president needs to build alliances,
+otherwise it is unlikely to pass its bills. The number of parties
+necessary to form at least 60\% of the deputies\footnote{Bills that
+  alter constitution require at least 308 votes of deputies and 49 votes
+  of senators, i.e.~60\% of the National Congress, in two rounds.} has
+risen from at least four to eight, including both situation and
+opposition parties, which means that the necessary number of parties
+required to rule is even higher. In the senate, the number has risen
+from three to seven.
 
 Competitiveness observed in National Congress elections is also present
 in subnational suffrage. Table \ref{tab:ganhadores2} shows that most
-dominant party has around 20\% of mayors and 25\% of governors, not
+dominant party had around 20\% of mayors and 25\% of governors, not
 necessary the same party in each election, adding another layer of
 complexity in the Brazilian Federal System (see Cancela \& Geys (2016)
 for a discussion about coordination in multilevel elections in Brazil).
@@ -739,8 +796,8 @@ donation, another fund was created, the Electoral Fund\footnote{Called
 which is distributed with following rule: 2\% equally between registered
 parties; 35\% to parties with, at least, one deputy; 48\% according to
 deputies proportion; and 15\% according to senators proportion. For
-example, in 2018, the Fund Party was R\$ 888.7 million (US\$ 165
-million), while the Electoral Fund was R\$ 1.7 billion (US\$ 316.3
+example, in 2018, the Fund Party was R\$ 888.7 million (US\$ 156
+million), while the Electoral Fund was R\$ 1.7 billion (US\$ 299
 million).
 
 Another important aspect of Brazilian suffrage regards campaign
@@ -777,11 +834,12 @@ request loans from institutions held by the government, apply to jobs as
 public servant, enroll in public education or engage in any public act
 that requests military service or income task discharge). This set
 raises the question if this rule changes incentives to acquire
-information about politicians and participate in elections. Table
-\ref{tab:cancelados} shows the total number of voters as well total
-population with voter registration canceled from 2005 to 2019.
+information about politicians and participate in elections, specially by
+poorer population. Table \ref{tab:cancelados} shows the total number of
+voters as well total population with voter registration canceled from
+2005 to 2019.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:cancelados}Total of volters and voter registration canceled, 2005 to 2009}
 \centering
@@ -812,14 +870,14 @@ actions to regularize their electoral obligations. Anyhow, turnout is
 pretty high when compared to USA or European countries.
 
 According to Downs (1957), low probability to be pivotal in elections
-explain the ``rational ignorance'' of voters and low preference to turn
-out. On the other hand, mandatory vote could change these incentives,
-making people more inclined to vote (Lijphart 1997). Leon \emph{et al.}
-(2014) finds that, for Brazilian case, mandatory voting seems not change
-people incentives to be more informed in voting decision. It seems the
-case that providing more information about candidates (Banerjee \emph{et
-al.} 2011), hence lowering the costs for collect information, is more
-effective than compulsory voting system.
+explain the ``rational ignorance'' of voters and low preference to
+turnout. On the other hand, mandatory vote could change these
+incentives, making people more inclined to vote (Lijphart 1997). Leon
+\emph{et al.} (2014) finds that, for Brazilian case, mandatory voting
+seems not change people incentives to be more informed in voting
+decision. It seems the case that providing more information about
+candidates (Banerjee \emph{et al.} 2011), hence lowering the costs for
+collect information, is more effective than compulsory voting system.
 
 Following Fujiwara \emph{et al.} (2016), we also consider possible
 persistent habits on voting pattern, incorporating raining information
@@ -833,24 +891,25 @@ Brazil, it may be an important contribution for analysis.
 databases}\label{empirical-strategy-and-databases}}
 
 In this section we describe in detail the empirical strategy, relied on
-the Backhaul program rules, and the databases that support the analysis.
+the Backhaul program rules, the databases that support the analysis and
+the cumulative RDD set up.
 
 \hypertarget{communication-usage}{%
 \subsection{Communication usage}\label{communication-usage}}
 
 As a glimpse of Brazilian communication consumption, Figure \ref{fig:0}
-presents internet and cell phone usage from 2008 to 2017.
+presents internet and cell phone usage from 2008 to 2018.
 
 \begin{figure}
 \centering
 \includegraphics{artigo1_files/figure-latex/internet_usage-1.png}
 \caption{Internet and cell phone usage in Brazil, \% of 16+ years-old
-population, 2008-2009 and 2011-2017 \label{fig:0}}
+population, 2008-2009 and 2011-2018 \label{fig:0}}
 \end{figure}
 
 In 2008, around 1/3 of Brazilians (16 years-old or above,
 i.e.~population in voting age) declared to have used internet at least
-once in the last three months (September as reference), while almost
+once in the past three months (September as reference), while almost
 58\% declared cell phone ownership for personal usage. In order to
 increase these figures, the government carried out a national plan in
 the begging of 2008. In 2011, these figures rose to 44\% and 73\%,
@@ -880,7 +939,7 @@ end of 2008, 80\% by the end of 2009 and 100\% by the end of 2010. Also,
 minimal internet velocities were set, increasing with population size
 (Table \ref{tab:program_backhauk}).
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:program_backhauk}Backhaul Plan --  setup}
 \centering
@@ -888,48 +947,49 @@ minimal internet velocities were set, increasing with population size
 \toprule
 Population Size & N\# municipalities & \% & Velocity (Mbps)\\
 \midrule
-Up to 20,000 & 3,077 & 90 & 8\\
-From 20,001 to 40,000 & 268 & 8 & 16\\
-From 40,001 to 60,000 & 63 & 2 & 32\\
-Above 60,001 & 31 & 1 & 64\\
-Total & 3,439 & 100 & \\
+Up to 20,000 & 3,077 & 89.5 & 8\\
+From 20,001 to 40,000 & 268 & 7.8 & 16\\
+From 40,001 to 60,000 & 63 & 1.8 & 32\\
+Above 60,001 & 31 & 0.9 & 64\\
+Total & 3,439 & 100.0 & \\
 \bottomrule
 \multicolumn{4}{l}{\rule{0pt}{1em}Source: Anatel}\\
 \end{tabu}
 \end{table}
 
-According to the National Agency of Telecommunication (Anatel\footnote{\emph{Agência
-  Nacional de Telecomunicações} in Portuguese.}) (Anatel 2010), the
-majority of municipalities to be covered by Backhaul program were up to
-20,0000 inhabitants, which is more than half of total municipalities of
-Brazil\footnote{Today, Brazil has 5,570 municipalities. By the time when
-  the program was created, six municipalities did not exist yet.}. The
-minimal required velocity (8 Mbps\footnote{Megabit per second.})
-guarantee improvement in navigation quality, allowing, for example,
-streaming (music and videos).
+According to the National Agency of Telecommunication
+(Anatel\footnote{\emph{Agência Nacional de Telecomunicações} in
+  Portuguese.}) (Anatel 2010), the majority of municipalities to be
+covered by Backhaul program were up to 20,000 inhabitants, which is more
+than half of total municipalities of Brazil\footnote{Today, Brazil has
+  5,568 municipalities and two districts. By the time when the program
+  was created, six municipalities did not exist yet.}. The minimal
+required velocity (8 Mbps\footnote{Megabit per second.}) guarantee
+improvement in navigation quality, allowing, for example, streaming (of
+music and videos).
 
 The program had three types of technology to be deployed: fiber, radio
-and satellite. The first is installed by cables of fiver optic, with
-less interference and in higher distances, being connected directly to
-the household (FTTH) or to a concentrating point (FTTC), either with a
+and satellite. The first is installed by cables of fiber optic, with
+less interference and in long distances, being connected directly to the
+household (FTTH) or to a concentrating point (FTTC), either with a
 higher cost of installation and maintenance. The second one is usually
-easier to be installed, by antennas, maintained and reaches broader
+easier to be installed (by antennas), maintained and reaches broader
 areas, like rural locales, but have limitations of interference, due to
-physical barriers, and in internet velocity, due to distance. Finally,
-the third needs a satellite, an antenna in the household and a base
-antenna to intermediate communication, a set with high costs of
-installation and maintenance, but capable to reach broader areas, like
-rural, and being susceptible to weather interference. Considering the
-cost, radio was the main technology chosen, for 71\% of the cities,
-followed by fiber, for 26\%, and satellite for only 3\%.
+physical barriers, and of internet speed, due to distance. Finally, the
+third needs a satellite, an antenna in the household and a base antenna
+to intermediate communication, a set with high costs of installation and
+maintenance, but capable to reach broader areas, like rural, still being
+susceptible to weather interference. Considering the costs, radio was
+the main technology chosen, for 71\% of the cities, followed by fiber,
+for 26\%, and satellite for only 3\%.
 
 Out of 5,570 municipalities, by 2015, only 85 remained uncovered (Table
 \ref{tab:desc_back}) and 2,125 (38\%) already had broadband
-infrastructure before the program, mainly larger cities. We notice that
-the program focused on small cities, with average population under
-15,000.
+infrastructure before the program beginning, mainly larger cities. We
+notice that the program focused on small cities, with average population
+under 15,000.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:desc_back}Backhaul deployment by coverage status, 2015}
 \centering
@@ -951,7 +1011,7 @@ should has backhaul infrastructure in 2010. However, by this year, only
 72\% of the goal was achieved. Table \ref{tab:backhaul_implementation}
 presents the roll out of the program by year.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:backhaul_implementation}Backhaul deployment by year}
 \centering
@@ -977,20 +1037,21 @@ Total & 3,360 & 11 & 14,403\\
 
 The main point of our identification strategy relies on the velocity
 discontinuity, which is further analyzed in Figure \ref{fig:1}
-geographically,\footnote{Since Brazil is a continental country with
-  important regional inequalities, regional visualization improve
-  analysis.}. North and Northeast regions are poorer, while South and
-Southeast are richer\footnote{For example, the state of São Paulo was
-  responsible for almost 1/3 of Brazilian GDP in 2017. Per capita
-  household income of the richest state (Federal District) was 3.84
-  times greater than the poorest (Alagoas), according to 2014 National
-  Household Survey (IBGE/PNAD). Brazilian Gini index for the same year
-  was 0.517.}, being important to analyze how the programs are deployed
-in the territory.
+geographically,\footnote{Since Brazil is a continental country
+  (8,516,000 km² of area, the fifth in the world) with important
+  regional inequalities, regional visualization improve analysis.}.
+North and Northeast regions are poorer, while South and Southeast are
+richer\footnote{For example, the state of São Paulo was responsible for
+  almost 1/3 of Brazilian GDP in 2017. Household income \emph{per
+  capita} of the richest state (Federal District) was 3.84 times greater
+  than the poorest (Alagoas), according to 2014 National Household
+  Survey (IBGE/PNAD). Brazilian Gini index for the same year was 0.517.},
+being important to analyze how the programs are deployed in the
+territory.
 
 \begin{figure}
 \centering
-\includegraphics{artigo1_files/figure-latex/unnamed-chunk-2-1.png}
+\includegraphics{artigo1_files/figure-latex/unnamed-chunk-1-1.png}
 \caption{Internet velocity in backhaul program by municipality
 \label{fig:1}}
 \end{figure}
@@ -998,7 +1059,7 @@ in the territory.
 Figure \ref{fig:1} shows that a big portion of cities in the south and
 center-west were covered before (blank areas), while the northeast had
 the largest number of cities in the program. Also, the north region (the
-Amazon area) had a lot of cities uncovered by the program (grey areas).
+Amazon area) had a lot of cities uncovered by the program (gray areas).
 The most common velocity was 8 Mbps, as showed before in Table
 \ref{tab:program_backhauk}, corresponding to cities under 20,000
 inhabitants.
@@ -1008,69 +1069,45 @@ inhabitants.
 
 Following Cattaneo \emph{et al.} (2018), each municipality has a running
 variable \(X_i\) (the size of population) with potential outcomes
-\(Y_i(0)\) (a lower internet velocity) and \(Y_i(1)\) (higher internet
-velocity). Municipalities face three possible cutoffs \(C_i \in C\),
-with \(C = {c_1 ... c_J}\). The effect for each cutoff,
-\(\tau(c)= \mathbb{E}[Y_i(1)-Y_i(0)|X_i=c,C_i=c]\) is identified by:
+\(Y_i(0)\) (a lower internet velocity) and \(Y_i(1)\) (higher -- double
+-- internet velocity). Municipalities face three possible cutoffs
+\(C_i \in C\), with \(C = {c_1, c_2, c_3}\). Ranges of population
+determine which type of treatment a municipality will receive: at least
+8 Mpbs if \(X_i \leq c_1\), at least 16 Mbps if \(c_1 < X_i \leq c_2\),
+at least 32 Mbps if \(c_2 < X_i \leq c_3\) and at least 64 Mbps if
+\(X_i > c_3\).
+
+Denote each treatment as \(d_j\), so \(D_i \in \{d_1,d_2,d_3\}\).
+
+The effect for each cutoff, under standard regularity conditions, is
+identified by:
 
 \begin{equation}
-\tau(c)= \lim\limits_{x \downarrow c}\mathbb{E}[Y_i|X_i=c,C_i=c]-\lim\limits_{x \uparrow c}\mathbb{E}[Y_i|X_i=c,C_i=c]
+\tau_j= \mathbb{E}[Y_i(d_j) - Y_i(d_{j-1})|X_i=c_j]= \lim\limits_{x \downarrow c_j}\mathbb{E}[Y_i|X_i=x]-\lim\limits_{x \uparrow c_j}\mathbb{E}[Y_i|X_i=x]
 \label{eq:1}
 \end{equation}
 
-For the pooled regression discontinuity estimate, running variable is
-recentered, \(\tilde X_i=X_i-C_i\), normalizing the cutoff at zero:
-
-\begin{equation}
-\tau_p= \lim\limits_{x \downarrow 0}\mathbb{E}[Y_i| \tilde X_i=x]-\lim\limits_{x \uparrow 0}\mathbb{E}[Y_i|\tilde X_i=x]
-\label{eq:2}
-\end{equation}
-
-where
-
-\begin{equation}
-\tau_p= \sum\limits_{c \in C}\tau(c) \omega(c)
-\label{eq:3}
-\end{equation}
-
-and
-
-\begin{equation}
-\omega(c) = \frac{f_{X|C}(c|c)\mathbb{P}[C_i=c]}{\sum\limits_{c \in C} f_{X|C}(c|c)\mathbb{P}[C_i=c]}
-\label{eq:4}
-\end{equation}
-
-Equation \ref{eq:4}, given a bandwidth \(h>0\), and considering that
-\(\omega(c)=\mathbb{P}[C_i = c|\tilde X_i = 0]\), can be estimated by:
-
-\begin{equation}
- \hat \omega(c) = \frac{\sum_{i} \mathbbm{1} (C_i=c,-h \leq \tilde X_i \leq h) } {\sum_{i} \mathbbm{1} (-h \leq \tilde X_i \leq h)}
-\label{eq:5}
-\end{equation}
-
-In the fuzzy design, which is our case here, the velocity of internet is
-not necessarily the same defined in the program for each municipality.
-So, there is a first stage to determine if a municipality had the
-velocity foreseen by the program, with \(T_i \in \{0,1\}\), where
-\(T_i=1\) denotes if the velocity of the program was deployed and
-\(T_i=0\) otherwise, and \(\mathbb{P}[T_i=1 |Xi = c,Ci = c]\).
+Each observation may be used to estimate two different, and contiguous,
+treatment effects. For example, looking to the first cutoff, 20,000,
+municipalities with population above that value are treated (up to the
+next cutoff -- 40,000) when estimating \(\tau_j\), but they are controls
+when estimating \(\tau_{j+1}\) (and, hence, below the next cutoff --
+40,000). An observation can or cannot be used to estimate two effects,
+depending on bandwidth selection.
 
 All the three cut-offs are considered (20,000, 40,000 and 60,000), with
-optimal bandwidth chosen following Imbens \& Kalyanaraman (2012).
-Regressions are performed in R software, with rdd package\footnote{Drew
-  Dimmery (2016). rdd: Regression Discontinuity Estimation. R package
-  version 0.57. \url{https://CRAN.R-project.org/package=rdd}} and
-rdmulti package\footnote{Matias D. Cattaneo, Rocio Titiunik and Gonzalo
-  Vazquez-Bare (2020). rdmulti: Analysis of RD Designs with Multiple
-  Cutoffs or Scores. R package version 0.5.
+optimal bandwidth chosen by minimizing the asymptotic mean squared error
+following Calonico \emph{et al.} (2014), Calonico \emph{et al.} (2017)
+and Calonico \emph{et al.} (2018).\footnote{Regressions are performed in
+  R software, with rdmulti package: Matias D. Cattaneo, Rocio Titiunik
+  and Gonzalo Vazquez-Bare (2020). rdmulti: Analysis of RD Designs with
+  Multiple Cutoffs or Scores. R package version 0.6.
   \url{https://CRAN.R-project.org/package=rdmulti}}.
 
-Figure \ref{fig:2} shows a clear jump in velocity cut-offs for the
-entire period. The jump around cut-offs are clear, where municipalities
-just below the population size established in the program face lower
-internet velocities. The first cut-off must be preferable due to sample
-size, as well as pooled weighted estimations, which will also be
-presented in results section.
+Figure \ref{fig:2} shows a clear jump in velocity cutoffs for the entire
+period. The jump around cutoffs are clear, where municipalities just
+below the population size established in the program face lower internet
+velocities.
 
 \begin{figure}
 \centering
@@ -1079,15 +1116,15 @@ presented in results section.
 cut-offs: 20,000; 40,000; 60,000 \label{fig:2}}
 \end{figure}
 
-The McCrary manipulation test of cutoffs (McCrary 2008) looks if there
-is a selection into treatment, analysing the density distribution of the
-running variable around the cutoff. An alternative test was developed by
-Cattaneo \emph{et al.} (2019) and Cattaneo \emph{et al.} (2020), where
-confidence bands are provided, well suited for RDD designs. Results for
-this test are presented in Table \ref{tab:test_tab} Figure
-\ref{fig:test_plot} for all three cutoffs.
+The classical McCrary manipulation test of cutoffs (McCrary 2008) looks
+if there is a selection into treatment, analyzing the density
+distribution of the running variable around the cutoff. An alternative
+test was developed by Cattaneo \emph{et al.} (2019) and Cattaneo
+\emph{et al.} (2020), where confidence bands are provided, well suited
+for RDD designs. Results for this test are presented in Table
+\ref{tab:test_tab} Figure \ref{fig:test_plot} for all three cutoffs.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:test_tab}Cattaneo, Jansson and Ma manipulation test of cutoffs}
 \centering
@@ -1096,11 +1133,11 @@ this test are presented in Table \ref{tab:test_tab} Figure
 \toprule
 Cutoff & Bw & N & Nl & Nr & T (jackknife) & P.value\\
 \midrule
-20,000 & 3,285 & 3,001 & 227 & 145 & 0.265 & 0.791\\
-40,000 & 3,201 & 226 & 42 & 27 & -0.717 & 0.473\\
-60,000 & 9,440 & 115 & 44 & 26 & -1.640 & 0.101\\
+20,000 & 4,768 & 3,001 & 305 & 158 & 2.399 & 0.016\\
+40,000 & 8,245 & 226 & 120 & 58 & -0.692 & 0.489\\
+60,000 & 13,753 & 115 & 47 & 37 & -0.266 & 0.791\\
 \bottomrule
-\multicolumn{7}{l}{\rule{0pt}{1em}Obs.1: Optimum bandwidht selection following Imbens \& Kalyanaraman (2012).}\\
+\multicolumn{7}{l}{\rule{0pt}{1em}Obs.1: Optimum bandwidht selection following Calonico, Cattaneo and Titiunik (2014).}\\
 \multicolumn{7}{l}{\rule{0pt}{1em}Obs.2: Unrestricted density estimation, triangular Kernel and VCE by jackknife.}\\
 \multicolumn{7}{l}{\rule{0pt}{1em}Obs.3: Bw=bandwidth; N, Nl and Nr are total n\# of obs., n\# on the left and n\# on the right.}\\
 \end{tabu}}
@@ -1113,75 +1150,89 @@ Cutoff & Bw & N & Nl & Nr & T (jackknife) & P.value\\
 cutoffs \label{fig:test_plot}}
 \end{figure}
 
-The manipulation test suggests that our identification strategy is
-valid, for all three cutoffs, although the last one in a lower
-significant level, the cutoff with a lower number of observations. As we
-can see on Figure \ref{fig:test_plot}, the visual inspect confirms the
-test results. However, Brazil has an odd population distribution, with
-unexpected jumps in some population ranges. Monasterio (2013) shows that
-these jumps occurs due to a legislation regarding Federal transfers of
-resources to municipalities (\emph{Fundo de Participação dos Municípios
-- FPM}), based on the population size.\footnote{According to the
-  Decree-Law 1,881/1981, there are 17 ranges of population, with
-  increasing resources being distributed for each range. The cuts are:
+The manipulation test, together with Figure \ref{fig:2}, suggests that
+our identification strategy is valid, for all three cutoffs, although
+the last one in a lower significant level (the cutoff with a lower
+number of observations). As we can see on Figure \ref{fig:test_plot},
+the visual inspect confirms the test results. Further, the figure shows
+that Brazil has an odd population distribution, with unexpected jumps in
+some population ranges. Monasterio (2013) shows that these jumps occur
+due to a legislation regarding Federal transfers of resources to
+municipalities (\emph{Fundo de Participação dos Municípios - FPM}),
+based on the population size\footnote{According to the Decree-Law
+  1,881/1981, there are 17 ranges of population, with increasing
+  possibility of resources distribution for each range. The cuts are:
   10,188; 13,584; 16,980; 23,772; 30,564; 37,356; 44,148; 50,940;
   61,128; 71,316; 81,504; 91,692; 101,880; 115,464; 129,048; 142,632;
   156,216. Available in
   \url{http://www.planalto.gov.br/ccivil_03/Decreto-Lei/1965-1988/Del1881.htm}}.
-Despite there are no intersections of Backhaul and FPM's cutoffs, we
-control for the later one, in order to avoid any confounder effect
+Despite there are no intersection of running variable and FPM's cutoffs,
+we control for the later one, in order to avoid any confounder effect
 regarding this situation in results.
 
-\hypertarget{descriptive-statistics}{%
-\subsection{Descriptive statistics}\label{descriptive-statistics}}
+\hypertarget{databases}{%
+\subsection{Databases}\label{databases}}
 
-Despite these clear discontinuities, a set of covariates were collected,
-in order to control for any further confounders that might remain. Lack
-of information at municipal level is one of the weakness in Brazilian
-researches at this territory level. Census occurs only every ten years,
-remaining just few administrative data in the between years, some of
-them with low quality (mainly for small cities). Even tough, considering
-that this is the only source of the main socioeconomic variables, we use
-information from the last two censuses (2000 and 2010), organized by
-Brazilian Institute of Statistics and Geography (IBGE). Also from IBGE,
-we collect total population estimates and GDP. Considering that direct
-cash transfers are important in Brazil, we collect data from the two
-major programs: Bolsa Família (PBF) and Benefício de Prestação
-Continuada for elders (BPC), booth organized by Ministry of
+Outcomes are election results/information, organized by Superior
+Election Court (TSE)\footnote{\emph{Tribunal Superior Eleitoral} in
+  Portuguese.}. We will analyze 2008, 2010 and 2012 elections, covering
+two municipal and one national suffrage. The main outcomes are: turnout,
+percentage of blank or null votes\footnote{In Brazilian election, people
+  may put a blank vote, which are not computed for any candidate and is
+  not considered for official results, as well null votes. The
+  difference consists in the way the registration of these votes are
+  made: the blank vote is available as a button in the electronic
+  ballot, while the null vote occurs when someone enters an invalid
+  candidate number into the ballot and confirms the vote.} and vote
+shares, for left wing parties (as mentioned before, and using Power \&
+Zucco Jr (2012) party index from Brazilian Legislative
+Survey\footnote{Version 7, available in
+  \url{https://dataverse.harvard.edu/dataverse/bls;jsessionid=992eedb7e954a17ef718c7078cf5?widget=dataverse\%40harvard\&q=\&types=dataverses\%3Afiles\%3Adatasets\&sort=dateSort\&order=desc\&page=3}},
+left wing parties are those up to quantile 0.25 of the index, center
+parties are those between 0.25 and 0.75 and right wing are those above),
+a small party and young candidates (under 30 years-old). Also, we look
+to the number of candidates and the budget campaign of a small party and
+young candidates.
+
+Despite the clear discontinuities in the running variable, a set of
+covariates were collected, in order to control for any further
+confounders that might remain. Lack of information at municipal level is
+one of the weakness in Brazilian researches at this territory level.
+Census occurs only every ten years\footnote{When not delayed. The 1990
+  census was postponed to 1991, as well as 2020 census is postponed to
+  2021.}, remaining just few administrative data in the between years,
+some of them with low quality (mainly for small cities). Even tough,
+considering this is the only source of the main socioeconomic variables,
+we use information from the last two censuses (2000 and 2010), organized
+by Brazilian Institute of Statistics and Geography (IBGE). Also from
+IBGE, we collect total population estimates and GDP. Considering that
+direct cash transfers are important in Brazil, we collect data from the
+two major programs: \emph{Bolsa Família} (PBF) and \emph{Benefício de
+Prestação Continuada} for elders (BPC), booth organized by Ministry of
 Citizenship\footnote{PBF is one of the biggest conditional cash transfer
   program in the world. The target are families under the extreme
   poverty and poverty lines (in 2020, families earning up to R\$ 89 by
-  person, or U\$ 15, by month are considered extremely poor, while
+  person, or U\$ 16, by month are considered extremely poor, while
   families above that amount and up to R\$ 178, or U\$ 31, are
   considered poor), focused one children. As counter part, school
   attendance and vaccination are required. PBF reaches around 14 million
   families in Brazil in 2020. On the other hand, BPC is a program for
   elderly and handicapped. The poor population in this profile (people
   aged 65 or over and all handicapped) are eligible for a minimum wage
-  paycheck.}. In addition, we collect the mass of wages (formal labour
-market) from RAIS database, organized by Ministry of Economy\footnote{In
-  Brazil, every formal company have to fill the Annual Relation of
-  Social Information (RAIS), with the profile of all workers they had in
-  the calendar year, including wages.}. We also collected information
-from National Institute of Meteorology, to control for rain and
-temperature in election day, following Fujiwara \emph{et al.} (2016).
-Municipalities were joined by the nearest distance between the center of
-the city and the closest meteorological station.
+  paycheck (R\$ 1.045, or U\$ 184, in 2020).}. In addition, we collect
+the mass of wages (formal labor market) from RAIS database, organized by
+Ministry of Economy\footnote{In Brazil, every formal company have to
+  fill the Annual Relation of Social Information (RAIS), with the
+  profile of all workers they had in the calendar year, including wages.}.
+We also collected information from National Institute of Meteorology, to
+control for rain and temperature in election day, following Fujiwara
+\emph{et al.} (2016). Municipalities were joined by the nearest distance
+between the center of the city and the closest meteorological station.
+Table \ref{tab:variables} summarizes each variable and source.
 
-In addition, we collected data from Ministry of Health regarding
-homicide and suicide, but, due to poor quality of data (missing values),
-we had to discard them. Public finance data were collected too, but
-discarded due to missing problem and for being highly correlated with
-other covariates (like GDP and population). In fact, some of covariates
-were discarded due to high correlation (for example electricity, car and
-computer ownership). Finally, we collected fiscal data, from Ministry of
-Economy, regarding public expenses (current expenses and investments),
-but again due to missing data and high correlation with other covariates
-(like GDP and mass of wages) these variables were dropped too.
+\begin{table}[!h]
 
-\begin{table}[H]
-
-\caption{\label{tab:variables}Description of varibles by type and source}
+\caption{\label{tab:variables}Variables, description and source, by type}
 \centering
 \fontsize{9}{11}\selectfont
 \begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright}X>{\raggedright\arraybackslash}p{2.5cm}}
@@ -1228,55 +1279,44 @@ Running & Population & Estimated population & IBGE\\
 
  & Rain & Rain preciptation in election day & Inmet\\
 
-\multirow{-16}{1.5cm}{\raggedright\arraybackslash Controls} & Fibra-optic & Fibra-optic internet infrasctructure in municipality & Anatel\\
+ & Fibra-optic & Fibra-optic internet infrasctructure in municipality & Anatel\\
+
+\multirow{-17}{1.5cm}{\raggedright\arraybackslash Controls} & FPM & FPM transfer per capita & Treasury\\
 \bottomrule
-\multicolumn{4}{l}{\rule{0pt}{1em}Source: IBGE, Inmet, ME (Ministry of Economy), MC (Ministry of Citizenship) and Anatel.}\\
+\multicolumn{4}{l}{\rule{0pt}{1em}Source: TSE, IBGE, Inmet, ME (Ministry of Economy), MC (Ministry of Citizenship) and Anatel.}\\
 \end{tabu}
 \end{table}
 
-Outcomes are election results, organized by Superior Election Court
-(TSE)\footnote{\emph{Tribunal Superior Eleitoral} in Portuguese.}. We
-will analyze 2008, 2010 and 2012 elections, covering two municipal and
-one national suffrage. The main outcomes we will analyze are: turnout,
-percentage of blank or null votes\footnote{In Brazilian election, people
-  may put a blank vote, which are not computed for any candidate and is
-  not considered for official results, as well null votes. The
-  difference consists in the way the registration of these votes are
-  made: the blank vote is available as a button in the electronic
-  ballot, while the null vote occurs when someone enters an invalid
-  candidate number into the ballot and confirms the vote.} and vote
-shares, for left wing, center or right wing parties (following Power \&
-Zucco Jr (2012) and the party index from Brazilian Legislative
-Survey\footnote{Version 7, available in
-  \url{https://dataverse.harvard.edu/dataverse/bls;jsessionid=992eedb7e954a17ef718c7078cf5?widget=dataverse\%40harvard\&q=\&types=dataverses\%3Afiles\%3Adatasets\&sort=dateSort\&order=desc\&page=3}}.
-Left wing parties are those up to quantile 0.25 of the party index,
-center parties are those between 0.25 and 0.75 and right wing parties
-are those above).
+\hypertarget{descriptive-statistics}{%
+\subsection{Descriptive statistics}\label{descriptive-statistics}}
 
-Descriptive statistics are separated by year (2008, 2010 and 2012),
-considering 2000 Census data for 2008 statistics and 2010 Census for
-2010 and 2012. All the other variables refers to the respective year.
+Descriptive statistics are separated by population ranges, considering
+the cutoffs (under 20,000, between 20,000 and 40,000, between 40,000 and
+60,000 and above 60,000). Table \ref{tab:desc.2008} shows the figures
+for 2008 year.
 
-\begin{table}[H]
+\begin{table}[!h]
 
 \caption{\label{tab:desc.2008}Descriptive statistics by population size of municipality, 2008}
 \centering
+\fontsize{9}{11}\selectfont
 \begin{tabu} to \linewidth {>{\raggedright\arraybackslash}p{4cm}>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
 \toprule
 Variable & Under 20k & Above 20k to 40k & Above 40k to 60k & Above 60k\\
 \midrule
+60\_anos\_2000 & 0.1 & 0.1 & 0.1 & 0.1\\
 Avg. Temperature & 24.2 & 25.6 & 26.4 & 27.2\\
 Black & 53.4 & 65.5 & 68.1 & 68.6\\
 BPC & 0.3 & 0.8 & 0.8 & 0.9\\
 College & 0.7 & 0.6 & 0.6 & 0.8\\
 Fiber-optic & 23.1 & 34.2 & 33.6 & 47.2\\
 Formal Wages & 11.5 & 11.5 & 12.8 & 13.8\\
-GDP & 57,285 & 187,775 & 306,319 & 856,740\\
+FPM & 742.9 & 326 & 261.3 & 214.3\\
+GDP & 7.8 & 6.9 & 6.3 & 8.2\\
+Income & 603.2 & 549.6 & 555.2 & 645.2\\
 Married & 30 & 24.1 & 22 & 22.5\\
-Median Income & 603.2 & 549.6 & 555.2 & 645.2\\
 PBF & 2.5 & 3 & 2.6 & 2\\
-Pop. over 60 years & 9.9 & 8.5 & 8 & 7\\
-Population & 8,042 & 27,272 & 47,976 & 97,096\\
+pop\_anterior & 8041.5 & 27272.5 & 47975.6 & 97096\\
 Radio & 79.3 & 75.4 & 75.6 & 76.1\\
 Rain (elect. day) & 3.3 & 1.7 & 1.9 & 2.9\\
 Rural & 49.8 & 46.6 & 40.3 & 32.2\\
@@ -1288,765 +1328,1058 @@ Observations & 2,733 & 520 & 107 & 72\\
 \end{tabu}
 \end{table}
 
-All three tables show a high heterogeneity in Brazil. Regional
-inequalities, as pointed before, are particularly important and should
-be considered in standard error estimates. It is very likely that
-municipalities in the northeast and in the south regions show different
-behavior that may possibly affect error distributions, that should be
-addressed by, for example, clustered standard errors, strategy we adopt
-here.
+We notice that municipalities under 20,000 inhabitants have less
+percentage of blacks, BPC transfers and fiber-optic technology
+penetration, while more population in working age, in rural areas,
+ownership of radio, population over 60 years and married people.
 
 In order to clarify identification validity, Table \ref{tab:t.test}
-presents a simple t-test for 20,000 population with a 5,000 people
-(adhoc) cutoff. Since this is the cutoff with larger sample size,
-results should be more robust.
+presents a simple t-test for 20,000 population cutoff with a 3,285
+cutoff, the same used before in the manipulation test.
 
-\begin{table}[H]
+\begin{table}[!h]
 
-\caption{\label{tab:t.test}Covariates means difference test for 20,000 cutoff, 2008, 2010 and 2012}
+\caption{\label{tab:t.test}Covariates means difference t test for 20,000 cutoff, 2008, 2010 and 2012}
 \centering
+\fontsize{9}{11}\selectfont
 \begin{tabu} to \linewidth {>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedright}X}
 \toprule
-Var & Diff 2008 & Diff 2010 & Diff 2012\\
+Variable & Diff 2008 & Diff 2010 & Diff 2012\\
 \midrule
-renda\_med\_2000 & 15.3 & -88.0*** & -47.7*\\
-60\_anos\_2000 & 0.02 & 0.02 & 0.17\\
-rural\_2000 & 3.56* & 7.26*** & 5.35***\\
-negro\_2000 & -2.25 & 2.29* & 0.66\\
-radio\_2000 & -0.33 & -1.57* & -0.54\\
-televisao\_2000 & -1.81 & -2.34*** & -1.67**\\
-ens\_sup\_2000 & 0.07 & -0.28** & -0.17*\\
-casado\_2000 & 0.52 & -0.07 & 0.19\\
-pea\_2000 & -0.14 & -2.25*** & -0.89\\
-PRECIP\_DIA & 0.0 & 0.3 & 0.1\\
-TEMP\_MED & -0.1 & 0.2 & 0.3\\
-valor\_bolsa & 0.19 & 0.68*** & 0.55**\\
-valor\_bpc\_idoso & -0.23** & -0.25*** & -0.15\\
-PIB & -7,108.4 & -74,974.7** & -91,131.7*\\
-salarios\_rais & -1.30*** & -1.35* & -0.99\\
-fibra & -8.71** & -6.22 & -5.32\\
+Median Income & 5.7 & -92.6*** & -38.4\\
+Pop. over 60 years & -0.11 & -0.03 & 0.23\\
+Rural & 4.59** & 6.84*** & 4.28**\\
+Black & -1.51 & 2.44 & 0.29\\
+Radio & -1.20 & -1.10 & 0.16\\
+Television & -3.48* & -1.91** & -1.11\\
+College & 0.03 & -0.26** & -0.16\\
+Married & 0.05 & 0.02 & 0.66\\
+Working Pop. & -0.73 & -2.22*** & -0.77\\
+Rain (elect. day) & -0.2 & 0.1 & 0.0\\
+Avg. Temperature & 0.0 & 0.4 & 0.2\\
+PBF & 0.24 & 0.67*** & 0.48**\\
+BPC & -0.22** & -0.27*** & -0.14\\
+GDP & 0.8 & -2.6 & -1.7\\
+Formal Wages & -1.73*** & -1.18* & -0.91\\
+Fiber-optic & -8.00* & -3.67 & -3.72\\
+FPM transfer (pc) & 51.5*** & 53.2*** & 73.4***\\
+N. Obs & 380 & 383 & 384\\
 \bottomrule
 \multicolumn{4}{l}{\rule{0pt}{1em}Source: IBGE, Inmet, ME, MC and Anatel.}\\
 \multicolumn{4}{l}{\rule{0pt}{1em}Obs.1: Null hypotheses is no difference.}\\
 \multicolumn{4}{l}{\rule{0pt}{1em}Obs.2: * = significant at 10\%; ** = significant at 5\%; *** = significant at 1\%.}\\
-\multicolumn{4}{l}{\rule{0pt}{1em}Obs.3: Bandwidth: 3,500}\\
+\multicolumn{4}{l}{\rule{0pt}{1em}Obs.3: Bandwidth: 3,285}\\
 \end{tabu}
 \end{table}
 
 Results for 2008 year in Table \ref{tab:t.test} (which, indeed, refers
 to 2000 census for socioeconomic variables) show that there were no
 significant differences for most of the characteristics between
-municipalities just above and just below the cut-off, except for the
-population (and velocity), as expected. Some results, however, do not
-hold in 2010 and 2012, years with values collected from 2010 census and,
-hence, closer to the years of analysis. Some covariates, like formal
-wages and BPC seems to be different across municipalities, while other
-covariates changes its significance in 2010 and 2012 samples. Overall,
+municipalities just above and just below the cutoff, except for formal
+wages (at 1\% of significance), BPC and rural population (at 5\% of
+significance), fiber-optic and television (at 10\% of significance).
+Some results, however, do not hold in 2010, year with values collected
+from 2010 census and, hence, closer to the year of analysis. Some
+covariates, like median income, rural areas, working age population BPC
+and PBF seems to be different across municipalities, although in a low
+absolute difference for the most of then. Results for 2012 is more
+similar to those observed in 2000, for the most of variables. Overall,
 Table \ref{tab:t.test} results suggests that our identification strategy
-should work, if controlled for some covariates, and even more if applied
-to a narrow cutoff (which will be the case).
+should work, if controlled for covariates.
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
-We begin our analysis of results looking the effects of broadband in
-participation. Considering that there are two rounds for two types of
-offices, mayor and president, and some municipalities might not have a
-second round, we focus only in the first one, using, hence, the larger
-sample size as possible.
+Considering that there are two rounds for two types of offices, mayor
+and president, and some municipalities might not have a second round, we
+focus only on the first one, using, hence, the larger sample size as
+possible. In tables results, there are always three election years,
+where two are local (2008 and 2012) and the other is national (2010). A
+summary of first stage of fuzzy RDD regressions are reported in Table
+\ref{tab:reg.fs2} in Appendix, all of then supporting the identification
+strategy.
 
-Results in Table \ref{tab:reg.part} suggest no relationship between
-broadband internet and participation in elections. For all regressions,
-considering the three cutoffs, and pooled results, only two showed
-significant relationship. Since participation in elections is mandatory
-in Brazil, and turnout is relatively high (around 80\%), there is no
-much room to improve this situation. These results are in line with
-Menezes (2015) for Brazil, as well as results reported by Miner (2015)
-for Malaysia, but differs from results reported in USA and European
-countries (Jaber 2013; Falck \emph{et al.} 2014; Gavazza \emph{et al.}
-2015; Campante \emph{et al.} 2017). Another way to look to this
-relationship is the difference in turnout between elections, presented
-in Table \ref{tab:reg.part.dif}.
+We begin our analysis of results looking to the effects of broadband
+internet in participation. Results in Table \ref{tab:reg.part} suggest
+no relationship between the velocity of this technology and
+participation in elections. For all regressions, considering the three
+cutoffs and the three years, only one had a slightly significant result
+(2010, for 60,000 inhabitants). Since participation in elections is
+mandatory in Brazil, and turnout is relatively high (around 80\%), maybe
+there is no much room to improve this situation. These results are in
+line with Menezes (2015) for Brazil, as well as results reported by
+Miner (2015) for Malaysia, but differ from results reported in USA and
+European countries (Jaber 2013; Falck \emph{et al.} 2014; Gavazza
+\emph{et al.} 2015; Campante \emph{et al.} 2017), where vote is not
+mandatory, and, hence, an important institutional difference when
+analyzing this result.
 
-\begin{table}[H]
+\begin{table}[!h]
 
-\caption{\label{tab:reg.part}RDD regression results for turnout. Election years: 2008, 2010 and 2012. Brazil}
+\caption{\label{tab:reg.part}Fuzzy-RDD regression results for turnout. Election years: 2008, 2010 and 2012}
 \centering
-\begin{tabular}[t]{lllrrrrrr}
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
 \toprule
-Year & Cutoff & Type & Bw & Obs. & Estimates & SE & p.value & Weight\\
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
 \midrule
- &  & With covariates & 3,285 & 380 & 0.001 & 0.002 & 0.608 & 0.814\\
+ & 20,000 & 3,584 & 401 & 0.003 & 0.010 & 0.634\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,285 & 380 & 0.002 & 0.002 & 0.225 & 0.814\\
+ & 40,000 & 11,403 & 265 & 0.003 & 0.004 & 0.229\\
 
 
- &  & With covariates & 3,201 & 58 & 0.006 & 0.005 & 0.268 & 0.138\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 16,997 & 126 & -0.002 & 0.003 & 0.168\\
+
+\cmidrule{1-7}
+ & 20,000 & 4,924 & 554 & -0.001 & 0.006 & 0.493\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,201 & 58 & 0.002 & 0.001 & 0.001 & 0.138\\
+ & 40,000 & 12,191 & 302 & 0.001 & 0.002 & 0.419\\
 
 
- &  & With covariates & 9,440 & 67 & -0.001 & 0.001 & 0.248 & 0.049\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2010} & 60,000 & 23,183 & 200 & 0.002 & 0.001 & 0.071\\
+
+\cmidrule{1-7}
+ & 20,000 & 10,735 & 1,335 & 0.002 & 0.003 & 0.507\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 9,440 & 67 & -0.004 & 0.004 & 0.377 & 0.049\\
+ & 40,000 & 6,617 & 143 & 0.001 & 0.010 & 0.870\\
 
 
- &  & With covariates & 5,930 & 847 & 0.000 & 0.000 & 0.568 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2008} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 5,593 & 783 & 0.000 & 0.000 & 0.439 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 2,939 & 352 & -0.004 & 0.006 & 0.438 & 0.815\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 2,939 & 352 & 0.007 & 0.007 & 0.267 & 0.815\\
-
-
- &  & With covariates & 3,769 & 79 & 0.010 & 0.028 & 0.711 & 0.138\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,769 & 79 & -0.001 & 0.004 & 0.880 & 0.138\\
-
-
- &  & With covariates & 7,547 & 58 & 0.009 & 0.009 & 0.313 & 0.047\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 7,547 & 58 & 0.003 & 0.003 & 0.216 & 0.047\\
-
-
- &  & With covariates & 4,032 & 568 & -0.018 & 0.004 & 0.903 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2010} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 3,225 & 464 & -0.011 & 0.001 & 0.841 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 2,133 & 224 & 0.023 & 0.007 & 0.002 & 0.796\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 2,133 & 224 & 0.446 & 6.514 & 0.945 & 0.796\\
-
-
- &  & With covariates & 3,749 & 76 & 0.003 & 0.002 & 0.201 & 0.159\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,749 & 76 & -0.004 & 0.008 & 0.568 & 0.159\\
-
-
- &  & With covariates & 7,622 & 65 & -0.004 & 0.006 & 0.479 & 0.045\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 7,622 & 65 & -0.001 & 0.001 & 0.464 & 0.045\\
-
-
- &  & With covariates & 2,753 & 394 & -0.005 & 0.000 & 0.368 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2012} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 2,781 & 397 & -0.006 & 0.000 & 0.433 & 1.000\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 11,631 & 95 & 0.001 & 0.003 & 0.649\\
 \bottomrule
-\multicolumn{9}{l}{\rule{0pt}{1em}Standard Errors are clustered by regions}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Turnout for first round}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Bw=bandwidth}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}LATE estimates.}\\
 \end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Turnout for the first round. Results with controls listed in Table 10
+\end{tablenotes}
+\end{threeparttable}
 \end{table}
 
-Results suggests that broadband did not changed turnout rate between
-elections in Brazil. It is an interesting result since a new possibility
-of leisure, at least apparently, did not reduce people participation in
-elections. However, in another backgrounds, where participation in
-elections are not mandatory, results may be different (like in Germany
-and UK, showed by Falck \emph{et al.} (2014) and Gavazza \emph{et al.}
-(2015), respectively).
-
-\begin{table}[H]
-
-\caption{\label{tab:reg.part.dif}RDD regression results for difference in turnout. Election years: 2008, 2010 and 2012}
-\centering
-\begin{tabular}[t]{lllrrrrrr}
-\toprule
-Year & Cutoff & Type & Bw & Obs. & Estimates & SE & p.value & Weight\\
-\midrule
- &  & With covariates & 3,921 & 389 & -0.002 & 0.002 & 0.244 & 0.890\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,921 & 389 & -0.004 & 0.005 & 0.456 & 0.890\\
-
-
- &  & With covariates & 3,418 & 63 & -0.001 & 0.003 & 0.737 & 0.159\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,418 & 63 & 0.001 & 0.001 & 0.288 & 0.159\\
-
-
- &  & With covariates & 11,298 & 71 & -0.001 & 0.000 & 0.186 & 0.052\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 11,298 & 71 & -0.004 & 0.003 & 0.105 & 0.052\\
-
-
- &  & With covariates & 8,037 & 1,073 & 0.002 & 0.000 & 0.323 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2008} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 8,085 & 1,079 & 0.002 & 0.000 & 0.341 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 3,787 & 436 & -0.001 & 0.003 & 0.612 & 0.796\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,787 & 436 & 0.003 & 0.002 & 0.097 & 0.796\\
-
-
- &  & With covariates & 3,170 & 63 & 0.005 & 0.014 & 0.748 & 0.150\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,170 & 63 & 0.001 & 0.006 & 0.894 & 0.150\\
-
-
- &  & With covariates & 6,268 & 46 & -0.003 & 0.001 & 0.000 & 0.054\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 6,268 & 46 & 0.005 & 0.005 & 0.350 & 0.054\\
-
-
- &  & With covariates & 5,807 & 856 & 0.006 & 0.000 & 0.579 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2010} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 4,814 & 681 & 0.011 & 0.004 & 0.553 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 4,285 & 464 & 0.003 & 0.001 & 0.020 & 0.822\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 4,285 & 464 & 0.004 & 0.002 & 0.049 & 0.822\\
-
-
- &  & With covariates & 3,911 & 75 & 0.006 & 0.005 & 0.233 & 0.155\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,911 & 75 & -0.001 & 0.002 & 0.648 & 0.155\\
-
-
- &  & With covariates & 9,312 & 79 & -0.004 & 0.013 & 0.753 & 0.055\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 9,312 & 79 & -0.003 & 0.005 & 0.572 & 0.055\\
-
-
- &  & With covariates & 3,950 & 526 & -0.002 & 0.000 & 0.831 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2012} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 3,908 & 523 & -0.002 & 0.000 & 0.899 & 1.000\\
-\bottomrule
-\multicolumn{9}{l}{\rule{0pt}{1em}Standard Errors are clustered by regions}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Turnout for first round}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Bw=bandwidth}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}LATE estimates.}\\
-\end{tabular}
-\end{table}
+Seeing from a different perspective, the new possibility of leisure did
+not reduce people participation in elections. In other backgrounds,
+where participation in elections are not mandatory, results may be
+different (like in Germany and UK, showed by Falck \emph{et al.} (2014)
+and Gavazza \emph{et al.} (2015), respectively with negative effects).
 
 The next outcome regards to the percentage of blank or null votes (Table
-\ref{tab:r.pct.bn}). Again, there is little support in favor of the
-influence of broadband internet in blank or null votes (a \emph{proxy}
-for ``absence of engagement with political process'', since these votes
-can be seen as a ``whatever vote''). So, results so far suggests that
+\ref{tab:r.pct.bn}). Again, there no support in favor of the influence
+of broadband internet in this type of votes (a \emph{proxy} for
+``absence of engagement with political process'', since these votes can
+be seen as a ``whatever vote''). So, results so far suggests that
 broadband did not encourage or discourage people to turnout neither
 people to place more directed votes in elections (again in accordance to
 Menezes (2015) results).
 
-\begin{table}[H]
+\begin{table}[!h]
 
-\caption{\label{tab:r.pct.bn}RDD regression results for blank of null votes. Election years: 2008, 2010 and 2012}
+\caption{\label{tab:r.pct.bn}RDD-fuzzy regression results for blank or null votes. Election years: 2008, 2010 and 2012. Offices: president and mayors.}
 \centering
-\begin{tabular}[t]{lllrrrrrr}
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
 \toprule
-Year & Cutoff & Type & Bw & Obs. & Estimates & SE & p.value & Weight\\
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
 \midrule
- &  & With covariates & 3,624 & 212 & 0.009 & 0.013 & 0.465 & 0.781\\
+ & 20,000 & 4,250 & 471 & -0.095 & 0.136 & 0.752\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,624 & 212 & -0.016 & 0.055 & 0.771 & 0.781\\
+ & 40,000 & 11,989 & 282 & 0.000 & 0.003 & 0.565\\
 
 
- &  & With covariates & 3,171 & 40 & 0.014 & 0.031 & 0.663 & 0.167\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 20,209 & 147 & 0.001 & 0.004 & 0.490\\
+
+\cmidrule{1-7}
+ & 20,000 & 4,098 & 461 & 0.004 & 0.004 & 0.182\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,171 & 40 & 0.000 & 0.004 & 0.967 & 0.167\\
+ & 40,000 & 9,872 & 251 & 0.002 & 0.004 & 0.320\\
 
 
- &  & With covariates & 13,386 & 58 & -0.009 & 0.022 & 0.676 & 0.052\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2010} & 60,000 & 18,868 & 152 & 0.000 & 0.001 & 0.877\\
+
+\cmidrule{1-7}
+ & 20,000 & 3,681 & 413 & 0.023 & 0.027 & 0.196\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 13,386 & 58 & 0.001 & 0.008 & 0.856 & 0.052\\
+ & 40,000 & 14,408 & 394 & -0.002 & 0.005 & 0.677\\
 
 
- &  & With covariates & 5,064 & 384 & 0.000 & 0.000 & 0.918 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2008} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 5,293 & 401 & 0.000 & 0.000 & 0.879 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 3,341 & 389 & 0.004 & 0.002 & 0.088 & 0.802\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,341 & 389 & -0.004 & 0.002 & 0.011 & 0.802\\
-
-
- &  & With covariates & 3,682 & 74 & -0.001 & 0.002 & 0.652 & 0.148\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,682 & 74 & 0.000 & 0.005 & 0.962 & 0.148\\
-
-
- &  & With covariates & 8,379 & 65 & 0.000 & 0.000 & 0.833 & 0.050\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 8,379 & 65 & 0.000 & 0.001 & 0.845 & 0.050\\
-
-
- &  & With covariates & 5,812 & 858 & -0.005 & 0.000 & 0.409 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2010} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 4,262 & 595 & 0.066 & 2.042 & 0.696 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 2,529 & 163 & 1.659 & 91.191 & 0.985 & 0.772\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 2,529 & 163 & -0.020 & 0.028 & 0.472 & 0.772\\
-
-
- &  & With covariates & 3,304 & 47 & 0.015 & 0.011 & 0.186 & 0.162\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,304 & 47 & 0.018 & 0.018 & 0.315 & 0.162\\
-
-
- &  & With covariates & 12,260 & 72 & 0.211 & 4.966 & 0.966 & 0.066\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 12,260 & 72 & -0.124 & 1.543 & 0.936 & 0.066\\
-
-
- &  & With covariates & 3,556 & 299 & 0.003 & 0.000 & 0.676 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2012} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 3,611 & 302 & 0.003 & 0.000 & 0.685 & 1.000\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 13,801 & 107 & 0.034 & 0.170 & 0.822\\
 \bottomrule
-\multicolumn{9}{l}{\rule{0pt}{1em}Standard Errors are clustered by regions.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}For mayor elections (2008 and 2012) and presidential election (2010).}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Bw=bandwidth.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}LATE estimates.}\\
 \end{tabular}
-\end{table}
-
-No huge changes are observed when we look to the differences in these
-percentages between elections (Table \ref{tab:r.pct.bn.dif}).
-
-\begin{table}[H]
-
-\caption{\label{tab:r.pct.bn.dif}RDD regression results for difference in blank of null votes. Election years: 2008, 2010 and 2012}
-\centering
-\begin{tabular}[t]{lllrrrrrr}
-\toprule
-Year & Cutoff & Type & Bw & Obs. & Estimates & SE & p.value & Weight\\
-\midrule
- &  & With covariates & 3,967 & 117 & 0.016 & 0.013 & 0.211 & 0.753\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,967 & 117 & -0.112 & 1.073 & 0.917 & 0.753\\
-
-
- &  & With covariates & 3,767 & 32 & 0.005 & 0.003 & 0.149 & 0.191\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,767 & 32 & 0.001 & 0.001 & 0.062 & 0.191\\
-
-
- &  & With covariates & 25,181 & 82 & -0.001 & 0.001 & 0.568 & 0.057\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 25,181 & 82 & -0.001 & 0.001 & 0.325 & 0.057\\
-
-
- &  & With covariates & 4,721 & 194 & 0.002 & 0.000 & 0.594 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2008} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 6,803 & 299 & 0.001 & 0.000 & 0.796 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 3,727 & 428 & 0.002 & 0.002 & 0.196 & 0.798\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,727 & 428 & 0.001 & 0.002 & 0.508 & 0.798\\
-
-
- &  & With covariates & 3,433 & 67 & -0.001 & 0.003 & 0.771 & 0.149\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,433 & 67 & -0.002 & 0.007 & 0.745 & 0.149\\
-
-
- &  & With covariates & 9,434 & 70 & 0.001 & 0.000 & 0.002 & 0.053\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 9,434 & 70 & 0.000 & 0.000 & 0.000 & 0.053\\
-
-
- &  & With covariates & 7,162 & 1,065 & 0.001 & 0.000 & 0.257 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2010} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 5,313 & 774 & 0.005 & 0.000 & 0.268 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 2,633 & 124 & 0.108 & 0.226 & 0.633 & 0.759\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 2,633 & 124 & -0.243 & 1.203 & 0.840 & 0.759\\
-
-
- &  & With covariates & 2,721 & 38 & 0.014 & 0.012 & 0.226 & 0.181\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 2,721 & 38 & 0.023 & 0.015 & 0.135 & 0.181\\
-
-
- &  & With covariates & 15,880 & 78 & -0.085 & 0.714 & 0.906 & 0.060\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 15,880 & 78 & -0.026 & 0.051 & 0.613 & 0.060\\
-
-
- &  & With covariates & 8,256 & 607 & -0.013 & 0.002 & 0.572 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2012} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 6,084 & 432 & 0.004 & 0.001 & 0.786 & 1.000\\
-\bottomrule
-\multicolumn{9}{l}{\rule{0pt}{1em}Standard Errors are clustered by regions.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}For mayor elections (2008 and 2012) and presidential election (2010).}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Bw=bandwidth.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}LATE estimates.}\\
-\end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10
+\end{tablenotes}
+\end{threeparttable}
 \end{table}
 
 In last presidential elections (2018), polarization was dramatic in
 Brazil. Left versus Right debate was at the center of the presidential
 run, with the last four times presidential winner party (the left wing
-Workers Party -- PT) being the main target. In fact, 2014 elections was
-one of the closest seen in Brazil, when Mrs.~Rouseff defeated Mr.~Neves
-(from central right Brazilian Social Democracy Party -- PSDB) with only
-51.64\% of the valid votes in the second round. Internet may had a
-important role in this scenario, since, back in 2010, Mr.~Lula da Silva,
-the first president of Workers Party, had 80\% of presidency approval,
-the highest value ever recorded.\footnote{A news about these figures are
-  available in:
+Workers Party -- PT) being the main target. Before that, the 2014
+elections was one of the closest seen in Brazil, when Mrs.~Rouseff
+defeated Mr.~Neves (from central right Brazilian Social Democracy Party
+-- PSDB) with only 51.64\% of the valid votes in the second round.
+Internet may had an important role in this scenario, since, back in
+2010, Mr.~Lula da Silva, the first president of Workers Party, had 80\%
+of presidency approval, the highest value ever recorded.\footnote{A news
+  about these figures are available in:
   \url{http://g1.globo.com/politica/noticia/2010/12/popularidade-de-lula-bate-recorde-e-chega-87-diz-ibope.html}}
 
-Hence, a closer look at the relationship between broadband and vote
-share of left parties since 2008 might shed light into this turnaround
-in Brazil. As pointed before, vote shares were classified as left,
-center or right based on Power \& Zucco Jr (2012) party index. Table
-\ref{tab:parties} presents this organization.
+Hence, a closer look at the relationship between broadband velocity and
+vote share of left parties since 2008 might shed light into this
+turnaround in Brazil. As pointed before, vote shares were classified as
+left, center or right based on Power \& Zucco Jr (2012) party index.
 
-Results suggests, once again, that there is no clear relationship
-between broadband internet and the vote received by left wing parties in
-elections for mayors and president (Table \ref{tab:r.pct.vote}). So,
-unlike results reported by previous studies, there is little evidence of
-important effects of internet on vote shares, at least when fixed
-broadband is considered (Jaber 2013; Falck \emph{et al.} 2014; Gavazza
-\emph{et al.} 2015; Campante \emph{et al.} 2017).
+Results suggests, once again, that there is no relationship between
+broadband internet speed and the vote share received by left wing
+parties in elections for president and mayors (Table
+\ref{tab:r.pct.vote}). So, unlike results reported by previous studies
+(Jaber 2013; Falck \emph{et al.} 2014; Gavazza \emph{et al.} 2015;
+Campante \emph{et al.} 2017), there is little evidence of important
+effects of internet on vote shares, at least when fixed broadband is
+considered.
+
+\begin{table}[!h]
+
+\caption{\label{tab:r.pct.vote}Fuzzy-RDD regression results for left wing parties vote share. Election years: 2008, 2010 and 2012. Offices: president and mayors.}
+\centering
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
+\toprule
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
+\midrule
+ & 20,000 & 3,723 & 217 & -0.269 & 2.040 & 0.940\\
+
+
+ & 40,000 & 12,974 & 195 & -0.009 & 0.034 & 0.919\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 26,281 & 143 & -0.001 & 0.004 & 0.809\\
+
+\cmidrule{1-7}
+ & 20,000 & 4,810 & 542 & -0.003 & 0.011 & 0.820\\
+
+
+ & 40,000 & 7,651 & 175 & -0.025 & 0.319 & 0.800\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2010} & 60,000 & 21,243 & 183 & 0.003 & 0.003 & 0.243\\
+
+\cmidrule{1-7}
+ & 20,000 & 3,693 & 237 & -0.229 & 1.285 & 0.484\\
+
+
+ & 40,000 & 12,756 & 212 & -0.006 & 0.016 & 0.876\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 15,286 & 87 & -0.048 & 0.127 & 0.497\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Despite results suggest no relationship between left wing parties and
+votes, some smaller parties, that face narrow campaign budgets, could
+use broadband internet to reach more people at lower costs. Table
+\ref{tab:r.pct.psol} presents the vote share of PSOL party for local
+legislators (\emph{vereador}) and federal deputy (\emph{deputado
+federal}), offices with more number of candidates\footnote{Executive
+  offices campaigns are more expensive and parties usually support each
+  other to improve winning chances, forming blocks (\emph{coligações}).}.
+PSOL (\emph{Partido Socialismo e Liberdade}\footnote{Socialism and
+  Liberty Party.}) is a relatively recent left wing party, formed in
+2004 with dissidents from PT, which makes an interesting case of study.
+
+\begin{table}[!h]
+
+\caption{\label{tab:r.pct.psol}RDD-fuzzy regression results for PSOL vote share. Election years: 2008, 2010 and 2012. Offices: local legislator and federal deputy.}
+\centering
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
+\toprule
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
+\midrule
+ & 20,000 & 13,955 & 66 & -0.0016 & 0.0017 & 0.6262\\
+
+
+ & 40,000 & 27,243 & 84 & 0.0000 & 0.0006 & 0.3531\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 38,619 & 71 & 0.0009 & 0.0030 & 0.7607\\
+
+\cmidrule{1-7}
+ & 20,000 & 6,802 & 772 & -0.0004 & 0.0002 & 0.0119\\
+
+
+ & 40,000 & 13,581 & 358 & 0.0002 & 0.0002 & 0.0250\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2010} & 60,000 & 20,984 & 179 & -0.0001 & 0.0001 & 0.0789\\
+
+\cmidrule{1-7}
+ & 20,000 & 9,708 & 77 & 0.0029 & 0.0187 & 0.8564\\
+
+
+ & 40,000 & 12,799 & 62 & 0.0003 & 0.0017 & 0.8727\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 17,647 & 42 & 0.0010 & 0.0038 & 0.5404\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Results suggests a negative effect, for two out the three cutoffs, in
+2010 national elections, but with a limited effect in terms of
+percentage of votes. Menezes (2015), reports positive effects for small
+and third-placed parties, also for 2010 elections, which is, somewhat
+related with results found here, at least in significant results (not in
+magnitude or direction).
+
+Another possible effect could be seen in votes for young candidates
+(under 30 years), who could take better advantage of broadband internet
+due to familiarity to new technologies. Table \ref{tab:r.votos_jovens}
+presents the vote share of local legislators (\emph{vereador}) and
+federal deputy, who also have more candidates running than for executive
+offices.
+
+\begin{table}[!h]
+
+\caption{\label{tab:r.votos_jovens}RDD-fuzzy regression results for young candidates (under 30 years-old). Election years: 2008, 2010 and 2012. Offices: local legislator and federal deputy.}
+\centering
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
+\toprule
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
+\midrule
+ & 20,000 & 4,621 & 506 & -0.090 & 0.261 & 0.909\\
+
+
+ & 40,000 & 13,638 & 333 & 0.004 & 0.006 & 0.180\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 10,466 & 71 & 0.002 & 0.002 & 0.135\\
+
+\cmidrule{1-7}
+ & 20,000 & 3,147 & 368 & 0.009 & 0.014 & 0.288\\
+
+
+ & 40,000 & 11,604 & 281 & -0.002 & 0.012 & 0.752\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2010} & 60,000 & 7,021 & 55 & 0.000 & 0.001 & 0.795\\
+
+\cmidrule{1-7}
+ & 20,000 & 4,319 & 474 & -0.011 & 0.013 & 0.206\\
+
+
+ & 40,000 & 4,806 & 102 & -0.341 & 25.000 & 0.878\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 12,816 & 102 & 0.013 & 0.050 & 1.000\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Results suggests no relationship between broadband internet speed and
+vote share for young candidates, in any year or cutoff, meaning that
+this technology seems have not helped in electoral performance of
+younger.
+
+We now investigate two outcomes not related to ballots directly, but
+with candidates participation and budget. Table \ref{tab:r.pct.ncand}
+present results for the first, only for 2008 and 2012 years, since in
+national elections candidates do not run representing cities or
+districts.
 
 \begin{table}[H]
 
-\caption{\label{tab:r.pct.vote}RDD regression for left wing parties vote share. Election years: 2008, 2010 and 2012}
+\caption{\label{tab:r.pct.ncand}RDD-fuzzy regression results for number of candidates. Election years: 2008, 2010 and 2012. Offices: local legislator and federal deputy.}
 \centering
-\begin{tabular}[t]{lllrrrrrr}
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
 \toprule
-Year & Cutoff & Type & Bw & Obs. & Estimates & SE & p.value & Weight\\
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
 \midrule
- &  & With covariates & 3,661 & 212 & -0.043 & 0.035 & 0.223 & 0.785\\
+ & 20,000 & 4,309 & 476 & 0.645 & 0.969 & 0.846\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,661 & 212 & -0.126 & 0.297 & 0.670 & 0.785\\
+ & 40,000 & 11,976 & 282 & -0.103 & 0.190 & 0.519\\
 
 
- &  & With covariates & 3,597 & 48 & 0.017 & 0.083 & 0.835 & 0.159\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 28,290 & 262 & 0.006 & 0.032 & 0.758\\
+
+\cmidrule{1-7}
+ & 20,000 & 12,800 & 1,680 & 0.000 & 0.028 & 0.822\\
 
 
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,597 & 48 & 0.004 & 0.015 & 0.814 & 0.159\\
+ & 40,000 & 6,637 & 143 & 0.166 & 0.513 & 0.661\\
 
 
- &  & With covariates & 14,064 & 64 & 0.017 & 0.027 & 0.523 & 0.056\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 14,064 & 64 & 0.001 & 0.002 & 0.719 & 0.056\\
-
-
- &  & With covariates & 4,795 & 362 & 0.013 & 0.000 & 0.286 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2008} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 5,578 & 427 & 0.013 & 0.000 & 0.226 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 3,076 & 362 & 0.009 & 0.003 & 0.006 & 0.792\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,076 & 362 & -0.061 & 0.016 & 0.000 & 0.792\\
-
-
- &  & With covariates & 3,774 & 79 & -0.016 & 0.024 & 0.496 & 0.154\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,774 & 79 & 0.012 & 0.045 & 0.780 & 0.154\\
-
-
- &  & With covariates & 6,870 & 52 & 0.043 & 0.033 & 0.193 & 0.054\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 6,870 & 52 & -0.010 & 0.013 & 0.440 & 0.054\\
-
-
- &  & With covariates & 4,541 & 639 & 0.398 & 11.434 & 0.715 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2010} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 4,953 & 703 & -0.197 & 0.590 & 0.427 & 1.000\\
-
-\cmidrule{1-9}
- &  & With covariates & 3,824 & 243 & -0.022 & 0.014 & 0.129 & 0.772\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 20000} & Without covariates & 3,824 & 243 & -0.130 & 0.298 & 0.663 & 0.772\\
-
-
- &  & With covariates & 3,357 & 47 & -0.004 & 0.016 & 0.785 & 0.163\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 40000} & Without covariates & 3,357 & 47 & 0.014 & 0.028 & 0.600 & 0.163\\
-
-
- &  & With covariates & 13,583 & 79 & -0.319 & 6.687 & 0.962 & 0.065\\
-
-
- & \multirow{-2}{*}{\raggedright\arraybackslash 60000} & Without covariates & 13,583 & 79 & -0.085 & 0.356 & 0.812 & 0.065\\
-
-
- &  & With covariates & 3,505 & 296 & 0.019 & 0.000 & 0.447 & 1.000\\
-
-
-\multirow{-8}{*}{\raggedright\arraybackslash 2012} & \multirow{-2}{*}{\raggedright\arraybackslash Pooled} & Without covariates & 3,692 & 307 & 0.022 & 0.001 & 0.501 & 1.000\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 10,808 & 89 & -0.079 & 0.169 & 0.828\\
 \bottomrule
-\multicolumn{9}{l}{\rule{0pt}{1em}Standard Errors are clustered by regions.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}For mayor elections (2008 and 2012) and presidential election (2010).}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}Bw=bandwidth.}\\
-\multicolumn{9}{l}{\rule{0pt}{1em}LATE estimates.}\\
 \end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
 \end{table}
 
-A limitation of RDD models is the bandwidth choice, that could influence
-results. It is possible that a narrower or wider bandwidth give
-different results, since fewer or more observations will be part of
-regressions (trade off between randomness and precision). Considering
-this possibility, Table \ref{tab:r.sig} presents only significant
-results using also half or double bandwidths.
+Like most of the outcomes so far, results suggests no relationship
+between broadband internet speed and the number of candidates running
+for local offices. The new possibility to reach voters seems not be
+sufficient to attract people to run in elections.
 
-\begin{landscape}\begin{table}[!h]
+Regarding budget campaign, we look two outcomes: the amount used by a
+small party (PSOL) and by young candidates (Tables
+\ref{tab:r.pct.receita} and \ref{tab:r.receita_jovens}, respectively).
 
-\caption{\label{tab:r.sig}RDD regression with alternative bandwidths. Election years: 2008, 2010 and 2012}
+\begin{table}[H]
+
+\caption{\label{tab:r.pct.receita}RDD-fuzzy regression results for PSOL campaign budget Election years: 2008, 2010 and 2012}
 \centering
-\fontsize{9}{11}\selectfont
-\begin{tabular}[t]{llllrrrrrl}
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
 \toprule
-Year & Model & Cutoff & Type & Bw & Obs. & Estimates & SE & p.value & Outcome\\
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
 \midrule
- & Double-BW & 20000 & With covariates & 7,322 & 479 & -0.126 & 0.019 & 0.000 & Left Vote Share\\
+ & 20,000 & 19,155 & 58 & 0.053 & 0.266 & 0.725\\
 
- & LATE & 40000 & Without covariates & 3,201 & 58 & 0.002 & 0.001 & 0.001 & Turnout\\
 
- & Double-BW & 40000 & Without covariates & 6,401 & 128 & 0.005 & 0.001 & 0.001 & Turnout\\
+ & 40,000 & 19,261 & 32 & 5.799 & 217.042 & 0.569\\
 
- & Half-BW & 60000 & With covariates & 6,693 & 30 & -0.001 & 0.001 & 0.044 & Blank and Null\\
 
- & Double-BW & 60000 & With covariates & 28,129 & 163 & -0.003 & 0.001 & 0.019 & Left Vote Share\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 28,808 & 26 & 0.037 & 0.199 & 0.941\\
 
- & Half-BW & 60000 & With covariates & 4,720 & 29 & -0.001 & 0.000 & 0.000 & Turnout\\
+\cmidrule{1-7}
+ & 20,000 & 7,267 & 40 & -0.032 & 0.337 & 0.929\\
 
- & Double-BW & 60000 & With covariates & 18,880 & 138 & -0.001 & 0.000 & 0.002 & Turnout\\
 
- & Double-BW & 60000 & Without covariates & 28,129 & 164 & -0.002 & 0.001 & 0.031 & Left Vote Share\\
+ & 40,000 & 15,803 & 55 & -0.056 & 0.074 & 0.206\\
 
-\multirow{-9}{*}{\raggedright\arraybackslash 2008} & Double-BW & 60000 & Without covariates & 18,880 & 139 & -0.003 & 0.001 & 0.003 & Turnout\\
-\cmidrule{1-10}
- & LATE & 20000 & With covariates & 3,341 & 389 & 0.004 & 0.002 & 0.088 & Blank and Null\\
 
- & Double-BW & 20000 & With covariates & 6,681 & 793 & 0.001 & 0.001 & 0.019 & Blank and Null\\
-
- & LATE & 20000 & With covariates & 3,076 & 362 & 0.009 & 0.003 & 0.006 & Left Vote Share\\
-
- & LATE & 20000 & Without covariates & 3,341 & 389 & -0.004 & 0.002 & 0.011 & Blank and Null\\
-
- & Double-BW & 20000 & Without covariates & 6,681 & 793 & -0.002 & 0.001 & 0.018 & Blank and Null\\
-
- & LATE & 20000 & Without covariates & 3,076 & 362 & -0.061 & 0.016 & 0.000 & Left Vote Share\\
-
- & Half-BW & 20000 & Without covariates & 1,538 & 184 & -0.083 & 0.027 & 0.002 & Left Vote Share\\
-
- & Double-BW & 20000 & Without covariates & 6,153 & 736 & -0.025 & 0.009 & 0.004 & Left Vote Share\\
-
- & Half-BW & 20000 & Without covariates & 1,470 & 176 & 0.027 & 0.010 & 0.006 & Turnout\\
-
- & Double-BW & 20000 & Without covariates & 5,879 & 709 & 0.004 & 0.002 & 0.100 & Turnout\\
-
- & Half-BW & 60000 & With covariates & 3,435 & 25 & 0.004 & 0.000 & 0.000 & Left Vote Share\\
-
-\multirow{-12}{*}{\raggedright\arraybackslash 2010} & Half-BW & 60000 & With covariates & 3,774 & 25 & 0.000 & 0.000 & 0.001 & Turnout\\
-\cmidrule{1-10}
- & LATE & 20000 & With covariates & 2,133 & 224 & 0.023 & 0.007 & 0.002 & Turnout\\
-
- & Double-BW & 20000 & With covariates & 4,266 & 475 & 0.008 & 0.004 & 0.023 & Turnout\\
-
- & Half-BW & 20000 & Without covariates & 1,265 & 73 & -0.006 & 0.002 & 0.013 & Blank and Null\\
-
- & Half-BW & 20000 & Without covariates & 1,912 & 116 & 0.058 & 0.028 & 0.039 & Left Vote Share\\
-
- & Half-BW & 20000 & Without covariates & 1,066 & 111 & -0.019 & 0.009 & 0.029 & Turnout\\
-
- & Double-BW & 40000 & With covariates & 6,607 & 96 & 0.019 & 0.010 & 0.065 & Blank and Null\\
-
- & Half-BW & 40000 & Without covariates & 1,652 & 25 & 0.034 & 0.009 & 0.000 & Blank and Null\\
-
- & Double-BW & 60000 & With covariates & 24,520 & 156 & -0.008 & 0.004 & 0.049 & Blank and Null\\
-
- & Half-BW & 60000 & With covariates & 3,811 & 27 & -0.005 & 0.002 & 0.003 & Turnout\\
-
- & Double-BW & 60000 & Without covariates & 24,520 & 156 & -0.007 & 0.002 & 0.001 & Blank and Null\\
-
-\multirow{-11}{*}{\raggedright\arraybackslash 2012} & Double-BW & 60000 & Without covariates & 27,167 & 189 & -0.006 & 0.002 & 0.003 & Left Vote Share\\
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 24,205 & 45 & 0.089 & 0.171 & 0.459\\
 \bottomrule
-\multicolumn{10}{l}{\rule{0pt}{1em}Standard Errors are clustered by regions.}\\
-\multicolumn{10}{l}{\rule{0pt}{1em}For mayor elections (2008 and 2012) and presidential election (2010).}\\
-\multicolumn{10}{l}{\rule{0pt}{1em}Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.}\\
-\multicolumn{10}{l}{\rule{0pt}{1em}Bw=bandwidth.}\\
-\multicolumn{10}{l}{\rule{0pt}{1em}LATE estimates.}\\
 \end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
 \end{table}
-\end{landscape}
 
-With bandwidth doubled, a significant and negative effect of broadband
-are observed for left wing vote share in 2008 (for the first and last
-cutoffs). However, results are only significant with covariates, a
-possible consequence due to the loss of randomness when the distance
-from the cut-off increases. Turnout seems to be positively related to
-broadband around 40,000 cut-off, while negatively related around 60,000,
-this last one more robust to covariates and changes in the cut-off. This
-is an interesting result, suggesting that cities with different sizes
-may respond differently to the internet.
+\begin{table}[H]
 
-In 2010, negative relationship between broadband and left wing vote
-shares seems to persist around 20,000 cutoff, although there is an
-ambiguity in a specification with covariates, changing its sign in LATE
-regression from positive to negative when covariates are omitted.
-Considering that around the 60,000 cut-off results are positive with
-covariate, these figures should be looked with even more caution.
-Turnout shows a positive relationship only with half bandwidth, for
-20,000 and 40,000 cutoffs, which don't seems to be a very robust results
-because they are sensitive to covariates. Black and null percentage
-votes are only significant for 20,000 cutoff, being highly sensitive to
-covariates. Booth LATE and doubled bandwidth regression show a change in
-sign when covariates are considered, putting in check the results.
+\caption{\label{tab:r.receita_jovens}RDD-fuzzy regression results for young candidates (under 30 years-old) budget. Election years: 2008, 2010 and 2012}
+\centering
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}}
+\toprule
+Year & Cutoff & Bw & Obs. & Coef. & SE & P.value\\
+\midrule
+ & 20,000 & 4,739 & 524 & -0.157 & 0.603 & 0.838\\
 
-Finally, left wing vote share is positively related in the first cut-off
-and negatively related in the last one, but only without covariates.
-Turnout shows a change of sign in the 20,000 cutoff when the bandwidth
-is narrowed, making any conclusion problematic. Finally, blank and null
-votes shows distinct behavior according to the cut-off, being negatively
-related to broad band in the first and the last one, while positively
-related in the middle.
 
-Putting all these results together, it is hard to conclude that the
-backhaul program, and, hence, broadband availability, made difference in
-2008, 2010 and 2012 elections in terms of turnout, left wing vote share
-and percentage of blank or null votes, at least when presidential and
-mayor offices, and only the first round, area considered.\footnote{These
-  are the natural scenarios to be first investigated because they are
-  the more important offices in each election.} It may possible that
-other offices present a different result. However, results (not
-reported) are similar, with significance only for a negative
-relationship between broadband and left wing vote share in municipal
-chamber office election (\emph{vereador}), only for the first cut-off.
-One more time, significant results are sparse, which means that it is
-hard to point a consistent pattern linking broadband internet
-availability to election outcomes. Finally, all polled regressions, a
-general result regardless the cut-off, were not significant, reinforcing
-this conclusion.
+ & 40,000 & 16,976 & 477 & 0.003 & 0.003 & 0.072\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2008} & 60,000 & 11,331 & 73 & 0.001 & 0.002 & 0.694\\
+
+\cmidrule{1-7}
+ & 20,000 & 4,892 & 539 & -0.017 & 0.010 & 0.021\\
+
+
+ & 40,000 & 5,467 & 118 & 0.048 & 0.200 & 0.609\\
+
+
+\multirow{-3}{1.9cm}{\raggedright\arraybackslash 2012} & 60,000 & 31,060 & 368 & -0.004 & 0.002 & 0.000\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+For the PSOL party, there is no relationship between broadband internet
+speed and budget, while for young candidates results are mix: slightly
+significant and positive for just one cutoff in 2008 (40,000) and
+actually negative in 2012 for the first and last cutoffs. If any
+conclusion could be taken is that broadband internet velocity are
+related with lower young candidates budgets in 2012 elections. The only
+parallel in literature we can make about this outcome is regarding party
+donating in US elections, where Jaber (2013) reports a positive impact
+for Democratic Party.
+
+\hypertarget{further-investigation}{%
+\subsection{Further investigation}\label{further-investigation}}
+
+In the previous section, due to RDD design, each regression was run
+considering the multiple cutoff structure. Another way to estimate
+results is with parametric regressions, using the distance of the
+running variable to the cutoff and adjusting it by a polynomial. We look
+to parametric regressions considering two specifications: linear and
+quadratic. This choice follows Gelman \& Imbens (2019), to avoid
+possible noisy estimates, eventual sensitivity to the degree of the
+polynomial and problems with the confidence intervals.
+
+The results are presented in Table \ref{tab:r.par}, with all outcomes
+and the three elections years and cutoffs. The lack of relationship
+between broadband internet and turnout, blank and null votes, left wing
+vote share, number of candidates, PSOL vote share and budget, and young
+candidates vote share and budget remains. Significant results are sparse
+and, some times, with inverted signs when linear specification is
+switched to quadratic.
+
+\begingroup\fontsize{10}{12}\selectfont
+
+\begin{longtable}[t]{>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedleft\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}}
+\caption{\label{tab:r.par}Parametric Fuzzy-RDD regression for all outcomes. Election years: 2008, 2010 and 2012}\\
+\toprule
+Year & Model & Cutoff & Obs. & Coef. & SE & P.value & Outcome\\
+\midrule
+\endfirsthead
+\caption[]{Parametric Fuzzy-RDD regression for all outcomes. Election years: 2008, 2010 and 2012 \textit{(continued)}}\\
+\toprule
+Year & Model & Cutoff & Obs. & Coef. & SE & P.value & Outcome\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\multicolumn{8}{l}{\rule{0pt}{1em}Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}     Results with controls listed in Table 10.}\\
+\endlastfoot
+ & Linear & 20,000 & 3,356 & 0.001 & 0.001 & 0.196 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,356 & 0.002 & 0.010 & 0.862 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,356 & 0.001 & 0.000 & 0.011 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,356 & -0.001 & 0.001 & 0.222 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,356 & 0.002 & 0.001 & 0.023 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 3,356 & -0.001 & 0.001 & 0.061 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Turnout}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,427 & 0.001 & 0.001 & 0.089 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,427 & 0.000 & 0.001 & 0.876 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,427 & 0.000 & 0.000 & 0.010 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,427 & -0.002 & 0.001 & 0.147 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,427 & 0.002 & 0.000 & 0.000 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2010} & Quadratic & 60,000 & 3,427 & 0.000 & 0.001 & 0.977 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Turnout}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,428 & 0.001 & 0.001 & 0.329 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,428 & 0.000 & 0.001 & 0.579 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,428 & 0.000 & 0.000 & 0.203 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,428 & -0.002 & 0.001 & 0.132 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,428 & 0.001 & 0.000 & 0.001 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 3,428 & 0.000 & 0.000 & 0.944 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Turnout}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,356 & 0.001 & 0.001 & 0.154 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,356 & 0.018 & 0.067 & 0.788 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,356 & -0.002 & 0.000 & 0.000 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,356 & 0.001 & 0.000 & 0.001 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,356 & -0.002 & 0.002 & 0.267 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 3,356 & 0.001 & 0.002 & 0.590 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Blank or Null votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,427 & 0.000 & 0.000 & 0.690 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,427 & 0.002 & 0.001 & 0.068 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,427 & 0.000 & 0.000 & 0.381 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,427 & 0.000 & 0.000 & 0.159 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,427 & 0.000 & 0.000 & 0.784 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2010} & Quadratic & 60,000 & 3,427 & 0.001 & 0.000 & 0.009 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Blank or Null votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,428 & 0.002 & 0.001 & 0.052 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,428 & 0.007 & 0.004 & 0.047 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,428 & 0.001 & 0.000 & 0.006 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,428 & 0.002 & 0.001 & 0.217 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,428 & -0.001 & 0.001 & 0.491 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 3,428 & -0.002 & 0.001 & 0.182 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Blank or Null votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 1,530 & 0.012 & 0.002 & 0.000 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 1,530 & 0.115 & 0.458 & 0.803 & \\
+\nopagebreak
+ & Linear & 40,000 & 1,530 & -0.003 & 0.001 & 0.000 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 1,530 & -0.015 & 0.004 & 0.000 & \\
+\nopagebreak
+ & Linear & 60,000 & 1,530 & -0.005 & 0.003 & 0.085 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 1,530 & -0.012 & 0.008 & 0.145 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Left wing vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,427 & 0.001 & 0.001 & 0.575 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,427 & -0.002 & 0.004 & 0.610 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,427 & 0.001 & 0.001 & 0.586 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,427 & 0.001 & 0.001 & 0.288 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,427 & 0.000 & 0.001 & 0.960 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2010} & Quadratic & 60,000 & 3,427 & 0.001 & 0.001 & 0.319 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Left wing vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 1,738 & -0.002 & 0.002 & 0.302 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 1,738 & -0.011 & 0.012 & 0.371 & \\
+\nopagebreak
+ & Linear & 40,000 & 1,738 & -0.001 & 0.002 & 0.480 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 1,738 & -0.004 & 0.002 & 0.058 & \\
+\nopagebreak
+ & Linear & 60,000 & 1,738 & -0.002 & 0.002 & 0.261 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 1,738 & -0.005 & 0.001 & 0.000 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Left wing vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,356 & 0.007 & 0.006 & 0.185 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,356 & 0.022 & 0.152 & 0.883 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,356 & -0.007 & 0.011 & 0.539 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,356 & -0.017 & 0.006 & 0.004 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,356 & -0.003 & 0.002 & 0.149 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 3,356 & 0.010 & 0.012 & 0.401 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash N. cand.}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,427 & 0.010 & 0.008 & 0.224 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,427 & 0.033 & 0.048 & 0.489 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,427 & -0.008 & 0.010 & 0.466 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,427 & -0.006 & 0.014 & 0.658 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,427 & -0.018 & 0.010 & 0.070 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 3,427 & -0.014 & 0.009 & 0.101 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash N. cand.}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 128 & 0.000 & 0.001 & 0.370 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 128 & 0.002 & 0.001 & 0.225 & \\
+\nopagebreak
+ & Linear & 40,000 & 128 & 0.001 & 0.001 & 0.089 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 128 & 0.000 & 0.000 & 0.038 & \\
+\nopagebreak
+ & Linear & 60,000 & 128 & 0.002 & 0.005 & 0.652 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 128 & 0.000 & 0.004 & 0.915 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash PSOL vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 2,815 & 0.000 & 0.000 & 0.266 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 2,815 & 0.000 & 0.000 & 0.002 & \\
+\nopagebreak
+ & Linear & 40,000 & 2,815 & 0.000 & 0.000 & 0.719 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 2,815 & 0.000 & 0.000 & 0.003 & \\
+\nopagebreak
+ & Linear & 60,000 & 2,815 & 0.000 & 0.000 & 0.765 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2010} & Quadratic & 60,000 & 2,815 & 0.000 & 0.000 & 0.629 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash PSOL vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 211 & -0.001 & 0.001 & 0.363 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 211 & -0.003 & 0.009 & 0.708 & \\
+\nopagebreak
+ & Linear & 40,000 & 211 & 0.000 & 0.000 & 0.018 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 211 & 0.000 & 0.000 & 0.770 & \\
+\nopagebreak
+ & Linear & 60,000 & 211 & 0.000 & 0.000 & 0.024 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 211 & 0.000 & 0.000 & 0.410 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash PSOL vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 89 & 0.245 & 0.350 & 0.484 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 89 & -0.430 & 1.099 & 0.696 & \\
+\nopagebreak
+ & Linear & 40,000 & 89 & -0.007 & 0.036 & 0.855 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 89 & -0.049 & 0.019 & 0.010 & \\
+\nopagebreak
+ & Linear & 60,000 & 89 & 0.082 & 0.109 & 0.450 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 89 & 0.162 & 0.109 & 0.137 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash PSOL budget}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 149 & -0.006 & 0.021 & 0.776 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 149 & -0.016 & 0.117 & 0.894 & \\
+\nopagebreak
+ & Linear & 40,000 & 149 & -0.046 & 0.007 & 0.000 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 149 & -0.141 & 0.033 & 0.000 & \\
+\nopagebreak
+ & Linear & 60,000 & 149 & 0.029 & 0.016 & 0.079 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 149 & 0.044 & 0.039 & 0.265 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash PSOL budget}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,237 & 0.002 & 0.002 & 0.258 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,237 & 0.014 & 0.038 & 0.720 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,237 & 0.001 & 0.001 & 0.104 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,237 & 0.001 & 0.002 & 0.489 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,237 & -0.001 & 0.001 & 0.525 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 3,237 & -0.002 & 0.001 & 0.006 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Young votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,413 & 0.001 & 0.001 & 0.139 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,413 & 0.001 & 0.004 & 0.800 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,413 & 0.000 & 0.000 & 0.419 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,413 & -0.001 & 0.000 & 0.012 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,413 & -0.001 & 0.000 & 0.004 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2010} & Quadratic & 60,000 & 3,413 & -0.002 & 0.000 & 0.000 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Young votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,369 & -0.001 & 0.001 & 0.098 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,369 & -0.008 & 0.006 & 0.172 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,369 & -0.001 & 0.001 & 0.390 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,369 & -0.001 & 0.002 & 0.699 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,369 & 0.000 & 0.000 & 0.090 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 3,369 & -0.001 & 0.001 & 0.322 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Young votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,237 & 0.001 & 0.003 & 0.828 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,237 & 0.015 & 0.060 & 0.800 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,237 & 0.001 & 0.001 & 0.100 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,237 & 0.002 & 0.002 & 0.305 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,237 & 0.000 & 0.001 & 0.961 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2008} & Quadratic & 60,000 & 3,237 & -0.001 & 0.002 & 0.641 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Young budget}\\
+\cmidrule{1-8}\pagebreak[0]
+ & Linear & 20,000 & 3,369 & -0.002 & 0.000 & 0.000 & \\
+\nopagebreak
+ & Quadratic & 20,000 & 3,369 & -0.011 & 0.009 & 0.230 & \\
+\nopagebreak
+ & Linear & 40,000 & 3,369 & 0.000 & 0.000 & 0.441 & \\
+\nopagebreak
+ & Quadratic & 40,000 & 3,369 & 0.000 & 0.001 & 0.866 & \\
+\nopagebreak
+ & Linear & 60,000 & 3,369 & -0.001 & 0.000 & 0.167 & \\
+\nopagebreak
+\multirow{-6}{1.5cm}{\raggedright\arraybackslash 2012} & Quadratic & 60,000 & 3,369 & -0.002 & 0.001 & 0.026 & \multirow{-6}{1.5cm}{\raggedright\arraybackslash Young budget}\\*
+\end{longtable}
+\endgroup{}
+
+The only result we could point out as relatively consistent is the
+negative relationship between the internet velocity and left wing vote
+share, for local elections (2008 and 2010) and for the 40,000 cutoff.
+But, being too specific, it is hard to support this results as
+consistent, specially taking into considerations the results in previous
+section.
+
+A possible limitation of RDD models is the bandwidth choice, which could
+influence results. It is possible that a narrower or wider bandwidth
+give different results, since fewer or more observations will be part of
+regressions (a trade off between ``randomness'' and ``precision'').
+Considering this possibility, Table \ref{tab:r.sig} presents only
+significant results using also half or double bandwidths of those used
+in the previous section.
+
+\begingroup\fontsize{10}{12}\selectfont
+
+\begin{longtable}[t]{>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedleft\arraybackslash}p{1.4cm}>{\raggedleft\arraybackslash}p{1.4cm}>{\raggedleft\arraybackslash}p{1.4cm}>{\raggedleft\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{3.5cm}}
+\caption{\label{tab:r.sig}Significant Fuzzy-RDD regression with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012}\\
+\toprule
+Year & Cutoff & Model & Obs. & Coef. & SE & P.value & Outcome\\
+\midrule
+\endfirsthead
+\caption[]{Significant Fuzzy-RDD regression with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012 \textit{(continued)}}\\
+\toprule
+Year & Cutoff & Model & Obs. & Coef. & SE & P.value & Outcome\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\multicolumn{8}{l}{\rule{0pt}{1em}Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}     Results with controls listed in Table 10.}\\
+\endlastfoot
+2008 & 60,000 & Double-Bw & 423 & 0.000 & 0.001 & 0.010 & Turnout\\
+\cmidrule{1-8}\pagebreak[0]
+ & 60,000 & Half-Bw & 88 & 0.002 & 0.004 & 0.099 & \\
+\nopagebreak
+\multirow{-2}{1.4cm}{\raggedright\arraybackslash 2010} & 60,000 & Double-Bw & 1,214 & 0.001 & 0.001 & 0.000 & \multirow{-2}{3.5cm}{\raggedright\arraybackslash Turnout}\\
+\cmidrule{1-8}\pagebreak[0]
+2008 & 20,000 & Double-Bw & 549 & 0.013 & 0.010 & 0.001 & Blank or Null votes\\
+\cmidrule{1-8}\pagebreak[0]
+2010 & 20,000 & Half-Bw & 242 & 0.006 & 0.008 & 0.081 & Blank or Null votes\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Double-Bw & 519 & 0.002 & 0.002 & 0.000 & \\
+\nopagebreak
+ & 40,000 & Half-Bw & 103 & -0.013 & 0.037 & 0.087 & \\
+\nopagebreak
+\multirow{-3}{1.4cm}{\raggedright\arraybackslash 2012} & 60,000 & Double-Bw & 195 & -0.006 & 0.005 & 0.002 & \multirow{-3}{3.5cm}{\raggedright\arraybackslash Blank or Null votes}\\
+\cmidrule{1-8}\pagebreak[0]
+2008 & 40,000 & Double-Bw & 1,092 & 0.023 & 0.043 & 0.058 & Left wing vote share\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Half-Bw & 191 & 0.351 & 0.804 & 0.029 & \\
+\nopagebreak
+\multirow{-2}{1.4cm}{\raggedright\arraybackslash 2012} & 60,000 & Half-Bw & 65 & -0.022 & 0.021 & 0.051 & \multirow{-2}{3.5cm}{\raggedright\arraybackslash Left wing vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+2008 & 20,000 & Double-Bw & 1,031 & -0.103 & 0.097 & 0.000 & N. cand.\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Double-Bw & 1,687 & 0.000 & 0.000 & 0.000 & \\
+\nopagebreak
+\multirow{-2}{1.4cm}{\raggedright\arraybackslash 2010} & 60,000 & Double-Bw & 848 & 0.000 & 0.000 & 0.008 & \multirow{-2}{3.5cm}{\raggedright\arraybackslash PSOL vote share}\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Double-Bw & 1,097 & 0.006 & 0.014 & 0.099 & \\
+\nopagebreak
+\multirow{-2}{1.4cm}{\raggedright\arraybackslash 2008} & 60,000 & Double-Bw & 153 & 0.000 & 0.002 & 0.004 & \multirow{-2}{3.5cm}{\raggedright\arraybackslash Young votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Half-Bw & 226 & 0.004 & 0.056 & 0.078 & \\
+\nopagebreak
+ & 20,000 & Double-Bw & 1,031 & -0.006 & 0.004 & 0.028 & \\
+\nopagebreak
+\multirow{-3}{1.4cm}{\raggedright\arraybackslash 2012} & 60,000 & Double-Bw & 248 & -0.004 & 0.005 & 0.029 & \multirow{-3}{3.5cm}{\raggedright\arraybackslash Young votes}\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Double-Bw & 1,127 & 0.010 & 0.020 & 0.070 & \\
+\nopagebreak
+\multirow{-2}{1.4cm}{\raggedright\arraybackslash 2008} & 40,000 & Double-Bw & 2,098 & 0.032 & 0.136 & 0.075 & \multirow{-2}{3.5cm}{\raggedright\arraybackslash Young budget}\\
+\cmidrule{1-8}\pagebreak[0]
+ & 20,000 & Double-Bw & 1,242 & -0.008 & 0.003 & 0.000 & \\
+\nopagebreak
+\multirow{-2}{1.4cm}{\raggedright\arraybackslash 2012} & 60,000 & Double-Bw & 3,359 & -0.001 & 0.000 & 0.000 & \multirow{-2}{3.5cm}{\raggedright\arraybackslash Young budget}\\*
+\end{longtable}
+\endgroup{}
+
+Once again significant results are sparse, for some years, outcome,
+cutoffs and bandwidths, putting in check any solid relationship between
+broadband internet speed and election outcomes.
+
+\hypertarget{pooled-regressions}{%
+\subsubsection{Pooled regressions}\label{pooled-regressions}}
+
+The cumulative RDD regression design, although considers all the
+heterogeneity that multiple cutoffs offers, reduces the sample size,
+specially in the 40,000 and 60,000 cutoffs. We now look for pooled
+regressions, in order to verify if combined samples (and, hence, more
+observations) support results presented in the previous sections. All
+cutoffs are considered, and samples are divided by the mean value
+between the cutoffs (population up to 30,000 for the first, between
+30,001 and 50,000 for the second and 50,001 and above for the third).
+Results for all outcomes are presented in Table \ref{tab:r.pooled}.
+
+\begin{table}[!h]
+
+\caption{\label{tab:r.pooled}RDD-fuzzy pooled regressions for all outcomes. Election years: 2008, 2010 and 2012}
+\centering
+\begin{threeparttable}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedleft\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}}
+\toprule
+Year & Bw & Obs. & Coef. & SE & P.value & Outcome\\
+\midrule
+2008 & 3,435 & 476 & 0.001 & 0.008 & 0.786 & \\
+
+2010 & 3,559 & 510 & -0.009 & 0.007 & 0.068 & \\
+
+2012 & 4,379 & 605 & 0.013 & 0.010 & 0.121 & \multirow{-3}{1.9cm}{\raggedright\arraybackslash Turnout}\\
+\cmidrule{1-7}
+2008 & 3,727 & 506 & 0.051 & 0.010 & 0.000 & \\
+
+2010 & 4,770 & 676 & 0.008 & 0.005 & 0.063 & \\
+
+2012 & 3,513 & 499 & 0.008 & 0.019 & 0.531 & \multirow{-3}{1.9cm}{\raggedright\arraybackslash Blank or Null votes}\\
+\cmidrule{1-7}
+2008 & 3,672 & 275 & 0.102 & 0.033 & 0.001 & \\
+
+2010 & 4,784 & 676 & -0.002 & 0.021 & 0.869 & \\
+
+2012 & 2,246 & 188 & -0.096 & 0.027 & 0.000 & \multirow{-3}{1.9cm}{\raggedright\arraybackslash Left wing vote share}\\
+\cmidrule{1-7}
+2008 & 2,281 & 315 & -0.636 & 0.117 & 0.000 & \\
+
+2012 & 3,614 & 509 & 0.200 & 0.127 & 0.053 & \multirow{-2}{1.9cm}{\raggedright\arraybackslash N. cand.}\\
+\cmidrule{1-7}
+2008 & 3,684 & 28 & -0.003 & 0.011 & 0.801 & \\
+
+2010 & 7,764 & 1,131 & -0.001 & 0.001 & 0.113 & \\
+
+2012 & 3,915 & 65 & -0.002 & 0.005 & 0.257 & \multirow{-3}{1.9cm}{\raggedright\arraybackslash PSOL vote share}\\
+\cmidrule{1-7}
+2008 & 4,311 & 27 & 1.496 & 0.522 & 0.003 & \\
+
+2012 & 3,138 & 40 & 2.840 & 0.519 & 0.000 & \multirow{-2}{1.9cm}{\raggedright\arraybackslash PSOL budget}\\
+\cmidrule{1-7}
+2008 & 3,476 & 477 & 0.039 & 0.029 & 0.102 & \\
+
+2010 & 4,650 & 655 & -0.009 & 0.009 & 0.318 & \\
+
+2012 & 7,498 & 1,116 & -0.016 & 0.027 & 0.600 & \multirow{-3}{1.9cm}{\raggedright\arraybackslash Young votes}\\
+\cmidrule{1-7}
+2008 & 3,894 & 517 & 0.053 & 0.029 & 0.031 & \\
+
+2012 & 5,954 & 867 & -0.022 & 0.012 & 0.085 & \multirow{-2}{1.9cm}{\raggedright\arraybackslash Young budget}\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Results suggest a negative effect for turnout in 2010 and positive
+effects for blank or null votes in 2008 and 2010. Regarding left wing
+vote share, a positive effect in 2008 is reverted to negative in 2012.
+PSOL vote share is no longer significant, while its budget is. In 2008,
+we see a negative effect to number of candidates, reverting to positive
+in 2012. Finally, for younger candidates, we observe no effects on
+votes, but a significant effects on budget: positive in 2008 reverted to
+negative in 2012.
+
+Putting all these results together (the cumulative RDD, the parametric
+RDD and the pooled RDD), it is hard to conclude that the Backhaul
+program, and, hence, broadband internet velocity, made a significant
+difference in 2008, 2010 and 2012 elections in terms of turnout,
+percentage of blank or null votes, left wing vote share, PSOL vote
+share, young candidates vote share and PSOL and young candidates budget.
+Although only the first round and four offices were analyzed, it is not
+likely to see a different results in other scenarios (second rounds and
+other offices). The lack of consistency across specification, years and
+cutoffs put in check the significant results observed in some
+regressions.
 
 \hypertarget{discussion-and-conclusions}{%
 \section{Discussion and conclusions}\label{discussion-and-conclusions}}
 
-Relationship between broadband and elections outcome does not seems be
-relevant in Brazil, at least when fixed broadband are considered,
-neither for local or national elections. Despite our robust
-identification strategy, we did not find strong relationship between
-broadband availability, measured by the jumps of internet velocity in
-the backhaul program roll out, and election outcomes (turnout,
-percentage of blank and null votes and left parties vote share), in line
-with finds reported by Menezes (2015), with a different approach, giving
-robustness to our finds.
+Relationship between broadband velocity and elections outcome did not
+seems be relevant in Brazil, at least when fixed broadband are
+considered, neither for local or national elections between 2008 and
+2012. Despite our robust identification strategy, we did not find strong
+relationship between broadband velocity, measured by the jumps of
+internet speed in the Backhaul program roll out, and election outcomes.
+These results are in line with some finds reported by Menezes (2015)
+(turnout and blank and null votes), but differs from others (vote
+shares).
 
-However, these results are different from those reported in some part of
-the literature, mostly concentrated in European countries and USA (Jaber
+Our results are also different from those reported in some part of the
+literature, mostly concentrated in European countries and USA (Jaber
 2013; Falck \emph{et al.} 2014; Gavazza \emph{et al.} 2015; Campante
 \emph{et al.} 2017), which could indicate that the background may be
 important in this kind of analysis. First of all, vote is mandatory in
 Brazil, which is not necessarily true in other countries. Second, the
 political system in Brazil is presidentialist, in a federation republic,
 which means that people may behavior differently than in a
-parliamentarian system. Third, national congress deputies are elected by
-proportional vote, while senators are elected by direct vote, situation
-that may differ across countries. A fourth source of variation in
-political background regards to the difference between unitary and
-federal systems, that sets different rules to be played in the
-``political game''.
+parliamentarian system. Third, national congress deputies and local
+assemblies are elected by proportional vote, while senators are elected
+by majority vote, situation that may differ across countries. A fourth
+source of variation in political background regards to the difference
+between unitary and federal systems, that sets different rules to be
+played in the ``political game''.
 
-Aside the political background, there is a qualification of internet
-usage that is not addressed in our analysis. First of all, social
-networks have grown in Brazil after 2010. WhatsApp, one of the most
-popular social network in Brazil today, was created only in 2009, the
-very same year internet campaign was regulated. Is it possible that,
-today, mobile broadband and social medias usage in smartphones are more
-important for communication and mobilization than older social medias
-and connection made at home, through desktop or laptop computers.
-Unfortunately, there is not available in Brazil the roll out of 3G and
-4G technology implementation at municipality level, only at Direct
+Aside the political background, the internet usage is not fully
+controlled in our analysis. Installing the internet infrastructure in a
+municipality does not mean that all population will have access to the
+technology. Figure \ref{fig:0} shows that less than a third of Brazilian
+population had access to the internet in 2008, rising to 46.5\% in 2012.
+Despite the lower costs internet provide in electoral campaign, less
+than half of population could be reached until 2012, even a less portion
+in poorer cities. So, it might be the case that internet velocity had a
+limited room to change reality and the sparse significant results found
+is not sufficient to trace a pattern yet.
+
+Also, it was not possible to addressed the qualification of internet
+usage in our analysis. First of all, social networks have grown in
+Brazil after 2010. WhatsApp, one of the most popular social network in
+Brazil today, was created only in 2009, the very same year internet
+campaign was regulated. Is it possible that, today, mobile broadband and
+social medias usage in smartphones are more important for communication
+and mobilization than older social medias and connection made at home,
+through desktop or laptop computers and by fixed land lines.
+Unfortunately, the roll out of 3G and 4G technology implementation, at
+municipality level, is unavailable. There is only data at Direct
 Dialling codes (DDDs)\footnote{The DDD codes are numbers that divides
-  Brazil in 67 areas.}, which makes impossible to determine when the
-technology begun to operate in every city\footnote{We contact the
+  Brazil in 67 areas.} areas, which makes impossible to determine when
+the technology begun to operate in every city\footnote{We contacted the
   Regulation Agency of Telecommunication -- Anatel -- requesting mobile
   internet implementation at municipality level. Unfortunately, there is
-  no such data base available.}.
+  no such data available.}.
 
 Nonetheless, our paper contributes to bring into discussion that
 internet and political outcomes should be viewed in a wider perspective,
 meaning that some relationship may be circumstantial to idiosyncrasies
-of the countries. Also, further investigation, like the role of the new
-social medias and mobile broadband, are necessary to shed light in this
-discussion, even because internet and social medias are still evolving.
+of the countries or the technology. Also, further investigation, like
+the role of the new social medias and mobile broadband, are necessary to
+shed light in this discussion, even because internet and social medias
+are still evolving.
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
 \leavevmode\hypertarget{ref-aldrich_rational_1993}{}%
 Aldrich, J.H. (1993). Rational choice and turnout. \emph{American
 journal of political science}, 246--278.
 
 \leavevmode\hypertarget{ref-ali_why_2013}{}%
-Ali, S.N. \& Lin, C. (2013). Why people vote: Ethical motives and social
-incentives. \emph{American economic Journal: microeconomics},
+Ali, S.N. \& Lin, C. (2013). Why people vote: {Ethical} motives and
+social incentives. \emph{American economic Journal: microeconomics},
 \textbf{5}, 73--98.
 
 \leavevmode\hypertarget{ref-allcott_social_2017}{}%
@@ -2055,43 +2388,60 @@ Allcott, H. \& Gentzkow, M. (2017). Social media and fake news in the
 211--36.
 
 \leavevmode\hypertarget{ref-anatel_relatorio_2010}{}%
-Anatel. (2010). RELATÓRIO DE ACOMPANHAMENTO DAS METAS DE IMPLEMENTAÇÃO
-DA INFRAESTRUTURA DE REDE DE SUPORTE DO STFC PARA CONEXÃO EM BANDA LARGA
-(BACKHAUL).
+Anatel. (2010). {RELATÓRIO} {DE} {ACOMPANHAMENTO} {DAS} {METAS} {DE}
+{IMPLEMENTAÇÃO} {DA} {INFRAESTRUTURA} {DE} {REDE} {DE} {SUPORTE} {DO}
+{STFC} {PARA} {CONEXÃO} {EM} {BANDA} {LARGA} ({BACKHAUL}).
 
 \leavevmode\hypertarget{ref-banerjee_informed_2011}{}%
 Banerjee, A., Kumar, S., Pande, R. \& Su, F. (2011). Do informed voters
-make better choices? Experimental evidence from urban India.
+make better choices? {Experimental} evidence from urban {India}.
 \emph{Unpublished manuscript}. Retrieved June 4, 2017, from
 \url{https://pdfs.semanticscholar.org/fc45/db4976c51fd67177757ca895896c3a01039e.pdf}
 
 \leavevmode\hypertarget{ref-besley_handcuffs_2006}{}%
-Besley, T. \& Prat, A. (2006). Handcuffs for the grabbing hand? Media
+Besley, T. \& Prat, A. (2006). Handcuffs for the grabbing hand? {Media}
 capture and government accountability. \emph{American economic review},
 \textbf{96}, 720--736.
 
 \leavevmode\hypertarget{ref-bimber_information_2003}{}%
-Bimber, B. (2003). \emph{Information and American democracy: Technology
-in the evolution of political power}. Cambridge University Press.
+Bimber, B. (2003). \emph{Information and {American} democracy:
+{Technology} in the evolution of political power}. Cambridge University
+Press.
 
 \leavevmode\hypertarget{ref-bimber_internet_1998}{}%
-Bimber, B. (1998). The Internet and political mobilization: Research
+Bimber, B. (1998). The {Internet} and political mobilization: {Research}
 note on the 1996 election season. \emph{Social Science Computer Review},
 \textbf{16}, 391--401.
 
 \leavevmode\hypertarget{ref-boulding_political_2015}{}%
 Boulding, C. \& Brown, D.S. (2015). Do political parties matter for
-turnout? Number of parties, electoral rules and local elections in
-Brazil and Bolivia. \emph{Party Politics}, \textbf{21}, 404--416.
+turnout? {Number} of parties, electoral rules and local elections in
+{Brazil} and {Bolivia}. \emph{Party Politics}, \textbf{21}, 404--416.
+
+\leavevmode\hypertarget{ref-calonico_effect_2018}{}%
+Calonico, S., Cattaneo, M.D. \& Farrell, M.H. (2018). On the effect of
+bias estimation on coverage accuracy in nonparametric inference.
+\emph{Journal of the American Statistical Association}, \textbf{113},
+767--779.
+
+\leavevmode\hypertarget{ref-calonico_rdrobust_2017}{}%
+Calonico, S., Cattaneo, M.D., Farrell, M.H. \& Titiunik, R. (2017).
+Rdrobust: {Software} for regression-discontinuity designs. \emph{The
+Stata Journal}, \textbf{17}, 372--404.
+
+\leavevmode\hypertarget{ref-calonico_robust_2014}{}%
+Calonico, S., Cattaneo, M.D. \& Titiunik, R. (2014). Robust
+nonparametric confidence intervals for regression-discontinuity designs.
+\emph{Econometrica}, \textbf{82}, 2295--2326.
 
 \leavevmode\hypertarget{ref-campante_politics_2017}{}%
-Campante, F., Durante, R. \& Sobbrio, F. (2017). Politics 2.0: The
+Campante, F., Durante, R. \& Sobbrio, F. (2017). Politics 2.0: {The}
 multifaceted effect of broadband internet on political participation.
 \emph{Journal of the European Economic Association}, \textbf{16},
 1094--1136.
 
 \leavevmode\hypertarget{ref-cancela_explaining_2016}{}%
-Cancela, J. \& Geys, B. (2016). Explaining voter turnout: A
+Cancela, J. \& Geys, B. (2016). Explaining voter turnout: {A}
 meta-analysis of national and subnational elections. \emph{Electoral
 Studies}, \textbf{42}, 264--275.
 
@@ -2106,18 +2456,19 @@ Association}, 1--7.
 
 \leavevmode\hypertarget{ref-cattaneo_analysis_2018}{}%
 Cattaneo, M.D., Titiunik, R. \& Vazquez-Bare, G. (2018). Analysis of
-Regression Discontinuity Designs with Multiple Cutoffs or Multiple
-Scores. 18. Retrieved from
+{Regression} {Discontinuity} {Designs} with {Multiple} {Cutoffs} or
+{Multiple} {Scores}. 18. Retrieved from
 \url{https://sites.google.com/site/rdpackages/rdmulti/Cattaneo-Titiunik-VazquezBare_2018_rdmulti.pdf}
 
 \leavevmode\hypertarget{ref-czernich_broadband_2012}{}%
-Czernich, N. (2012). Broadband Internet and Political Participation:
-Evidence for G ermany. \emph{Kyklos}, \textbf{65}, 31--52.
+Czernich, N. (2012). Broadband {Internet} and {Political}
+{Participation}: {Evidence} for {G} ermany. \emph{Kyklos}, \textbf{65},
+31--52.
 
 \leavevmode\hypertarget{ref-dellavigna_fox_2007}{}%
-DellaVigna, S. \& Kaplan, E. (2007). The Fox News effect: Media bias and
-voting. \emph{The Quarterly Journal of Economics}, \textbf{122},
-1187--1234. Retrieved June 4, 2017, from
+DellaVigna, S. \& Kaplan, E. (2007). The {Fox} {News} effect: {Media}
+bias and voting. \emph{The Quarterly Journal of Economics},
+\textbf{122}, 1187--1234. Retrieved June 4, 2017, from
 \url{http://qje.oxfordjournals.org/content/122/3/1187.short}
 
 \leavevmode\hypertarget{ref-downs_economic_1957}{}%
@@ -2125,42 +2476,47 @@ Downs, A. (1957). An economic theory of political action in a democracy.
 \emph{Journal of political economy}, \textbf{65}, 135--150.
 
 \leavevmode\hypertarget{ref-drago_meet_2014}{}%
-Drago, F., Nannicini, T. \& Sobbrio, F. (2014). Meet the press: How
+Drago, F., Nannicini, T. \& Sobbrio, F. (2014). Meet the press: {How}
 voters and politicians respond to newspaper entry and exit.
 \emph{American Economic Journal: Applied Economics}, \textbf{6},
 159--88.
 
 \leavevmode\hypertarget{ref-durante_partisan_2012}{}%
 Durante, R. \& Knight, B. (2012). Partisan control, media bias, and
-viewer responses: Evidence from Berlusconi's Italy. \emph{Journal of the
-European Economic Association}, \textbf{10}, 451--481. Retrieved June 4,
-2017, from
+viewer responses: {Evidence} from {Berlusconi}'s {Italy}. \emph{Journal
+of the European Economic Association}, \textbf{10}, 451--481. Retrieved
+June 4, 2017, from
 \url{http://onlinelibrary.wiley.com/doi/10.1111/j.1542-4774.2011.01060.x/full}
 
 \leavevmode\hypertarget{ref-enikolopov_media_2011}{}%
 Enikolopov, R., Petrova, M. \& Zhuravskaya, E. (2011). Media and
-political persuasion: Evidence from Russia. \emph{The American Economic
-Review}, \textbf{101}, 3253--3285.
+political persuasion: {Evidence} from {Russia}. \emph{The American
+Economic Review}, \textbf{101}, 3253--3285.
 
 \leavevmode\hypertarget{ref-falck_e-lections:_2014}{}%
-Falck, O., Gold, R. \& Heblich, S. (2014). E-lections: Voting Behavior
-and the Internet. \emph{American Economic Review}, \textbf{104},
-2238--65.
+Falck, O., Gold, R. \& Heblich, S. (2014). E-lections: {Voting}
+{Behavior} and the {Internet}. \emph{American Economic Review},
+\textbf{104}, 2238--65.
 
 \leavevmode\hypertarget{ref-ferejohn_paradox_1974}{}%
-Ferejohn, J.A. \& Fiorina, M.P. (1974). The paradox of not voting: A
+Ferejohn, J.A. \& Fiorina, M.P. (1974). The paradox of not voting: {A}
 decision theoretic analysis. \emph{American political science review},
 \textbf{68}, 525--536.
 
 \leavevmode\hypertarget{ref-fujiwara_habit_2016}{}%
 Fujiwara, T., Meng, K. \& Vogl, T. (2016). Habit formation in voting:
-Evidence from rainy elections. \emph{American Economic Journal: Applied
-Economics}, \textbf{8}, 160--88.
+{Evidence} from rainy elections. \emph{American Economic Journal:
+Applied Economics}, \textbf{8}, 160--88.
 
 \leavevmode\hypertarget{ref-gavazza_internet_2015}{}%
 Gavazza, A., Nardotto, M. \& Valletti, T.M. (2015). Internet and
-politics: Evidence from uk local elections and local government
+politics: {Evidence} from uk local elections and local government
 policies.
+
+\leavevmode\hypertarget{ref-gelman_why_2019}{}%
+Gelman, A. \& Imbens, G. (2019). Why high-order polynomials should not
+be used in regression discontinuity designs. \emph{Journal of Business
+\& Economic Statistics}, \textbf{37}, 447--456.
 
 \leavevmode\hypertarget{ref-gentzkow_television_2006}{}%
 Gentzkow, M. (2006). Television and voter turnout. \emph{The Quarterly
@@ -2172,29 +2528,24 @@ newspaper entry and exit on electoral politics. \emph{American Economic
 Review}, \textbf{101}, 2980--3018.
 
 \leavevmode\hypertarget{ref-gerber_does_2009}{}%
-Gerber, A.S., Karlan, D. \& Bergan, D. (2009). Does the media matter? A
-field experiment measuring the effect of newspapers on voting behavior
-and political opinions. \emph{American Economic Journal: Applied
-Economics}, \textbf{1}, 35--52.
+Gerber, A.S., Karlan, D. \& Bergan, D. (2009). Does the media matter?
+{A} field experiment measuring the effect of newspapers on voting
+behavior and political opinions. \emph{American Economic Journal:
+Applied Economics}, \textbf{1}, 35--52.
 
 \leavevmode\hypertarget{ref-horacio_media_2014}{}%
-Horacio, A. \& Monteiro, J.C. (2014). Media Networks and Political
-Accountability: Evidence from Radio Networks in Brazil. Retrieved May
-20, 2017, from
+Horacio, A. \& Monteiro, J.C. (2014). Media {Networks} and {Political}
+{Accountability}: {Evidence} from {Radio} {Networks} in {Brazil}.
+Retrieved May 20, 2017, from
 \url{http://trafficlight.bitdefender.com/info?url=http\%3A//joanamonteiro.webs.com/Papers/Media_Networks_June.pdf\&language=en_US}
 
-\leavevmode\hypertarget{ref-imbens_optimal_2012}{}%
-Imbens, G. \& Kalyanaraman, K. (2012). Optimal bandwidth choice for the
-regression discontinuity estimator. \emph{The Review of economic
-studies}, \textbf{79}, 933--959.
-
 \leavevmode\hypertarget{ref-jaber_broadband_2013}{}%
-Jaber, A. (2013). Broadband Internet and Political Behavior: Evidence
-from the United States. \emph{Available at SSRN 2353549}.
+Jaber, A. (2013). Broadband {Internet} and {Political} {Behavior}:
+{Evidence} from the {United} {States}. \emph{Available at SSRN 2353549}.
 
 \leavevmode\hypertarget{ref-larson_internet_2004}{}%
-Larson, K. (2004). \emph{The Internet and political participation: The
-effect of Internet use on voter turnout}. PhD Thesis thesis,
+Larson, K. (2004). \emph{The {Internet} and political participation: The
+effect of {Internet} use on voter turnout}. \{PhD\} \{Thesis\} thesis,.
 
 \leavevmode\hypertarget{ref-lazer_science_2018}{}%
 Lazer, D.M., Baum, M.A., Benkler, Y., Berinsky, A.J., Greenhill, K.M.,
@@ -2203,79 +2554,80 @@ Menczer, F., Metzger, M.J., Nyhan, B., Pennycook, G. \& Rothschild, D.
 1094--1096.
 
 \leavevmode\hypertarget{ref-lelkes_hostile_2017}{}%
-Lelkes, Y., Sood, G. \& Iyengar, S. (2017). The hostile audience: The
+Lelkes, Y., Sood, G. \& Iyengar, S. (2017). The hostile audience: {The}
 effect of access to broadband internet on partisan affect.
 \emph{American Journal of Political Science}, \textbf{61}, 5--20.
 
 \leavevmode\hypertarget{ref-de_leon_test_2014}{}%
 Leon, L. de, Leite, F. \& Rizzi, R. (2014). A test for the rational
-ignorance hypothesis: Evidence from a natural experiment in Brazil.
+ignorance hypothesis: {Evidence} from a natural experiment in {Brazil}.
 \emph{American Economic Journal: Economic Policy}, \textbf{6}, 380--98.
 
 \leavevmode\hypertarget{ref-lijphart_unequal_1997}{}%
-Lijphart, A. (1997). Unequal participation: Democracy's unresolved
-dilemma presidential address, American Political Science Association,
-1996. \emph{American political science review}, \textbf{91}, 1--14.
+Lijphart, A. (1997). Unequal participation: {Democracy}'s unresolved
+dilemma presidential address, {American} {Political} {Science}
+{Association}, 1996. \emph{American political science review},
+\textbf{91}, 1--14.
 
 \leavevmode\hypertarget{ref-maddux_world_1997}{}%
-Maddux, C.D. \& Johnson, D.L. (1997). The World Wide Web: History,
-cultural context, and a manual for developers of educational
-information-based Web sites. \emph{Educational Technology}, \textbf{37},
-5--12.
+Maddux, C.D. \& Johnson, D.L. (1997). The {World} {Wide} {Web}:
+{History}, cultural context, and a manual for developers of educational
+information-based {Web} sites. \emph{Educational Technology},
+\textbf{37}, 5--12.
 
 \leavevmode\hypertarget{ref-mccrary_manipulation_2008}{}%
 McCrary, J. (2008). Manipulation of the running variable in the
-regression discontinuity design: A density test. \emph{Journal of
+regression discontinuity design: {A} density test. \emph{Journal of
 econometrics}, \textbf{142}, 698--714.
 
 \leavevmode\hypertarget{ref-menezes_internet_2015}{}%
-Menezes, A. (2015). Internet Availability, Political Information, and
-Voting: Evidence from Brazil. Retrieved from
+Menezes, A. (2015). Internet {Availability}, {Political} {Information},
+and {Voting}: {Evidence} from {Brazil}. Retrieved from
 \url{http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.706.5314}
 
 \leavevmode\hypertarget{ref-minard_internet_2015}{}%
-Minard, P. \& Landriault, M. (2015). Internet Use, Voter Turnout, and
-Party Preference across Four Regime Types in East Asia. \emph{Taiwan
-Journal of Democracy}, \textbf{11}, 75--108.
+Minard, P. \& Landriault, M. (2015). Internet {Use}, {Voter} {Turnout},
+and {Party} {Preference} across {Four} {Regime} {Types} in {East}
+{Asia}. \emph{Taiwan Journal of Democracy}, \textbf{11}, 75--108.
 
 \leavevmode\hypertarget{ref-miner_unintended_2015}{}%
-Miner, L. (2015). The unintended consequences of Internet diffusion:
-Evidence from Malaysia. \emph{Journal of Public Economics},
+Miner, L. (2015). The unintended consequences of {Internet} diffusion:
+{Evidence} from {Malaysia}. \emph{Journal of Public Economics},
 \textbf{132}, 66--78.
 
 \leavevmode\hypertarget{ref-monasterio_o_2013}{}%
-Monasterio, L. (2013). \emph{O FPM ea estranha distribuição da população
-dos pequenos municípios brasileiros}. Texto para Discussão.
+Monasterio, L. (2013). \emph{O {FPM} ea estranha distribuição da
+população dos pequenos municípios brasileiros}. Texto para Discussão.
 
 \leavevmode\hypertarget{ref-oberholzer-gee_media_2009}{}%
 Oberholzer-Gee, F. \& Waldfogel, J. (2009). Media markets and localism:
-Does local news en Espanol boost Hispanic voter turnout? \emph{American
-Economic Review}, \textbf{99}, 2120--28.
+{Does} local news en {Espanol} boost {Hispanic} voter turnout?
+\emph{American Economic Review}, \textbf{99}, 2120--28.
 
 \leavevmode\hypertarget{ref-pettersson-lidbom_parties_2008}{}%
-Pettersson-Lidbom, P. (2008). DO PARTIES MATTER FOR ECONOMIC OUTCOMES? A
-REGRESSION-DISCONTINUITY APPROACH. \emph{Journal of the European
-Economic Association}, \textbf{6}, 1037--1056. Retrieved May 12, 2017,
-from
+Pettersson-Lidbom, P. (2008). {DO} {PARTIES} {MATTER} {FOR} {ECONOMIC}
+{OUTCOMES}? {A} {REGRESSION}-{DISCONTINUITY} {APPROACH}. \emph{Journal
+of the European Economic Association}, \textbf{6}, 1037--1056. Retrieved
+May 12, 2017, from
 \url{http://trafficlight.bitdefender.com/info?url=http\%3A//onlinelibrary.wiley.com/doi/10.1162/JEEA.2008.6.5.1037/full\&language=en_US}
 
 \leavevmode\hypertarget{ref-power_elite_2012}{}%
 Power, T.J. \& Zucco Jr, C. (2012). Elite preferences in a consolidating
-democracy: The Brazilian legislative surveys, 1990--2009. \emph{Latin
+democracy: The {Brazilian} legislative surveys, 1990--2009. \emph{Latin
 American Politics and Society}, \textbf{54}, 1--27.
 
 \leavevmode\hypertarget{ref-poy_internet_2016}{}%
-Poy, S. \& Schüller, S. (2016). Internet and voting in the Web 2.0 era:
-Evidence from a local broadband policy.
+Poy, S. \& Schüller, S. (2016). Internet and voting in the {Web} 2.0
+era: Evidence from a local broadband policy.
 
 \leavevmode\hypertarget{ref-riker_theory_1968}{}%
-Riker, W.H. \& Ordeshook, P.C. (1968). A Theory of the Calculus of
-Voting. \emph{American political science review}, \textbf{62}, 25--42.
+Riker, W.H. \& Ordeshook, P.C. (1968). A {Theory} of the {Calculus} of
+{Voting}. \emph{American political science review}, \textbf{62}, 25--42.
 
 \leavevmode\hypertarget{ref-souza_federalismo_2005}{}%
 Souza, C. (2005). Federalismo, desenho contitucional e instituições
-federativas no Brasil pós-1988. \emph{Revista de sociologia e política},
-105--121.
+federativas no {Brasil} pós-1988. \emph{Revista de sociologia e
+política}, 105--121.
 
 \leavevmode\hypertarget{ref-stromberg_radios_2004}{}%
 Strömberg, D. (2004). Radio's impact on public spending. \emph{The
@@ -2285,11 +2637,211 @@ Quarterly Journal of Economics}, \textbf{119}, 189--221. Retrieved May
 
 \leavevmode\hypertarget{ref-tolbert_unraveling_2003}{}%
 Tolbert, C.J. \& McNeal, R.S. (2003). Unraveling the effects of the
-Internet on political participation? \emph{Political research
+{Internet} on political participation? \emph{Political research
 quarterly}, \textbf{56}, 175--185.
 
 \leavevmode\hypertarget{ref-uhlaner_rational_1989}{}%
-Uhlaner, C.J. (1989). Rational turnout: The neglected role of groups.
+Uhlaner, C.J. (1989). Rational turnout: {The} neglected role of groups.
 \emph{American Journal of Political Science}, 390--422.
+
+\end{CSLReferences}
+
+\clearpage
+
+\hypertarget{appendix}{%
+\section*{Appendix}\label{appendix}}
+\addcontentsline{toc}{section}{Appendix}
+
+\begingroup\fontsize{10}{12}\selectfont
+
+\begin{longtable}[t]{>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{4cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.3cm}}
+\caption{\label{tab:reg.fs2}First stage of Fuzzy-RDD regressions for all outcomes}\\
+\toprule
+Year & Cutoff & Outcome & (Intercept) & Tr & Xl & Xr & F.stat\\
+\midrule
+\endfirsthead
+\caption[]{First stage of Fuzzy-RDD regressions for all outcomes \textit{(continued)}}\\
+\toprule
+Year & Cutoff & Outcome & (Intercept) & Tr & Xl & Xr & F.stat\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\multicolumn{8}{l}{\rule{0pt}{1em}Obs: Standard Errors (SE) are clustered by regions. Optimal bandwidth (Bw) selection by Mean Square}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}             Error following Calonico, Cattaneo and Titiunik (2014).}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}             Triangular kernel with quadratic local-polynomial.}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}             Turnout for the first round.}\\
+\multicolumn{8}{l}{\rule{0pt}{1em}             Results with controls listed in Table 10}\\
+\endlastfoot
+ &  & Blank or Null votes & -4.407 & -1.414 & 0.001** & 0.001 & 13.09***\\
+\nopagebreak
+ &  & Left wing vote share & 3.071 & -2.095 & 0.001* & 0.000 & 5.83***\\
+\nopagebreak
+ &  & N. cand. & -4.140 & -1.380 & 0.001** & 0.001 & 13.25***\\
+\nopagebreak
+ &  & PSOL budget & -17.673 & -2.821 & 0.000 & 0.000 & 1.35\\
+\nopagebreak
+ &  & PSOL vote share & -10.418 & -4.467 & 0.000 & 0.001** & 2.42***\\
+\nopagebreak
+ &  & Turnout & -8.690 & -1.710 & 0.002** & 0.001 & 11.10***\\
+\nopagebreak
+ &  & Young budget & -3.631 & -1.049 & 0.001*** & 0.001* & 14.47***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2008} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash 20,000} & Young votes & -3.965 & -1.131 & 0.001*** & 0.001* & 13.96***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & 16.382 & 4.026 & 0.000* & 0.000 & 10.70***\\
+\nopagebreak
+ &  & Left wing vote share & 15.618 & -0.761 & 0.001* & 0.000 & 7.45***\\
+\nopagebreak
+ &  & N. cand. & 16.405 & 4.025 & 0.000* & 0.000 & 10.70***\\
+\nopagebreak
+ &  & PSOL budget & -242.491* & 24.409* & -0.001 & 0.001 & 3.51**\\
+\nopagebreak
+ &  & PSOL vote share & -75.356 & -9.385 & 0.001 & 0.002*** & 5.76***\\
+\nopagebreak
+ &  & Turnout & 17.322 & 3.934 & 0.001* & 0.000 & 10.03***\\
+\nopagebreak
+ &  & Young budget & 4.718 & 5.284** & 0.000 & 0.000 & 18.23***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2008} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash 40,000} & Young votes & 9.598 & 5.335** & 0.000* & 0.000 & 13.65***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & 142.193** & 16.646** & 0.000 & -0.001 & 9.43***\\
+\nopagebreak
+ &  & Left wing vote share & 103.102 & 20.470** & 0.001 & -0.001* & 7.92***\\
+\nopagebreak
+ &  & N. cand. & 89.264** & 15.927*** & 0.000 & -0.001 & 16.31***\\
+\nopagebreak
+ &  & PSOL budget & 171.406 & -34.691 & 0.002 & -0.001 & 1.92\\
+\nopagebreak
+ &  & PSOL vote share & -27.075 & 23.145** & 0.001 & -0.001** & 3.68***\\
+\nopagebreak
+ &  & Turnout & 171.414** & 17.917** & 0.000 & -0.001 & 8.34***\\
+\nopagebreak
+ &  & Young budget & 244.117** & 25.441** & -0.001 & -0.003 & 4.72***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2008} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash 60,000} & Young votes & 249.056** & 27.166** & -0.002 & -0.003 & 4.74***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & 1.800 & 3.883*** & 0.000 & 0.000 & 59.68***\\
+\nopagebreak
+ &  & Left wing vote share & 3.057 & 3.004** & 0.000 & 0.000** & 27.44***\\
+\nopagebreak
+ &  & N. cand. & 20.586*** & 3.626*** & 0.000*** & 0.000* & 59.84***\\
+\nopagebreak
+ &  & PSOL budget & -48.025 & 11.061* & -0.001 & -0.001 & 2.95***\\
+\nopagebreak
+ &  & PSOL vote share & 7.967 & 13.170** & -0.001 & -0.001 & 3.73***\\
+\nopagebreak
+ &  & Turnout & 34.252*** & 1.207 & 0.000 & 0.000* & 38.57***\\
+\nopagebreak
+ &  & Young budget & 1.751 & 3.356*** & 0.000** & 0.000** & 56.94***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2008} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash Pooled} & Young votes & 1.846 & 3.214*** & 0.000** & 0.000** & 57.08***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -7.007 & 2.495*** & 0.001*** & 0.001*** & 23.79***\\
+\nopagebreak
+ &  & Left wing vote share & -6.890 & 2.892*** & 0.001*** & 0.001*** & 29.57***\\
+\nopagebreak
+ &  & PSOL vote share & -8.461** & 3.591*** & 0.001*** & 0.001*** & 46.85***\\
+\nopagebreak
+ &  & Turnout & -6.873 & 2.970*** & 0.001*** & 0.001*** & 30.33***\\
+\nopagebreak
+\multirow{-5}{1.3cm}{\raggedright\arraybackslash 2010} & \multirow{-5}{1.3cm}{\raggedright\arraybackslash 20,000} & Young votes & -7.555 & 1.891** & 0.002*** & 0.001** & 17.33***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -71.169*** & 3.481** & 0.001*** & 0.001** & 15.22***\\
+\nopagebreak
+ &  & Left wing vote share & -82.716*** & 1.954 & 0.001** & 0.002*** & 11.55***\\
+\nopagebreak
+ &  & PSOL vote share & -59.078*** & 5.131*** & 0.001*** & 0.001** & 21.05***\\
+\nopagebreak
+ &  & Turnout & -63.840*** & 4.361** & 0.001*** & 0.001** & 17.97***\\
+\nopagebreak
+\multirow{-5}{1.3cm}{\raggedright\arraybackslash 2010} & \multirow{-5}{1.3cm}{\raggedright\arraybackslash 40,000} & Young votes & -65.281*** & 4.164** & 0.001*** & 0.001** & 16.65***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -68.369 & 19.281*** & 0.001** & 0.000 & 10.36***\\
+\nopagebreak
+ &  & Left wing vote share & -55.390 & 18.911*** & 0.001** & 0.000 & 12.87***\\
+\nopagebreak
+ &  & PSOL vote share & -57.071 & 18.786*** & 0.001** & 0.000 & 11.99***\\
+\nopagebreak
+ &  & Turnout & -48.205 & 18.167*** & 0.001*** & 0.000 & 14.43***\\
+\nopagebreak
+\multirow{-5}{1.3cm}{\raggedright\arraybackslash 2010} & \multirow{-5}{1.3cm}{\raggedright\arraybackslash 60,000} & Young votes & -128.045** & 6.629 & 0.010*** & -0.003 & 8.07***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & 22.296*** & 0.938 & 0.000 & 0.000 & 52.48***\\
+\nopagebreak
+ &  & Left wing vote share & 18.773*** & 1.647** & 0.000 & 0.000 & 65.08***\\
+\nopagebreak
+ &  & PSOL vote share & -0.946 & 3.991*** & 0.000*** & 0.001*** & 60.34***\\
+\nopagebreak
+ &  & Turnout & 19.819*** & 1.500** & 0.000 & 0.000 & 59.57***\\
+\nopagebreak
+\multirow{-5}{1.3cm}{\raggedright\arraybackslash 2010} & \multirow{-5}{1.3cm}{\raggedright\arraybackslash Pooled} & Young votes & -9.476** & 3.015*** & 0.000** & 0.001*** & 67.44***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -5.575 & 1.615** & 0.002*** & 0.001** & 21.47***\\
+\nopagebreak
+ &  & Left wing vote share & -8.703 & 0.960 & 0.002*** & 0.001** & 10.85***\\
+\nopagebreak
+ &  & N. cand. & -4.608** & 4.804*** & 0.000*** & 0.000*** & 117.72***\\
+\nopagebreak
+ &  & PSOL budget & -48.958** & 2.497 & 0.001** & 0.001* & 6.44***\\
+\nopagebreak
+ &  & PSOL vote share & -22.785* & 3.957** & 0.001** & 0.000 & 8.29***\\
+\nopagebreak
+ &  & Turnout & -5.077** & 4.444*** & 0.000*** & 0.000*** & 91.36***\\
+\nopagebreak
+ &  & Young budget & -5.402 & 2.168*** & 0.001*** & 0.001** & 31.88***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2012} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash 20,000} & Young votes & -5.876 & 1.793** & 0.001*** & 0.001** & 26.52***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -44.942*** & 5.117*** & 0.001*** & 0.000** & 25.09***\\
+\nopagebreak
+ &  & Left wing vote share & -40.295*** & 3.609** & 0.001*** & 0.001** & 15.00***\\
+\nopagebreak
+ &  & N. cand. & -60.061*** & 0.091 & 0.002*** & 0.001* & 9.24***\\
+\nopagebreak
+ &  & PSOL budget & -84.435** & 5.518 & 0.001** & 0.000 & 7.08***\\
+\nopagebreak
+ &  & PSOL vote share & -40.603 & 5.733* & 0.001** & 0.000 & 6.59***\\
+\nopagebreak
+ &  & Turnout & -60.151*** & 0.070 & 0.002*** & 0.001* & 9.24***\\
+\nopagebreak
+ &  & Young budget & -60.978** & -1.447 & 0.003*** & 0.001 & 7.73***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2012} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash 40,000} & Young votes & -64.062** & -3.238 & 0.004*** & 0.001 & 6.96***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -79.639 & -2.756 & 0.002** & 0.003** & 7.81***\\
+\nopagebreak
+ &  & Left wing vote share & -82.973 & 1.088 & 0.002** & 0.002** & 5.81***\\
+\nopagebreak
+ &  & N. cand. & -77.764 & -7.264 & 0.002** & 0.004** & 6.23***\\
+\nopagebreak
+ &  & PSOL budget & -135.674* & 11.076* & 0.001 & 0.002** & 11.04***\\
+\nopagebreak
+ &  & PSOL vote share & -174.023* & 11.344 & 0.001 & 0.001 & 6.41***\\
+\nopagebreak
+ &  & Turnout & -78.936 & -6.264 & 0.002** & 0.004** & 6.79***\\
+\nopagebreak
+ &  & Young budget & -33.465* & 15.215*** & 0.001*** & 0.000 & 32.02***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2012} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash 60,000} & Young votes & -78.819 & -4.944 & 0.002** & 0.004** & 7.44***\\
+\cmidrule{1-8}\pagebreak[0]
+ &  & Blank or Null votes & -5.428** & 3.752*** & 0.000*** & 0.001*** & 78.94***\\
+\nopagebreak
+ &  & Left wing vote share & 17.203** & 2.108** & 0.000*** & 0.001*** & 46.51***\\
+\nopagebreak
+ &  & N. cand. & 20.621*** & 1.988** & 0.000** & 0.000** & 70.85***\\
+\nopagebreak
+ &  & PSOL budget & -38.712 & 5.558 & -0.001 & 0.001*** & 6.71***\\
+\nopagebreak
+ &  & PSOL vote share & -7.134 & 1.610 & 0.000 & 0.002*** & 8.41***\\
+\nopagebreak
+ &  & Turnout & 31.327*** & 0.075 & 0.000 & 0.000** & 46.55***\\
+\nopagebreak
+ &  & Young budget & -6.665** & 2.338*** & 0.000*** & 0.001*** & 69.19***\\
+\nopagebreak
+\multirow{-8}{1.3cm}{\raggedright\arraybackslash 2012} & \multirow{-8}{1.3cm}{\raggedright\arraybackslash Pooled} & Young votes & -6.475** & 2.268*** & 0.000*** & 0.001*** & 70.24***\\*
+\end{longtable}
+\endgroup{}
 
 \end{document}
