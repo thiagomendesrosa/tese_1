@@ -40,11 +40,11 @@ estimativa <-
 as_survey(pnad_design) %>%
   srvyr::filter(v8005>=16) %>%
   srvyr::mutate(internet=factor(case_when(v2203==1~"Sim",
-                                   v2203==3~"Não")),
+                                   v2203==3~"N?o")),
                 banda_larga=factor(case_when(v22032==1~"Sim",
-                                             v22032==3~"Não")),
+                                             v22032==3~"N?o")),
                 celular=factor(case_when(v22006==2~"Sim",
-                                         v22006==4~"Não"))) %>%
+                                         v22006==4~"N?o"))) %>%
   srvyr::group_by(internet) %>%
   srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                    pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -56,11 +56,11 @@ estimativa <-
   as_survey(pnad_design) %>%
   srvyr::filter(v8005>=16) %>%
   srvyr::mutate(internet=factor(case_when(v2203==1~"Sim",
-                                          v2203==3~"Não")),
+                                          v2203==3~"N?o")),
                 banda_larga=factor(case_when(v22032==1~"Sim",
-                                             v22032==3~"Não")),
+                                             v22032==3~"N?o")),
                 celular=factor(case_when(v22006==2~"Sim",
-                                         v22006==4~"Não"))) %>%
+                                         v22006==4~"N?o"))) %>%
   srvyr::group_by(banda_larga) %>%
   srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                    pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -72,11 +72,11 @@ estimativa <-
   as_survey(pnad_design) %>%
   srvyr::filter(v8005>=16) %>%
   srvyr::mutate(internet=factor(case_when(v2203==1~"Sim",
-                                          v2203==3~"Não")),
+                                          v2203==3~"N?o")),
                 banda_larga=factor(case_when(v22032==1~"Sim",
-                                             v22032==3~"Não")),
+                                             v22032==3~"N?o")),
                 celular=factor(case_when(v22006==2~"Sim",
-                                         v22006==4~"Não"))) %>%
+                                         v22006==4~"N?o"))) %>%
   srvyr::group_by(celular) %>%
   srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                    pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -118,9 +118,9 @@ for(i in anos){
     as_survey(pnad_design) %>%
     srvyr::filter(v8005>=16) %>%
     srvyr::mutate(internet=factor(case_when(v06111==1~"Sim",
-                                            v06111==3~"Não")),
+                                            v06111==3~"N?o")),
                   celular=factor(case_when(v06112==2~"Sim",
-                                           v06112==4~"Não"))) %>%
+                                           v06112==4~"N?o"))) %>%
     srvyr::group_by(internet) %>%
     srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                      pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -133,9 +133,9 @@ estimativa_internet <<- rbind(estimativa_internet, estimativa)
     as_survey(pnad_design) %>%
     srvyr::filter(v8005>=16) %>%
     srvyr::mutate(internet=factor(case_when(v06111==1~"Sim",
-                                            v06111==3~"Não")),
+                                            v06111==3~"N?o")),
                   celular=factor(case_when(v06112==1~"Sim",
-                                           v06112==3~"Não"))) %>%
+                                           v06112==3~"N?o"))) %>%
     srvyr::group_by(celular) %>%
     srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                      pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -146,9 +146,9 @@ estimativa_internet <<- rbind(estimativa_internet, estimativa)
 }
 
 
-# Pegar informações da PNAD contínua
+# Pegar informa??es da PNAD cont?nua
 
-for(i in 2016:2018){
+for(i in 2016:2019){
 
 pnad <- RODBC::sqlQuery(db,paste0("select V2009, S01021, S01029,S01030A1,S01030A3,S07001,S07006,S07007,UPA, Estrato, V1027, V1029, posest from pnadc.pnada",i,"sup_tic"))
 
@@ -181,9 +181,9 @@ estimativa <-
   as_survey(pnad_design) %>%
   srvyr::filter(V2009>=16) %>%
   srvyr::mutate(internet=factor(case_when(S07001==1~"Sim",
-                                          S07001==2~"Não")),
+                                          S07001==2~"N?o")),
                 celular=factor(case_when(S07006==1~"Sim",
-                                         S07006==2~"Não"))) %>%
+                                         S07006==2~"N?o"))) %>%
   srvyr::group_by(internet) %>%
   srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                    pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -196,9 +196,9 @@ estimativa <-
   as_survey(pnad_design) %>%
   srvyr::filter(V2009>=16) %>%
   srvyr::mutate(internet=factor(case_when(S07001==1~"Sim",
-                                          S07001==2~"Não")),
+                                          S07001==2~"N?o")),
                 celular=factor(case_when(S07006==1~"Sim",
-                                         S07006==2~"Não"))) %>%
+                                         S07006==2~"N?o"))) %>%
   srvyr::group_by(celular) %>%
   srvyr::summarise(n=survey_total(vartype = "ci",na.rm=T),
                    pct=survey_mean(vartype = "ci",na.rm=T)) %>%
@@ -216,7 +216,7 @@ final <- estimativa_internet %>%
                      dplyr::rename(resposta=celular) %>%
                      dplyr::mutate(var="Cell phone"))
 
-write.table(final,"D:/temp.csv",row.names = F,dec = ",",
+write.table(final,"bases/internet.csv",row.names = F,dec = ",",
             fileEncoding = "latin1",sep = ";")
 
 
@@ -228,7 +228,7 @@ dplyr::filter(resposta=="Sim") %>%
   geom_text(aes(y=pct+0.01, label=paste0(round(pct*100,2),"%")),
             show.legend = F) +
   scale_y_continuous(labels=scales::percent)+
-  scale_x_discrete(breaks = 2008:2018) +
+  scale_x_discrete(breaks = 2008:2019) +
   labs(x="Year",
        y="%",
        caption = "Source: National Household Survey (PNAD e PNADc)\nObs1.: Usage of internet in the last 3 months (survey date month as reference)\nObs2.: Cell phone ownership for personal use\nObs.3: No value for 2010 (Census year)")+
