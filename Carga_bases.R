@@ -1367,10 +1367,10 @@ rais <- data.table::fread("rais_bi_vinc.csv") %>%
                      dplyr::rename(COD_IBGE=`Município`) %>%
                      dplyr::arrange(COD_IBGE,Ano)) 
 
-# Carregar informações do Imet
+# Carregar informações do Inmet
 
 # Listar arquivos
-files <- list.files("imet/mensal", full.names = T)
+files <- list.files("inmet/mensal", full.names = T)
 
 # Carregar bases
 
@@ -1391,7 +1391,7 @@ info_estacao <<- rbind(info_estacao,base)
 
 }
 
-files <- list.files("imet/diario", full.names = T)
+files <- list.files("inmet/diario", full.names = T)
 
 dados_estacao <- c()
 
