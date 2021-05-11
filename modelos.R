@@ -1989,8 +1989,9 @@ descriptives_2008_pop <- rdd %>%
   dplyr::select(cortes,Variable,Average) %>% 
   tidyr::spread(cortes,Average) %>% 
   dplyr::mutate(Variable=case_when(str_detect(Variable,"renda_med")==T~"Income",
-                                        str_detect(Variable,"Sixty")==T~"Pop. over 60 years",
+                                        str_detect(Variable,"60_anos_2000")==T~"Pop. over 60 years",
                                         str_detect(Variable,"rural")==T~"Rural",
+                                        str_detect(Variable,"pop_anterior")==T~"Population",
                                         str_detect(Variable,"negro")==T~"Black",
                                         str_detect(Variable,"radio")==T~"Radio",
                                         str_detect(Variable,"televisao")==T~"Television",
@@ -2004,7 +2005,7 @@ descriptives_2008_pop <- rdd %>%
                                         str_detect(Variable,"PIB")==T~"GDP p.c.",
                                         str_detect(Variable,"valor_bpc_idoso")==T~"BPC",
                                         str_detect(Variable,"salarios_rais")==T~"Formal Wages",
-                                        str_detect(Variable,"fibra")==T~"Fiber-optic",
+                                        str_detect(Variable,"fibra")==T~"Fiber",
                                         str_detect(Variable,"fpm_valor")==T~"FPM",
                                         TRUE~Variable)) %>% 
   dplyr::arrange(Variable) %>% 
