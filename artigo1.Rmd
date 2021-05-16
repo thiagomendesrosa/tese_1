@@ -212,7 +212,7 @@ partidos %>%
   kableExtra::column_spec(1,width="4cm") %>% 
   kableExtra::footnote(general_title = "",
                        general= c("Source: TSE",
-                                  "Obs.: Parties with changes in their names are considered as an unique party."),
+                                  "Obs.: Parties with changes in their names are considered as a unique party."),
                        fixed_small_size=T)
 ```
 
@@ -250,7 +250,7 @@ ganhadores1 %>%
   knitr::kable("latex",
                linesep="",
                booktabs = T,
-               caption = "Distribuition of winners, by party, in National Congress, 2002-2018",
+               caption = "Distribution of winners, by party, in National Congress, 2002-2018",
                digits=1) %>%
   kableExtra::kable_styling(latex_options = c("hold_position","scale_down"),
                             full_width = T,
@@ -260,7 +260,7 @@ ganhadores1 %>%
                                  "2010"=2,"2014"=2,"2018"=2)) %>% 
   kableExtra::footnote(
     general=c("Source: TSE",
-      "Obs.: Parties with changes in their names are considered as an unique party."),
+      "Obs.: Parties with changes in their names are considered as a unique party."),
     general_title = "",
     fixed_small_size = T) 
   
@@ -274,7 +274,7 @@ ganhadores2 %>%
   knitr::kable("latex",
                linesep="",
                booktabs = T,
-               caption = "Distribuition of winners by party in local executive elections, 2002-2018",
+               caption = "Distribution of winners by party in local executive elections, 2002-2018",
                digits=1) %>%
   kableExtra::kable_styling(latex_options = c("hold_position","scale_down"),
                             full_width = T,
@@ -284,7 +284,7 @@ ganhadores2 %>%
                                  "2008/2010"=2,"2012/2014"=2,"2016/2018"=2)) %>% 
   kableExtra::footnote(
     general=c("Source: TSE",
-      "Obs.: Parties that changed their names are considered as an unique party."),
+      "Obs.: Parties that changed their names are considered as a unique party."),
     general_title = "",
     fixed_small_size = T) 
   
@@ -309,7 +309,7 @@ knitr::kable("latex",
                  linesep="",
                booktabs = T,
                #digits = c(0,0,0,1,0),
-               caption = "Total of volters and voter registration canceled, 2005 to 2009",
+               caption = "Total of voters and voter registration canceled, 2005 to 2009",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("hold_position"),
                             full_width = T,
@@ -540,7 +540,7 @@ The effect for each cutoff, under standard regularity conditions, is identified 
 
 \begin{equation}
 \tau_j= \mathbb{E}[Y_i(d_j) - Y_i(d_{j-1})|X_i=c_j]= \lim\limits_{x \downarrow c_j}\mathbb{E}[Y_i|X_i=x]-\lim\limits_{x \uparrow c_j}\mathbb{E}[Y_i|X_i=x]
-\label{eq:1}
+\label{eq:001}
 \end{equation}
 
 Each observation may be used to estimate two different, and contiguous, treatment effects. For example, looking to the first cutoff, 20,000, municipalities with population above that value are treated (up to the next cutoff -- 40,000) when estimating $\tau_j$, but they are controls when estimating $\tau_{j+1}$ (and, hence, below the next cutoff -- 40,000). An observation can or cannot be used to estimate two effects, depending on bandwidth selection.
@@ -549,7 +549,7 @@ We consider the three cut-offs (20,000, 40,000 and 60,000), with optimal bandwid
 
 Figure \ref{fig:2} shows a clear jump in velocity cutoffs for the entire period. Municipalities just below the population size established in the program face lower internet velocities. 
 
-```{r discontinuity, fig.cap="Discontinuity in Backhaul program velocity by population cut-offs: 20,000; 40,000; 60,000 \\label{fig:2}", results='asis'}
+```{r discontinuity, fig.cap="Discontinuity in Backhaul program velocity by population cutoffs: 20,000; 40,000; 60,000 \\label{fig:2}", results='asis'}
 
 backtemp <- backhaul %>%
   dplyr::filter(ano==2013, popIBGE_anoantes<=70000) %>%
@@ -670,7 +670,7 @@ dplyr::tibble(Cutoff=c(t1$opt$c,t2$opt$c,t3$opt$c),
                             full_width = T) %>%
   kableExtra::column_spec(6, width="3cm") %>% 
   kableExtra::footnote(
-    general=c("Obs.1: Optimum bandwidht selection following Calonico, Cattaneo and Titiunik (2014).",
+    general=c("Obs.1: Optimum bandwidth selection following Calonico, Cattaneo and Titiunik (2014).",
       "Obs.2: Unrestricted density estimation, triangular Kernel and VCE by jackknife.",
       "Obs.3: Bw=bandwidth; N, Nl and Nr are total n# of obs., n# on the left and n# on the right."),
     general_title = "",
@@ -689,7 +689,7 @@ dplyr::tibble(Cutoff=c(t1$opt$c,t2$opt$c,t3$opt$c),
                   font.label = list(size = 10, 
                                     color = "black", 
                                     face = "bold")),
-                bottom=text_grob("Obs.: Optimum bandwidht selection following Calonico, Cattaneo and Titiunik (2014).\n Unrestricted density estimation, triangular Kernel and VCE by jackknife.",
+                bottom=text_grob("Obs.: Optimum bandwidth selection following Calonico, Cattaneo and Titiunik (2014).\n Unrestricted density estimation, triangular Kernel and VCE by jackknife.",
                                  size=8,
                                  hjust=0.9))
 
@@ -717,7 +717,7 @@ dplyr::tibble(`Category`=c(rep("Outcome",4),
               `Variable`=c("Turnout",
                            "Vote share",
                            "Blank and null votes",
-                           "Campaing budget",
+                           "Campaign budget",
                            "Population",
                            "Black",
                            "College",
@@ -755,8 +755,8 @@ dplyr::tibble(`Category`=c(rep("Outcome",4),
                            "Ratio of PBF payments and GDP",
                            "Ratio of formal wages (sum) and GDP",
                            "Average temperature a week before and after election day",
-                           "Rain preciptation in election day",
-                           "Optical fiber infrasctructure in municipality internet provision",
+                           "Rain precipitation in election day",
+                           "Optical fiber infrastructure in municipality internet provision",
                            "Per capita FPM transfer"
                            ),
            `Source`=c(rep("TSE",4),
@@ -927,7 +927,7 @@ resultados_part_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Turnout for the first round. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Turnout for the first round. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -958,7 +958,7 @@ resultados_bn_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -984,14 +984,14 @@ resultados_vse_cc %>%
                linesep="",
                booktabs = T,
                digits = c(0,0,0,0,3,3,3),
-               caption = "Fuzzy-RDD multi-cutoff results for left wing parties vote share. Election years: 2008, 2010 and 2012. Offices: president and mayors.",
+               caption = "Fuzzy-RDD multi-cutoff results for left-wing parties vote share. Election years: 2008, 2010 and 2012. Offices: president and mayors.",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("hold_position")) %>%
   kableExtra::column_spec(1:7,"1.9cm") %>% 
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -1020,7 +1020,7 @@ resultados_pt_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -1052,7 +1052,7 @@ resultados_votos_jovem_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -1084,7 +1084,7 @@ resultados_ncand_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -1115,7 +1115,7 @@ resultados_receita_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -1142,7 +1142,7 @@ resultados_receita_jovem_cc %>%
   kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(2, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)
@@ -1192,8 +1192,8 @@ resultados_parametrico %>%
                             latex_hline = "major",
                             target=1) %>% 
   kableExtra::footnote(general = 
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
-      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left-wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
       "     Results with controls listed in Table 10."),
     general_title = "",
     fixed_small_size = T) 
@@ -1228,7 +1228,7 @@ resultados_sig %>%
                booktabs = T,
                longtable=T,
                digits = c(0,0,0,0,3,3,3,3),
-               caption = "Significant Fuzzy-RDD result with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012",
+               caption = "Significant Fuzzy-RDD results with half or double bandwidths for all outcomes. Election years: 2008, 2010 and 2012",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("HOLD_position"),
                             font_size = 10) %>%
@@ -1239,8 +1239,8 @@ resultados_sig %>%
                             latex_hline = "major",
                             target=1) %>% 
   kableExtra::footnote(general = 
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
-      "     Left wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust variance estimator.",
+      "     Left-wing parties: PSTU, PSOL, PC do B, PT, PSB and PCO.",
       "     Results with controls listed in Table 10."),
     general_title = "",
     fixed_small_size = T)
@@ -1287,7 +1287,7 @@ resultados_part_cc %>%
   #kableExtra::collapse_rows(1, latex_hline = "major") %>% 
   kableExtra::collapse_rows(7, latex_hline = "major") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
+    c("Obs.: Standard Errors (SE) are clustered by regions, with heteroskedasticity-robust nearest neighbor variance estimator (three minimum neighbors). Optimal bandwidth (Bw) selection by Mean Square Error following Calonico, Cattaneo and Titiunik (2014). Triangular kernel with quadratic local-polynomial. Results with controls listed in Table 10."),
     general_title="",
     fixed_small_size = T,
     threeparttable = T)

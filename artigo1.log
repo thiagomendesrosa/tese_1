@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (MiKTeX 21.3) (preloaded format=pdflatex 2021.4.25)  14 MAY 2021 23:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (MiKTeX 21.3) (preloaded format=pdflatex 2021.4.25)  15 MAY 2021 22:37
 entering extended mode
 **./artigo1.tex
 (artigo1.tex
@@ -1808,11 +1808,11 @@ Overfull \hbox (13.20302pt too wide) in alignment at lines 2805--2813
 ### semi simple group (level 1) entered at line 71 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 28155 strings out of 479287
- 496599 string characters out of 2863087
- 960622 words of memory out of 3000000
+ 28157 strings out of 479287
+ 496623 string characters out of 2863087
+ 960605 words of memory out of 3000000
  44532 multiletter control sequences out of 15000+600000
- 505809 words of font info for 244 fonts, out of 8000000 for 9000
+ 505892 words of font info for 245 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  87i,16n,117p,1013b,13803s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.41} has been referenced b
@@ -1955,7 +1955,7 @@ e1/public/lm/lmr9.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmri10
 Files/MiKTeX 2.9/fonts/type1/public/lm/lmsy10.pfb><C:/Program Files/MiKTeX 2.9/
 fonts/type1/public/lm/lmsy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public
 /amsfonts/symbols/msbm10.pfb>
-Output written on artigo1.pdf (46 pages, 555457 bytes).
+Output written on artigo1.pdf (46 pages, 555385 bytes).
 PDF statistics:
  676 PDF objects out of 1000 (max. 8388607)
  214 named destinations out of 1000 (max. 500000)

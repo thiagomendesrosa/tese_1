@@ -15,7 +15,7 @@ resultados_first_final %>%
                longtable=T,
                booktabs = T,
                digits = c(0,0,0,0,3,3,3),
-               caption = "First stage of Fuzzy-RDD regressions for all outcomes",
+               caption = "First stage of Fuzzy-RDD for all outcomes",
                format.args = list(decimal.mark = '.', big.mark = ",")) %>%
   kableExtra::kable_styling(latex_options = c("hold_position","repeat_header"),
                             font_size=10) %>%
@@ -26,7 +26,7 @@ resultados_first_final %>%
                             target=2) %>% 
   #kableExtra::collapse_rows(1, latex_hline = "none") %>% 
   kableExtra::footnote(general=
-    c("Obs: Standard Errors (SE) are clustered by regions. Optimal bandwidth (Bw) selection by Mean Square",
+    c("Obs.: Standard Errors (SE) are clustered by regions. Optimal bandwidth (Bw) selection by Mean Square",
     "             Error following Calonico, Cattaneo and Titiunik (2014).",
     "             Triangular kernel with quadratic local-polynomial.",
     "             Turnout for the first round.",
